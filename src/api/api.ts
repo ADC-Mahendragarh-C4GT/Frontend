@@ -62,7 +62,9 @@ export interface Update {
 
 // Auth & User
 export const fetchUserTypes = () => api.get<UserType[]>("/accounts/user-types/");
-
+// fetchUserTypes().then((response) => {
+//   console.log("--------------->", response.data);
+// });
 export const login = (email: string, password: string, userType: string) => {
   return api.post<LoginResponse>("/accounts/login/", { email, password, user_type: userType });
 };

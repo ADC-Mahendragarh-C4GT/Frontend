@@ -13,7 +13,7 @@ const Login = () => {
       .then((res) => {
         setUserTypes(res.data);
         if (res.data.length) {
-          setUserType(res.data[0].value); // default to first
+          setUserType("");
         }
       })
       .catch((err) => {
@@ -27,7 +27,7 @@ const Login = () => {
     try {
       const response = await login(email, password, userType);
       console.log(response.data);
-      setError(""); 
+      setError("");
     } catch (err) {
       console.error(err);
       setError("Invalid credentials");
@@ -35,16 +35,48 @@ const Login = () => {
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center", fontFamily: "Arial" }}>
-      <div style={{ display: "flex", maxWidth: 800, width: "100%", boxShadow: "0 0 10px rgba(0,0,0,0.1)" }}>
-        <div style={{ flex: 1, textAlign: "center", padding: 20 }}>
-          <img src="/haryana-logo.png" alt="Govt of Haryana" style={{ maxWidth: "100%" }} />
-          <h2>Municipal Corporation Rohtak</h2>
+    <div
+      style={{
+        display: "flex",
+        minHeight: "100vh",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "Arial",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          maxWidth: 800,
+          width: "100%",
+          boxShadow: "0 0 10px rgba(248, 246, 246, 0.1)",
+        }}
+      >
+        <div style={{ flex: 1, textAlign: "center", padding: 40 }}>
+          <img
+            src="/images/HaryanaGov.jpg"
+            alt="Govt of Haryana"
+            style={{ maxWidth: "100%" }}
+          />
+          <h2 style={{ color: "#272727", fontSize: "30px" }}>
+            Municipal Corporation Rohtak
+          </h2>
         </div>
 
-        <div style={{ flex: 1, padding: 40 }}>
-          <h2>Welcome again!</h2>
-          <p>Please enter your details</p>
+        <div
+          style={{
+            flex: 1,
+            padding: 40,
+            color: "#272727",
+            fontFamily: "Aileron",
+          }}
+        >
+          <h2 style={{ fontSize: "26px", margin: "0.2em 0" }}>
+            Welcome again!
+          </h2>
+          <p style={{ margin: "0.2em 0", fontSize: "16px" }}>
+            Please enter your details
+          </p>
 
           <form onSubmit={handleSubmit}>
             <div>
@@ -53,6 +85,10 @@ const Login = () => {
                 onChange={(e) => setUserType(e.target.value)}
                 style={{ width: "100%", padding: 10, marginBottom: 20 }}
               >
+                <option value="" disabled>
+                  ⬇ Select User Type ⬇
+                </option>
+
                 {userTypes.map((type) => (
                   <option key={type.value} value={type.value}>
                     {type.label}
@@ -68,7 +104,14 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                style={{ width: "100%", padding: 10, marginBottom: 20, borderBottom: "1px solid #ccc", border: "none", borderBottomStyle: "solid" }}
+                style={{
+                  width: "100%",
+                  padding: 10,
+                  marginBottom: 20,
+                  borderBottom: "1px solid #ccc",
+                  border: "none",
+                  borderBottomStyle: "solid",
+                }}
               />
             </div>
 
@@ -79,7 +122,14 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                style={{ width: "100%", padding: 10, marginBottom: 10, borderBottom: "1px solid #ccc", border: "none", borderBottomStyle: "solid" }}
+                style={{
+                  width: "100%",
+                  padding: 10,
+                  marginBottom: 10,
+                  borderBottom: "1px solid #ccc",
+                  border: "none",
+                  borderBottomStyle: "solid",
+                }}
               />
             </div>
 
