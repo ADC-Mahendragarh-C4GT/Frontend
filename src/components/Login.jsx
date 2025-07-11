@@ -79,14 +79,21 @@ const Login = () => {
           </p>
 
           <form onSubmit={handleSubmit}>
-            <div>
+            <div
+              style={{
+                width: "60%",
+                padding: 10,
+                border: "none",
+                margin: "0 auto",
+              }}
+            >
               <select
                 value={userType}
                 onChange={(e) => setUserType(e.target.value)}
-                style={{ width: "100%", padding: 10, marginBottom: 20 }}
+                style={{ width: "100%", padding: 10, }}
               >
                 <option value="" disabled>
-                  ⬇ Select User Type ⬇
+                  ⬇ Select Your Post ⬇
                 </option>
 
                 {userTypes.map((type) => (
@@ -108,9 +115,13 @@ const Login = () => {
                   width: "100%",
                   padding: 10,
                   marginBottom: 20,
-                  borderBottom: "1px solid #ccc",
-                  border: "none",
+                  borderBottom: "2.5px solid #272727",
+                  borderTop: "none",
+                  borderLeft: "none",
+                  borderRight: "none",
                   borderBottomStyle: "solid",
+                  background: "white",
+                  fontSize: "16px",
                 }}
               />
             </div>
@@ -125,15 +136,19 @@ const Login = () => {
                 style={{
                   width: "100%",
                   padding: 10,
-                  marginBottom: 10,
-                  borderBottom: "1px solid #ccc",
-                  border: "none",
+                  marginBottom: 20,
+                  borderBottom: "2.5px solid #272727",
+                  borderTop: "none",
+                  borderLeft: "none",
+                  borderRight: "none",
                   borderBottomStyle: "solid",
+                  background: "white",
+                  fontSize: "16px",
                 }}
               />
             </div>
 
-            <div style={{ textAlign: "right", marginBottom: 20 }}>
+            <div style={{ textAlign: "right", marginBottom: 10 }}>
               <small>Forgot Password?</small>
             </div>
 
