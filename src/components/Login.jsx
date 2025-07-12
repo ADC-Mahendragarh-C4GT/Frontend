@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { login, fetchUserTypes } from "../api/api";
+import { useNavigate } from "react-router-dom";
+
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -7,7 +9,8 @@ const Login = () => {
   const [userType, setUserType] = useState("");
   const [userTypes, setUserTypes] = useState([]);
   const [error, setError] = useState("");
-
+  const navigate = useNavigate();
+  
   useEffect(() => {
     fetchUserTypes()
       .then((res) => {
@@ -27,7 +30,12 @@ const Login = () => {
     try {
       const response = await login(email, password, userType);
       console.log(response.data);
+
       setError("");
+
+      // Redirect to homepage
+      navigate("/home");
+
     } catch (err) {
       console.error(err);
       setError("Invalid credentials");
@@ -90,7 +98,8 @@ const Login = () => {
               <select
                 value={userType}
                 onChange={(e) => setUserType(e.target.value)}
-                style={{ width: "100%", padding: 10, }}
+                style={{ width: "100%", padding: 10 }}
+                required
               >
                 <option value="" disabled>
                   ⬇ Select Your Post ⬇
@@ -107,7 +116,7 @@ const Login = () => {
             <div>
               <input
                 type="email"
-                placeholder="Email/username"
+                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -122,6 +131,7 @@ const Login = () => {
                   borderBottomStyle: "solid",
                   background: "white",
                   fontSize: "16px",
+                  color: "#000",
                 }}
               />
             </div>
@@ -144,6 +154,7 @@ const Login = () => {
                   borderBottomStyle: "solid",
                   background: "white",
                   fontSize: "16px",
+                  color: "#000",
                 }}
               />
             </div>
