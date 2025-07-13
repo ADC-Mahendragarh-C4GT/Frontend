@@ -50,6 +50,9 @@ const Login = () => {
         alignItems: "center",
         justifyContent: "center",
         fontFamily: "Arial",
+        margin: 0,
+        padding: "2rem",
+        textAlign: "center",
       }}
     >
       <div
