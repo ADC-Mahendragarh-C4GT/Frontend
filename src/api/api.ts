@@ -85,7 +85,15 @@ export const getProfile = () => {
 export const getRoads = () => api.get<Road[]>("/api/roads/");
 export const getContractors = () => api.get<Contractor[]>("/api/contractors/");
 export const getInfraWorks = () => api.get<InfraWork[]>("/api/infra-works/");
-export const getUpdates = () => api.get<Update[]>("/api/updates/");
+
+export const getUpdates = (page: number = 1, pageSize: number = 100) => {
+  return api.get("/api/updatesPage/", {
+    params: {
+      page,
+      page_size: pageSize,
+    },
+  });
+};
 
 export const createRoad = (data: Partial<Road>) => {
   return api.post<Road>("/api/roads/", data);

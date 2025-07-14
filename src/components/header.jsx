@@ -31,28 +31,54 @@ export default function Header() {
     //   </nav>
     // </header>
 
-
-    <header className="fixed top-0 left-0 w-full bg-white shadow z-50">
-      <div className="inline justify-between items-center px-4 py-2">
-        <img
-          src="/images/HaryanaGov.jpg" // replace with actual path
-          alt="Haryana Emblem"
-          style={{display: "inline", marginRight: "16px", height: "80px", maxWidth: "10%"}}
-          className="h-10"
-        />
-        <h1 className="text-xl font-bold text-gray-800" style={{display: "inline", marginRight: "20px", color: "#000", height: "80",
-          maxWidth: "80%"}}>
-
+    <header
+      className="fixed top-0 left-0 w-full bg-white shadow"
+      style={{
+        display: "flex",
+        margin: "0",
+        padding: "0",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#bcbcbc",
+        height:"70px",
+      }}
+    >
+      <img
+        src="/images/HaryanaGov.png"
+        alt="Haryana Emblem"
+        style={{
+          display: "inline",
+          marginRight: "16px",
+          height: "70px",
+          width: "8%",
+        }}
+        className="h-10"
+      />
+      <div style={{display: "flex", alignItems: "center", justifyContent: "center", width: "77%"}}>
+        <h1
+          className="font-bold text-gray-800"
+          style={{
+            display: "inline",
+            color: "#000",
+            marginTop: "0",
+            
+            marginBottom: "0",
+          }}
+        >
           Municipal Corporation Rohtak
         </h1>
-        <img
-          src="/images/HaryanaGov.jpg" // replace with actual path
-          alt="Azadi ka Amrit Mahotsav"
-          className="h-10"
-          style={{display: "inline", marginRight: "16px", height: "80px", maxWidth: "10%"}}
-
-        />
       </div>
+      <img
+        src="/images/Azadi.png"
+        alt="Azadi ka Amrit Mahotsav"
+        className="h-10"
+        style={{
+          display: "inline",
+          marginRight: "16px",
+          height: "70px",
+          width: "15%",
+        }}
+      />
     </header>
   );
 }

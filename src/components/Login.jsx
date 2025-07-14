@@ -65,7 +65,7 @@ const Login = () => {
       >
         <div style={{ flex: 1, textAlign: "center", padding: 40 }}>
           <img
-            src="/images/HaryanaGov.jpg"
+            src="/images/HaryanaGov.png"
             alt="Govt of Haryana"
             style={{ maxWidth: "100%" }}
           />
