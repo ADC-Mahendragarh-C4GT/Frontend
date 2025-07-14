@@ -37,7 +37,7 @@ export default function Header() {
         <img
           src="/images/HaryanaGov.jpg" // replace with actual path
           alt="Haryana Emblem"
-          style={{display: "inline", marginRight: "16px", height: "80px", maxWidth: "20%"}}
+          style={{display: "inline", marginRight: "16px", height: "80px", maxWidth: "10%"}}
           className="h-10"
         />
         <h1 className="text-xl font-bold text-gray-800" style={{display: "inline", marginRight: "20px", color: "#000", height: "80",
@@ -49,7 +49,7 @@ export default function Header() {
           src="/images/HaryanaGov.jpg" // replace with actual path
           alt="Azadi ka Amrit Mahotsav"
           className="h-10"
-          style={{display: "inline", marginRight: "16px", height: "80px", maxWidth: "20%"}}
+          style={{display: "inline", marginRight: "16px", height: "80px", maxWidth: "10%"}}
 
         />
       </div>
