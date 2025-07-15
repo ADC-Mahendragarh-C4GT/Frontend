@@ -95,6 +95,15 @@ export const getUpdates = (page: number = 1, pageSize: number = 100) => {
   });
 };
 
+export const getUpdatesByWork = (workId: number) => {
+  return api.get("/api/works/" + workId + "/updates/", {
+    params: {
+      work: workId,
+    },
+  });
+};
+
+
 export const createRoad = (data: Partial<Road>) => {
   return api.post<Road>("/api/roads/", data);
 };
