@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Header from "./header";
 import { getUpdates } from "../api/api";
-
+import { useNavigate } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -68,6 +68,19 @@ export default function Home() {
     return matchesRoad && matchesContractor;
   });
 
+const navigate = useNavigate();
+const timestamp = new Date().toLocaleString();
+console.log(`Clicked at ${timestamp}`);
+
+const handleRowClick = (work) => {
+    localStorage.setItem("currentWork", JSON.stringify(work)); // fallback
+    console.log(
+    `[${timestamp}] Row clicked → road=${work.road.unique_code}, contractor=${work.contractor.contractor_name}`
+  );
+    navigate(`/road/${work.road.unique_code}`, { state: { work } });
+  };
+
+
   return (
     <>
       <Header />
@@ -125,10 +138,10 @@ export default function Home() {
                 <TableCell align="center">Work Completed (%)</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
+            <TableBody >
               {filteredUpdates.length > 0 ? (
                 filteredUpdates.map((update, index) => (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={update.id}>
+                  <TableRow hover role="checkbox" tabIndex={-1} key={update.id} style ={{ cursor: "pointer" }} onClick={() => handleRowClick(update.work)}>
                     <TableCell align="center">
                       {page * rowsPerPage + index + 1}
                     </TableCell>
