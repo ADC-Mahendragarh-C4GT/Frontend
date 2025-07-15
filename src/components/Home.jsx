@@ -15,56 +15,31 @@ export default function Home() {
   const [roadQuery, setRoadQuery] = useState("");
   const [contractorQuery, setContractorQuery] = useState("");
   const [updates, setUpdates] = useState([]);
-  const [filteredUpdates, setFilteredUpdates] = useState([]);
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [page, setPage] = useState(0); // MUI is 0-based
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
 
-  useEffect(() => {
-    loadUpdates();
-  }, []);
+  const loadUpdates = async (pageNumber = 1, pageSize = 10) => {
+  const finalSize = pageSize === -1 ? totalCount || 100000 : pageSize;
+  console.log(
+    `[${new Date().toLocaleTimeString()}] Fetching page=${pageNumber}, pageSize=${finalSize}`
+  );
 
-
-  useEffect(() => {
-    loadUpdates(page + 1, rowsPerPage);
-  }, [page, rowsPerPage]);
-
-  
-  useEffect(() => {
-    const roadQ = roadQuery.toLowerCase();
-    const contractorQ = contractorQuery.toLowerCase();
-
-    const filtered = updates.filter((update) => {
-      const roadName = update?.work?.road?.road_name ?? "";
-      const roadCode = update?.work?.road?.unique_code ?? "";
-      const contractorName = update?.work?.contractor?.contractor_name ?? "";
-
-      const matchesRoad =
-        !roadQ ||
-        roadName.toLowerCase().includes(roadQ) ||
-        roadCode.toLowerCase().includes(roadQ);
-
-      const matchesContractor =
-        !contractorQ || contractorName.toLowerCase().includes(contractorQ);
-
-      return matchesRoad && matchesContractor;
-    });
-
-    setFilteredUpdates(filtered);
-  }, [roadQuery, contractorQuery, updates]);
-
-  
-  const loadUpdates = async (pageNumber = 1, pageSize = 100) => {
   try {
-    const finalSize = pageSize === -1 ? totalCount : pageSize;
     const response = await getUpdates(pageNumber, finalSize);
     setUpdates(response.data.results);
-    setFilteredUpdates(response.data.results);
     setTotalCount(response.data.count);
   } catch (error) {
     console.error("Error fetching updates:", error);
   }
 };
+
+  useEffect(() => {
+    console.log(
+      `useEffect triggered → page=${page + 1}, rowsPerPage=${rowsPerPage}`
+    );
+    loadUpdates(page + 1, rowsPerPage);
+  }, [page, rowsPerPage]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -75,23 +50,63 @@ export default function Home() {
     setPage(0);
   };
 
+  const filteredUpdates = updates.filter((update) => {
+    const roadName = update?.work?.road?.road_name?.toLowerCase() ?? "";
+    const roadCode = update?.work?.road?.unique_code?.toLowerCase() ?? "";
+    const contractorName =
+      update?.work?.contractor?.contractor_name?.toLowerCase() ?? "";
+
+    const roadQ = roadQuery.toLowerCase();
+    const contractorQ = contractorQuery.toLowerCase();
+
+    const matchesRoad =
+      !roadQ || roadName.includes(roadQ) || roadCode.includes(roadQ);
+
+    const matchesContractor =
+      !contractorQ || contractorName.includes(contractorQ);
+
+    return matchesRoad && matchesContractor;
+  });
+
   return (
     <>
       <Header />
 
-      <div style={{ display: "flex", gap: "1rem", margin: "1rem 0", itemsAlign: "center", justifyContent: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "1rem",
+          margin: "1rem 0",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <input
           type="text"
           placeholder="Search by Road Name or Number"
           value={roadQuery}
-          style={{padding: "0.8rem", borderRadius: "20px", border: "1px solid #ccc", width: "20%", backgroundColor: "#f9f9f9", color: "#000"}}
+          style={{
+            padding: "0.8rem",
+            borderRadius: "20px",
+            border: "1px solid #ccc",
+            width: "20%",
+            backgroundColor: "#f9f9f9",
+            color: "#000",
+          }}
           onChange={(e) => setRoadQuery(e.target.value)}
         />
         <input
           type="text"
           placeholder="Search by Contractor Name"
           value={contractorQuery}
-          style={{padding: "0.8rem", borderRadius: "20px", border: "1px solid #ccc", width: "20%", backgroundColor: "#f9f9f9", color: "#000"}}
+          style={{
+            padding: "0.8rem",
+            borderRadius: "20px",
+            border: "1px solid #ccc",
+            width: "20%",
+            backgroundColor: "#f9f9f9",
+            color: "#000",
+          }}
           onChange={(e) => setContractorQuery(e.target.value)}
         />
       </div>
@@ -112,38 +127,31 @@ export default function Home() {
             </TableHead>
             <TableBody>
               {filteredUpdates.length > 0 ? (
-                filteredUpdates
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((update, index) => (
-                    <TableRow
-                      hover
-                      role="checkbox"
-                      tabIndex={-1}
-                      key={update.id}
-                    >
-                      <TableCell align="center">
-                        {page * rowsPerPage + index + 1}
-                      </TableCell>
-                      <TableCell align="center">
-                        {update.work.road.unique_code}
-                      </TableCell>
-                      <TableCell align="center">
-                        {update.work.road.road_name}
-                      </TableCell>
-                      <TableCell align="center">
-                        {update.work.description}
-                      </TableCell>
-                      <TableCell align="center">
-                        {update.work.contractor.contractor_name}
-                      </TableCell>
-                      <TableCell align="center">
-                        {update.work.start_date}
-                      </TableCell>
-                      <TableCell align="center">
-                        {update.progress_percent}%
-                      </TableCell>
-                    </TableRow>
-                  ))
+                filteredUpdates.map((update, index) => (
+                  <TableRow hover role="checkbox" tabIndex={-1} key={update.id}>
+                    <TableCell align="center">
+                      {page * rowsPerPage + index + 1}
+                    </TableCell>
+                    <TableCell align="center">
+                      {update.work.road.unique_code}
+                    </TableCell>
+                    <TableCell align="center">
+                      {update.work.road.road_name}
+                    </TableCell>
+                    <TableCell align="center">
+                      {update.work.description}
+                    </TableCell>
+                    <TableCell align="center">
+                      {update.work.contractor.contractor_name}
+                    </TableCell>
+                    <TableCell align="center">
+                      {update.work.start_date}
+                    </TableCell>
+                    <TableCell align="center">
+                      {update.progress_percent}%
+                    </TableCell>
+                  </TableRow>
+                ))
               ) : (
                 <TableRow>
                   <TableCell align="center" colSpan={7}>
@@ -156,9 +164,9 @@ export default function Home() {
         </TableContainer>
 
         <TablePagination
-          rowsPerPageOptions={[10, 25, 100, 200, { label: "All", value: -1 }]}
+          rowsPerPageOptions={[10, 25, 100, { label: "All", value: -1 }]}
           component="div"
-          count={filteredUpdates.length}
+          count={totalCount}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
