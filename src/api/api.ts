@@ -58,6 +58,8 @@ export interface Update {
   [key: string]: any;
 }
 
+
+
 // API calls
 
 // Auth & User
@@ -96,11 +98,9 @@ export const getUpdates = (page: number = 1, pageSize: number = 100) => {
 };
 
 export const getUpdatesByWork = (workId: number) => {
-  return api.get("/api/works/" + workId + "/updates/", {
-    params: {
-      work: workId,
-    },
-  });
+  const response = api.get(`/api/infra-works/${workId}/updates/`);
+  console.log('Fetching updates for work ID:', workId, response);
+  return response;
 };
 
 
@@ -116,4 +116,7 @@ export const deleteRoad = (id: number) => {
   return api.delete<{ message: string }>(`/api/roads/${id}/`);
 };
 
+
 export default api;
+
+

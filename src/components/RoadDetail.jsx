@@ -1,12 +1,15 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./header";
+import { getUpdatesByWork } from "../api/api";
+import { useState, useEffect } from "react";
 
 export default function RoadDetail() {
   const navigate = useNavigate();
   const location = useLocation();
-  
-  
+  const [allUpdates, setAllUpdates] = useState([]);
+  const [showAll, setShowAll] = useState(false);
+
 
   // load from state or fallback to localStorage
   let work = location.state?.work;
@@ -19,13 +22,37 @@ export default function RoadDetail() {
 
   if (!work) return <h2>No work details found. Please go back.</h2>;
 
-  const { road, contractor, start_date, description, cost, completedOrpending, defect_liability_period} =
-    work;
+  const {
+    road,
+    contractor,
+    start_date,
+    description,
+    cost,
+    completedOrpending,
+    defect_liability_period,
+  } = work;
 
   console.log("work details:", work);
+
+  const AllUpdates = async (id) => {
+    try {
+      const response = await getUpdatesByWork(id);
+      console.log("Updates for work:", response.data);
+      setAllUpdates(response.data);
+    } catch (error) {
+      console.error("Error fetching updates:", error);
+    }
+  };
+  useEffect(() => {
+    if (work?.id) {
+      AllUpdates(work.id);
+    }
+  }, [work]);
+  console.log("allUpdates:", allUpdates);
+
   return (
     <>
-        <Header />
+      <Header />
       <div style={{ fontFamily: "Arial, sans-serif", color: "#333" }}>
         <div
           style={{
@@ -107,7 +134,7 @@ export default function RoadDetail() {
               <p>
                 <b>Cost:</b> ₹{cost ?? "40,000"}
               </p>
-              
+
               <div
                 style={{
                   height: "130px",
@@ -123,7 +150,7 @@ export default function RoadDetail() {
                 }}
               >
                 {/* {progress_percent}% */}
-
+                {allUpdates[0]?.progress_percent}%
               </div>
             </div>
           </div>
@@ -136,22 +163,48 @@ export default function RoadDetail() {
                 <tr>
                   <th style={thStyle}>S. No.</th>
                   <th style={thStyle}>Date</th>
-                  <th style={thStyle}>Phase</th>
+                  <th style={thStyle}>Progress Percentage</th>
                   <th style={thStyle}>Description</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td style={tdStyle}>1</td>
-                  <td style={tdStyle}>2025-07-10</td>
-                  <td style={tdStyle}>Phase 1</td>
-                  <td style={tdStyle}>{description}</td>
-                </tr>
-                <tr>
-                  <td colSpan={4} style={tdStyleCenter}>
-                    See all ➝ (only 5 are listed)
-                  </td>
-                </tr>
+                {allUpdates.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} style={tdStyleCenter}>
+                      No updates available on this road.
+                    </td>
+                  </tr>
+                ) : (
+                  <>
+                    {(showAll ? allUpdates : allUpdates.slice(0, 2)).map(
+                      (update, index) => (
+                        <tr key={update.id}>
+                          <td style={tdStyle}>{index + 1}</td>
+                          <td style={tdStyle}>{update.update_date}</td>
+                          <td style={tdStyle}>{update.progress_percent}%</td>
+                          <td style={tdStyle}>{update.status_note}</td>
+                        </tr>
+                      )
+                    )}
+
+                    {allUpdates.length > 2 && !showAll && (
+                      <tr>
+                        <td colSpan={4} style={tdStyleCenter}>
+                          <span
+                            style={{
+                              cursor: "pointer",
+                              color: "blue",
+                              textDecoration: "underline",
+                            }}
+                            onClick={() => setShowAll(true)}
+                          >
+                            See all ⬇
+                          </span>
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                )}
               </tbody>
             </table>
           </div>
