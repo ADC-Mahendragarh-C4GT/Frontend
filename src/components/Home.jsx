@@ -27,6 +27,8 @@ export default function Home() {
 
   try {
     const response = await getUpdates(pageNumber, finalSize);
+    console.log("Fetched updates:", response.data.results);
+
     setUpdates(response.data.results);
     setTotalCount(response.data.count);
   } catch (error) {
@@ -51,10 +53,10 @@ export default function Home() {
   };
 
   const filteredUpdates = updates.filter((update) => {
-    const roadName = update?.work?.road?.road_name?.toLowerCase() ?? "";
-    const roadCode = update?.work?.road?.unique_code?.toLowerCase() ?? "";
+    const roadName = update?.road?.road_name?.toLowerCase() ?? "";
+    const roadCode = update?.road?.unique_code?.toLowerCase() ?? "";
     const contractorName =
-      update?.work?.contractor?.contractor_name?.toLowerCase() ?? "";
+      update?.contractor?.contractor_name?.toLowerCase() ?? "";
 
     const roadQ = roadQuery.toLowerCase();
     const contractorQ = contractorQuery.toLowerCase();
@@ -79,7 +81,8 @@ const handleRowClick = (work) => {
   );
     navigate(`/road/${work.road.unique_code}`, { state: { work } });
   };
-
+  
+  
 
   return (
     <>
@@ -135,30 +138,37 @@ const handleRowClick = (work) => {
                 <TableCell align="center">Work</TableCell>
                 <TableCell align="center">Contractor</TableCell>
                 <TableCell align="center">Start Date</TableCell>
+                <TableCell align="center">Status</TableCell>
+
                 <TableCell align="center">Work Completed (%)</TableCell>
               </TableRow>
             </TableHead>
             <TableBody >
+              
               {filteredUpdates.length > 0 ? (
                 filteredUpdates.map((update, index) => (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={update.id} style ={{ cursor: "pointer" }} onClick={() => handleRowClick(update.work)}>
+                  
+                  <TableRow hover role="checkbox" tabIndex={-1} key={update.id} style ={{ cursor: "pointer"}} onClick={() => handleRowClick(update)}>
                     <TableCell align="center">
                       {page * rowsPerPage + index + 1}
                     </TableCell>
                     <TableCell align="center">
-                      {update.work.road.unique_code}
+                      {update.road.unique_code}
                     </TableCell>
                     <TableCell align="center">
-                      {update.work.road.road_name}
+                      {update.road.road_name}
                     </TableCell>
                     <TableCell align="center">
-                      {update.work.description}
+                      {update.description}
                     </TableCell>
                     <TableCell align="center">
-                      {update.work.contractor.contractor_name}
+                      {update.contractor.contractor_name}
                     </TableCell>
                     <TableCell align="center">
-                      {update.work.start_date}
+                      {update.start_date}
+                    </TableCell>
+                    <TableCell align="center">
+                      {update.completedOrpending}
                     </TableCell>
                     <TableCell align="center">
                       {update.progress_percent}%

@@ -1,13 +1,12 @@
-import axios from "axios";
+import axios, { type AxiosResponse } from "axios";
 import BASE_URL from "./config";
+axios.defaults.withCredentials = true;
 
-// Initialize axios instance
 const api = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
 });
 
-// Define types
 export interface UserType {
   value: string;
   label: string;
@@ -58,15 +57,25 @@ export interface Update {
   [key: string]: any;
 }
 
+export interface Comment {
+  id: number;
+  comment_date: string;
+  text: string;
+  update: any;      
+  infra_work: any;  
+  commenter: any;
+  [key: string]: any;
+}
+
+interface AddCommentPayload {
+  workId: number;
+  updateId: number;
+  text: string;
+}
 
 
-// API calls
-
-// Auth & User
 export const fetchUserTypes = () => api.get<UserType[]>("/accounts/user-types/");
-// fetchUserTypes().then((response) => {
-//   console.log("--------------->", response.data);
-// });
+
 export const login = (email: string, password: string, userType: string) => {
   return api.post<LoginResponse>("/accounts/login/", { email, password, user_type: userType });
 };
@@ -88,7 +97,7 @@ export const getRoads = () => api.get<Road[]>("/api/roads/");
 export const getContractors = () => api.get<Contractor[]>("/api/contractors/");
 export const getInfraWorks = () => api.get<InfraWork[]>("/api/infra-works/");
 
-export const getUpdates = (page: number = 1, pageSize: number = 100) => {
+export const  getUpdates = (page: number = 1, pageSize: number = 10) => {
   return api.get("/api/updatesPage/", {
     params: {
       page,
@@ -117,6 +126,27 @@ export const deleteRoad = (id: number) => {
 };
 
 
+export const getCommentsByWork = (workId: number) => {
+  return api.get<Comment[]>("/api/comments/", {
+    params: {
+      work_id: workId,
+    },
+  });
+};
+
 export default api;
+
+
+
+export const addComment = (data: AddCommentPayload) => {
+  return api.post("/api/comments/", {
+    infra_work: data.workId,
+    update: data.updateId,
+    comment_text: data.text,
+    withCredentials: true,
+    
+  });
+};
+
 
 

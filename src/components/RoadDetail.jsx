@@ -1,7 +1,7 @@
-import React from "react";
+import React, { use } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./header";
-import { getUpdatesByWork } from "../api/api";
+import { getUpdatesByWork, getCommentsByWork, addComment } from "../api/api";
 import { useState, useEffect } from "react";
 
 export default function RoadDetail() {
@@ -9,7 +9,8 @@ export default function RoadDetail() {
   const location = useLocation();
   const [allUpdates, setAllUpdates] = useState([]);
   const [showAll, setShowAll] = useState(false);
-
+  const [allComments, setAllComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
 
   // load from state or fallback to localStorage
   let work = location.state?.work;
@@ -43,12 +44,66 @@ export default function RoadDetail() {
       console.error("Error fetching updates:", error);
     }
   };
+
+  const AllComments = async (id) => {
+    try {
+      const response = await getCommentsByWork(id);
+      console.log("Comments for work:", response.data);
+      setAllComments(response.data.results);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  };
+
   useEffect(() => {
     if (work?.id) {
       AllUpdates(work.id);
     }
   }, [work]);
+
+  useEffect(() => {
+    if (work?.id) {
+      AllComments(work.id);
+    }
+  }, [work]);
   console.log("allUpdates:", allUpdates);
+  const progressPercent = allUpdates[0]?.progress_percent ?? 0;
+
+  let bgColor = "#f8e5b0";
+  if (progressPercent === 0) {
+    bgColor = "#f8b0b0";
+  } else if (progressPercent === 100) {
+    bgColor = "#b0f8b0";
+  }
+
+
+const handleAddComment = async () => {
+  if (!commentText.trim()) return;
+
+  const latestUpdate = allUpdates[0];
+  if (!latestUpdate) {
+    alert("No update available to associate this comment with.");
+    return;
+  }
+
+  try {
+    await addComment({
+      workId: work.id,
+      updateId: latestUpdate.id,
+      text: commentText,
+    });
+
+    console.log("Comment added");
+    setCommentText("");
+
+    // Refresh comments
+    AllComments(work.id);
+  } catch (err) {
+    console.error("Failed to add comment:", err);
+  }
+};
+
+
 
   return (
     <>
@@ -140,7 +195,7 @@ export default function RoadDetail() {
                   height: "130px",
                   width: "130px",
                   borderRadius: "50%",
-                  background: "#ddd0b0",
+                  background: bgColor,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -211,38 +266,96 @@ export default function RoadDetail() {
 
           {/* Comments Table */}
           <div>
-            <h3>Comments</h3>
-            <input
-              placeholder="Add Comment (Type here)…"
+            <div
               style={{
-                width: "100%",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: "1rem",
                 marginBottom: "1rem",
-                padding: "0.5rem",
-                borderRadius: "4px",
-                border: "1px solid #ccc",
               }}
-            />
+            >
+              <h3 style={{ margin: 0 }}>Comments</h3>
+              <input
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="Type your comment..."
+                style={{
+                  flex: 1,
+                  padding: "0.5rem",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                }}
+              />
+              <button
+                onClick={handleAddComment}
+                style={{
+                  padding: "0.5rem 1rem",
+                  borderRadius: "6px",
+                  backgroundColor: "#4CAF50",
+                  color: "white",
+                  border: "none",
+                  cursor: "pointer",
+                  minWidth: "120px",
+                }}
+              >
+                Add Comment
+              </button>
+            </div>
+
             <table style={tableStyle}>
               <thead>
                 <tr>
                   <th style={thStyle}>S. No.</th>
-                  <th style={thStyle}>Commentator Name</th>
-                  <th style={thStyle}>Post</th>
+                  <th style={thStyle}>Commentator</th>
                   <th style={thStyle}>Comment</th>
+                  <th style={thStyle}>Progress Percentage</th>
+                  <th style={thStyle}>Work Update Description</th>
+                  <th style={thStyle}>Date when Commented</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td style={tdStyle}>1</td>
-                  <td style={tdStyle}>Officer A</td>
-                  <td style={tdStyle}>Supervisor</td>
-                  <td style={tdStyle}>Work is progressing smoothly.</td>
-                </tr>
-                <tr>
-                  <td colSpan={4} style={tdStyleCenter}>
-                    See all ➝ (only 5 are listed)
-                  </td>
-                </tr>
+                {allComments.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} style={tdStyleCenter}>
+                      No comments available on this road.
+                    </td>
+                  </tr>
+                ) : (
+                  <>
+                    {(showAll ? allComments : allComments.slice(0, 5)).map(
+                      (comment, index) => (
+                        <tr key={comment.id}>
+                          <td style={tdStyle}>{index + 1}</td>
+                          <td style={tdStyle}>{comment.commenter.username}</td>
+                          <td style={tdStyle}>{comment.comment_text}</td>
+                          <td style={tdStyle}>
+                            {comment.update.progress_percent}%
+                          </td>
+                          <td style={tdStyle}>{comment.update.status_note}</td>
+                          <td style={tdStyle}>{comment.comment_date}</td>
+                        </tr>
+                      )
+                    )}
+
+                    {allComments.length > 5 && !showAll && (
+                      <tr>
+                        <td colSpan={7} style={tdStyleCenter}>
+                          <span
+                            style={{
+                              cursor: "pointer",
+                              color: "blue",
+                              textDecoration: "underline",
+                            }}
+                            onClick={() => setShowAll(true)}
+                          >
+                            See all ⬇
+                          </span>
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                )}
               </tbody>
             </table>
           </div>
