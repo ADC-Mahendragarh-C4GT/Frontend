@@ -1,4 +1,4 @@
-import axios, { type AxiosResponse } from "axios";
+import axios from "axios";
 import BASE_URL from "./config";
 axios.defaults.withCredentials = true;
 
@@ -73,7 +73,6 @@ interface AddCommentPayload {
   text: string;
 }
 
-
 export const fetchUserTypes = () => api.get<UserType[]>("/accounts/user-types/");
 
 export const login = (email: string, password: string, userType: string) => {
@@ -98,16 +97,28 @@ export const getContractors = () => api.get<Contractor[]>("/api/contractors/");
 export const getInfraWorks = () => api.get<InfraWork[]>("/api/infra-works/");
 
 export const  getUpdates = (page: number = 1, pageSize: number = 10) => {
+  const token = localStorage.getItem("access_token");
+  console.log(`Fetching updates with token: ${token}`);
   return api.get("/api/updatesPage/", {
     params: {
       page,
       page_size: pageSize,
     },
+     headers: {
+    "Authorization": `Bearer ${token}`
+  }
   });
 };
 
+
+
 export const getUpdatesByWork = (workId: number) => {
-  const response = api.get(`/api/infra-works/${workId}/updates/`);
+  const token = localStorage.getItem("access_token");
+  const response = api.get(`/api/infra-works/${workId}/updates/`, {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  });
   console.log('Fetching updates for work ID:', workId, response);
   return response;
 };
@@ -127,10 +138,14 @@ export const deleteRoad = (id: number) => {
 
 
 export const getCommentsByWork = (workId: number) => {
+  const token = localStorage.getItem("access_token");
   return api.get<Comment[]>("/api/comments/", {
     params: {
       work_id: workId,
     },
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
   });
 };
 
@@ -139,12 +154,16 @@ export default api;
 
 
 export const addComment = (data: AddCommentPayload) => {
+  const token = localStorage.getItem("access_token");
   return api.post("/api/comments/", {
     infra_work: data.workId,
     update: data.updateId,
     comment_text: data.text,
+  }, {
     withCredentials: true,
-    
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
   });
 };
 

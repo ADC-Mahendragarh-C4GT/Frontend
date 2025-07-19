@@ -27,10 +27,11 @@ export default function Home() {
 
   try {
     const response = await getUpdates(pageNumber, finalSize);
-    console.log("Fetched updates:", response.data.results);
-
-    setUpdates(response.data.results);
-    setTotalCount(response.data.count);
+    console.log("response:", response);
+    console.log("Fetched updates:", response.data);
+    console.log(`Total count: ${response.data.length}`);
+    setUpdates(response.data);
+    setTotalCount(response.data.length);
   } catch (error) {
     console.error("Error fetching updates:", error);
   }
@@ -52,7 +53,7 @@ export default function Home() {
     setPage(0);
   };
 
-  const filteredUpdates = updates.filter((update) => {
+  const filteredUpdates = updates?.filter((update) => {
     const roadName = update?.road?.road_name?.toLowerCase() ?? "";
     const roadCode = update?.road?.unique_code?.toLowerCase() ?? "";
     const contractorName =
@@ -144,8 +145,8 @@ const handleRowClick = (work) => {
               </TableRow>
             </TableHead>
             <TableBody >
-              
-              {filteredUpdates.length > 0 ? (
+
+              {filteredUpdates?.length > 0 ? (
                 filteredUpdates.map((update, index) => (
                   
                   <TableRow hover role="checkbox" tabIndex={-1} key={update.id} style ={{ cursor: "pointer"}} onClick={() => handleRowClick(update)}>

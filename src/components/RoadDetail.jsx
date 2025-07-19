@@ -8,10 +8,10 @@ export default function RoadDetail() {
   const navigate = useNavigate();
   const location = useLocation();
   const [allUpdates, setAllUpdates] = useState([]);
-  const [showAll, setShowAll] = useState(false);
   const [allComments, setAllComments] = useState([]);
   const [commentText, setCommentText] = useState("");
-
+  const [showAllUpdates, setShowAllUpdates] = useState(false);
+  const [showAllComments, setShowAllComments] = useState(false);
   // load from state or fallback to localStorage
   let work = location.state?.work;
   if (!work) {
@@ -49,7 +49,7 @@ export default function RoadDetail() {
     try {
       const response = await getCommentsByWork(id);
       console.log("Comments for work:", response.data);
-      setAllComments(response.data.results);
+      setAllComments(response.data);
     } catch (error) {
       console.error("Error fetching comments:", error);
     }
@@ -76,34 +76,36 @@ export default function RoadDetail() {
     bgColor = "#b0f8b0";
   }
 
-
-const handleAddComment = async () => {
-  if (!commentText.trim()) return;
-
-  const latestUpdate = allUpdates[0];
-  if (!latestUpdate) {
-    alert("No update available to associate this comment with.");
-    return;
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    throw new Error("No access token found. Please log in.");
   }
 
-  try {
-    await addComment({
-      workId: work.id,
-      updateId: latestUpdate.id,
-      text: commentText,
-    });
+  const handleAddComment = async () => {
+    if (!commentText.trim()) return;
 
-    console.log("Comment added");
-    setCommentText("");
+    const latestUpdate = allUpdates[0];
+    if (!latestUpdate) {
+      alert("No update available to associate this comment with.");
+      return;
+    }
 
-    // Refresh comments
-    AllComments(work.id);
-  } catch (err) {
-    console.error("Failed to add comment:", err);
-  }
-};
+    try {
+      await addComment({
+        workId: work.id,
+        updateId: latestUpdate.id,
+        text: commentText,
+      });
 
+      console.log("Comment added");
+      setCommentText("");
 
+      // Refresh comments
+      AllComments(work.id);
+    } catch (err) {
+      console.error("Failed to add comment:", err);
+    }
+  };
 
   return (
     <>
@@ -231,7 +233,7 @@ const handleAddComment = async () => {
                   </tr>
                 ) : (
                   <>
-                    {(showAll ? allUpdates : allUpdates.slice(0, 2)).map(
+                    {(showAllUpdates ? allUpdates : allUpdates.slice(0, 2)).map(
                       (update, index) => (
                         <tr key={update.id}>
                           <td style={tdStyle}>{index + 1}</td>
@@ -242,7 +244,7 @@ const handleAddComment = async () => {
                       )
                     )}
 
-                    {allUpdates.length > 2 && !showAll && (
+                    {allUpdates.length > 2 && !showAllUpdates && (
                       <tr>
                         <td colSpan={4} style={tdStyleCenter}>
                           <span
@@ -251,7 +253,7 @@ const handleAddComment = async () => {
                               color: "blue",
                               textDecoration: "underline",
                             }}
-                            onClick={() => setShowAll(true)}
+                            onClick={() => setShowAllUpdates(true)}
                           >
                             See all ⬇
                           </span>
@@ -315,7 +317,7 @@ const handleAddComment = async () => {
                 </tr>
               </thead>
               <tbody>
-                {allComments.length === 0 ? (
+                {allComments?.length === 0 ? (
                   <tr>
                     <td colSpan={7} style={tdStyleCenter}>
                       No comments available on this road.
@@ -323,22 +325,28 @@ const handleAddComment = async () => {
                   </tr>
                 ) : (
                   <>
-                    {(showAll ? allComments : allComments.slice(0, 5)).map(
-                      (comment, index) => (
-                        <tr key={comment.id}>
-                          <td style={tdStyle}>{index + 1}</td>
-                          <td style={tdStyle}>{comment.commenter.username}</td>
-                          <td style={tdStyle}>{comment.comment_text}</td>
-                          <td style={tdStyle}>
-                            {comment.update.progress_percent}%
-                          </td>
-                          <td style={tdStyle}>{comment.update.status_note}</td>
-                          <td style={tdStyle}>{comment.comment_date}</td>
-                        </tr>
-                      )
-                    )}
-
-                    {allComments.length > 5 && !showAll && (
+                    {(showAllComments
+                      ? allComments
+                      : allComments.slice(0, 5)
+                    ).map((comment, index) => (
+                      <tr key={comment.id}>
+                        <td style={tdStyle}>{index + 1}</td>
+                        <td style={tdStyle}>
+                          {comment.commenter?.first_name}{" "}
+                          {comment.commenter?.last_name}(
+                          {comment.commenter?.user_type}){" "}
+                        </td>
+                        <td style={tdStyle}>{comment.comment_text}</td>
+                        <td style={tdStyle}>
+                          {comment.update?.progress_percent ?? "N/A"}%
+                        </td>
+                        <td style={tdStyle}>
+                          {comment.update?.status_note ?? "N/A"}
+                        </td>
+                        <td style={tdStyle}>{comment.comment_date ?? "N/A"}</td>
+                      </tr>
+                    ))}
+                    {allComments.length > 5 && !showAllComments && (
                       <tr>
                         <td colSpan={7} style={tdStyleCenter}>
                           <span
@@ -347,7 +355,7 @@ const handleAddComment = async () => {
                               color: "blue",
                               textDecoration: "underline",
                             }}
-                            onClick={() => setShowAll(true)}
+                            onClick={() => setShowAllComments(true)}
                           >
                             See all ⬇
                           </span>

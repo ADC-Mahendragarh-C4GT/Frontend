@@ -1,36 +1,24 @@
-export default function Header() {
-  return (
-    // <header
-    //   className="bg-blue-600 text-white p-4 fixed top-0 left-0 w-full z-50"
-    //   style={{ paddingTop: 0, marginTop: 0 }}
-    // >
-    //   <nav className="m-2">
-    //     <div className="inline m-auto justify-between flex items-center">
-    //       <li style={{ display: "inline", marginRight: "16px" }} className="self-start">
-    //         <img
-    //           src="/images/HaryanaGov.jpg"
-    //           alt="Govt of Haryana"
-    //           height={80}
-    //             width={80}
-    //           style={{ maxWidth: "100%" }}
-    //         />
-    //       </li>
-    //       <li style={{ display: "inline", marginRight: "16px", color: "#000" }} className="self-end">
-    //         Municipal Corporation Rohtak
-    //       </li>
-    //       <li style={{ display: "inline", marginLeft: "1px"}}>
-    //         <img
-    //           src="/images/HaryanaGov.jpg"
-    //           alt="Govt of Haryana"
-    //           height={80}
-    //           width={80}
-    //           style={{ maxWidth: "100%" }}
-    //         />
-    //       </li>
-    //     </div>
-    //   </nav>
-    // </header>
+import { useEffect, useState } from "react";
 
+export default function Header() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // Run once on mount
+    handleResize();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  return (
     <header
       className="fixed top-0 left-0 w-full bg-white shadow"
       style={{
@@ -40,7 +28,7 @@ export default function Header() {
         alignItems: "center",
         justifyContent: "center",
         backgroundColor: "#bcbcbc",
-        height:"70px",
+        height: "70px",
       }}
     >
       <img
@@ -52,20 +40,25 @@ export default function Header() {
           height: "70px",
           width: "8%",
         }}
-        className="h-10"
       />
-      <div style={{display: "flex", alignItems: "center", justifyContent: "center", width: "77%"}}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "77%",
+        }}
+      >
         <h1
-          className="font-bold text-gray-800"
+          className=" text-gray-800"
           style={{
             display: "inline",
             color: "#000",
             marginTop: "0",
-            
             marginBottom: "0",
           }}
         >
-          Municipal Corporation Rohtak
+          {isMobile ? "MC Rohtak" : "Municipal Corporation Rohtak"}
         </h1>
       </div>
       <img

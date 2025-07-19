@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { login, fetchUserTypes } from "../api/api";
 import { useNavigate } from "react-router-dom";
 
-
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -10,7 +9,7 @@ const Login = () => {
   const [userTypes, setUserTypes] = useState([]);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     fetchUserTypes()
       .then((res) => {
@@ -30,12 +29,12 @@ const Login = () => {
     try {
       const response = await login(email, password, userType);
       console.log(response.data);
-
+      localStorage.setItem("access_token", response.data.access);
+      localStorage.setItem("refresh_token", response.data.refresh);
       setError("");
 
       // Redirect to homepage
       navigate("/home");
-
     } catch (err) {
       console.error(err);
       setError("Invalid credentials");
@@ -180,7 +179,20 @@ const Login = () => {
             >
               Log In
             </button>
-
+            <br />
+            <p
+              style={{
+                margin: "0.5em 0",
+                fontSize: "16px",
+                fontWeight: "bold",
+              }}
+            >
+              OR
+            </p>
+            <p style={{ margin: "0.4em 0", fontSize: "16px" }}>
+              If you are from other department and want to request for work, then <a href="/other-department-form">click here</a>
+            </p>
+            
             {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
           </form>
         </div>
