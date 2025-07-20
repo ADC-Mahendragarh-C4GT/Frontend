@@ -39,6 +39,7 @@ export interface Road {
   [key: string]: any;
 }
 
+
 export interface Contractor {
   id: number;
   name: string;
@@ -67,11 +68,25 @@ export interface Comment {
   [key: string]: any;
 }
 
-interface AddCommentPayload {
+export interface AddCommentPayload {
   workId: number;
   updateId: number;
   text: string;
 }
+
+export interface OtherDepartmentRequestPayload {
+  department_name : string;
+  work_description : string;
+  contact_info : string;
+  requested_by : string;
+  [key: string]: any;
+}
+
+export interface getOtherDepartmentRequestPayload{
+  id : number;
+  [key : string]: any;
+}
+
 
 export const fetchUserTypes = () => api.get<UserType[]>("/accounts/user-types/");
 
@@ -168,4 +183,21 @@ export const addComment = (data: AddCommentPayload) => {
 };
 
 
+
+export const submitOtherDepartmentRequest = (data: OtherDepartmentRequestPayload) => {
+  return api.post("/api/other-department-requests/", 
+    {
+      road: data.road.id,
+      department_name: data.departmentName,
+      work_description: data.workDescription,
+      requested_by: data.requestedBy,
+      contact_info: data.contactInfo,
+    }
+  );
+};
+
+export const getPendingRequestsCount = async () => {
+  const response = await api.get("/api/other-department-requests/");
+  return response.data.length;
+};
 

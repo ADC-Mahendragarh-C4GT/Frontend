@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from './components/Login';
 import Home from "./components/home";
 import RoadDetail from "./components/RoadDetail";
+import OtherDepartmentForm from './components/OtherDepartmentForm';
+
 
 function App() {
   return (
@@ -12,6 +14,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/home" element={<Home />} />
         <Route path="/road/:id" element={<RoadDetail />} />
+        <Route path="/other-department-form" element={<OtherDepartmentForm />} />
       </Routes>
     </Router>
   );

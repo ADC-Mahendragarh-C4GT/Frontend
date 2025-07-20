@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Header from "./header";
-import { getUpdates } from "../api/api";
+import { getUpdates, getPendingRequestsCount} from "../api/api";
 import { useNavigate } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -18,24 +18,29 @@ export default function Home() {
   const [page, setPage] = useState(0); // MUI is 0-based
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  const userType = localStorage.getItem("user_type");
+
+  useEffect(() => {
+  if (userType === "XEN") {
+    getPendingRequestsCount().then(setPendingCount).catch(console.error);
+  }
+}, [userType]);
 
   const loadUpdates = async (pageNumber = 1, pageSize = 10) => {
-  const finalSize = pageSize === -1 ? totalCount || 100000 : pageSize;
-  console.log(
-    `[${new Date().toLocaleTimeString()}] Fetching page=${pageNumber}, pageSize=${finalSize}`
-  );
+    const finalSize = pageSize === -1 ? totalCount || 100000 : pageSize;
+    console.log(
+      `[${new Date().toLocaleTimeString()}] Fetching page=${pageNumber}, pageSize=${finalSize}`
+    );
 
-  try {
-    const response = await getUpdates(pageNumber, finalSize);
-    console.log("response:", response);
-    console.log("Fetched updates:", response.data);
-    console.log(`Total count: ${response.data.length}`);
-    setUpdates(response.data);
-    setTotalCount(response.data.length);
-  } catch (error) {
-    console.error("Error fetching updates:", error);
-  }
-};
+    try {
+      const response = await getUpdates(pageNumber, finalSize);
+      setUpdates(response.data);
+      setTotalCount(response.data.length);
+    } catch (error) {
+    }
+  };
 
   useEffect(() => {
     console.log(
@@ -71,23 +76,41 @@ export default function Home() {
     return matchesRoad && matchesContractor;
   });
 
-const navigate = useNavigate();
-const timestamp = new Date().toLocaleString();
-console.log(`Clicked at ${timestamp}`);
+  const navigate = useNavigate();
+  const timestamp = new Date().toLocaleString();
+  console.log(`Clicked at ${timestamp}`);
 
-const handleRowClick = (work) => {
+  const handleRowClick = (work) => {
     localStorage.setItem("currentWork", JSON.stringify(work)); // fallback
     console.log(
-    `[${timestamp}] Row clicked → road=${work.road.unique_code}, contractor=${work.contractor.contractor_name}`
-  );
+      `[${timestamp}] Row clicked → road=${work.road.unique_code}, contractor=${work.contractor.contractor_name}`
+    );
     navigate(`/road/${work.road.unique_code}`, { state: { work } });
   };
-  
-  
 
   return (
     <>
       <Header />
+{userType === "XEN" && (
+  <div
+    style={{
+      margin: "1rem auto",
+      padding: "1rem",
+      maxWidth: "600px",
+      background: "#f0f0f0",
+      borderRadius: "8px",
+      textAlign: "center",
+    }}
+  >
+    <p style={{ margin: 0, color:'#000' }}>
+      Total <strong>{pendingCount}</strong> requests are pending.{" "}
+      <a href="/pending-requests" style={{ color: "#007bff", textDecoration: "underline" }}>
+        Click here
+      </a>{" "}
+      to review.
+    </p>
+  </div>
+)}
 
       <div
         style={{
@@ -144,12 +167,17 @@ const handleRowClick = (work) => {
                 <TableCell align="center">Work Completed (%)</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody >
-
+            <TableBody>
               {filteredUpdates?.length > 0 ? (
                 filteredUpdates.map((update, index) => (
-                  
-                  <TableRow hover role="checkbox" tabIndex={-1} key={update.id} style ={{ cursor: "pointer"}} onClick={() => handleRowClick(update)}>
+                  <TableRow
+                    hover
+                    role="checkbox"
+                    tabIndex={-1}
+                    key={update.id}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleRowClick(update)}
+                  >
                     <TableCell align="center">
                       {page * rowsPerPage + index + 1}
                     </TableCell>
@@ -159,15 +187,11 @@ const handleRowClick = (work) => {
                     <TableCell align="center">
                       {update.road.road_name}
                     </TableCell>
-                    <TableCell align="center">
-                      {update.description}
-                    </TableCell>
+                    <TableCell align="center">{update.description}</TableCell>
                     <TableCell align="center">
                       {update.contractor.contractor_name}
                     </TableCell>
-                    <TableCell align="center">
-                      {update.start_date}
-                    </TableCell>
+                    <TableCell align="center">{update.start_date}</TableCell>
                     <TableCell align="center">
                       {update.completedOrpending}
                     </TableCell>

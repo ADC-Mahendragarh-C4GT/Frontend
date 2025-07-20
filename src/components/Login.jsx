@@ -31,6 +31,7 @@ const Login = () => {
       console.log(response.data);
       localStorage.setItem("access_token", response.data.access);
       localStorage.setItem("refresh_token", response.data.refresh);
+      localStorage.setItem("user_type", response.data.user_type);
       setError("");
 
       // Redirect to homepage
