@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Header from "./header";
-import { getUpdates, getPendingRequestsCount} from "../api/api";
+import { getUpdates, getPendingRequests } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -24,9 +24,20 @@ export default function Home() {
 
   useEffect(() => {
   if (userType === "XEN") {
-    getPendingRequestsCount().then(setPendingCount).catch(console.error);
+    console.log("Fetching pending requests count for XEN...");
+    getPendingRequests()
+      .then((data) => {
+        console.log("Fetched requests:", data);
+        const pendingCount = data.filter(req => req.status === "Pending").length;
+        console.log("Pending requests count:", pendingCount);
+        setPendingCount(pendingCount);
+      })
+      .catch((err) => {
+        console.error("Error fetching pending requests:", err);
+      });
   }
 }, [userType]);
+
 
   const loadUpdates = async (pageNumber = 1, pageSize = 10) => {
     const finalSize = pageSize === -1 ? totalCount || 100000 : pageSize;
@@ -38,8 +49,7 @@ export default function Home() {
       const response = await getUpdates(pageNumber, finalSize);
       setUpdates(response.data);
       setTotalCount(response.data.length);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   useEffect(() => {
@@ -91,26 +101,30 @@ export default function Home() {
   return (
     <>
       <Header />
-{userType === "XEN" && (
-  <div
-    style={{
-      margin: "1rem auto",
-      padding: "1rem",
-      maxWidth: "600px",
-      background: "#f0f0f0",
-      borderRadius: "8px",
-      textAlign: "center",
-    }}
-  >
-    <p style={{ margin: 0, color:'#000' }}>
-      Total <strong>{pendingCount}</strong> requests are pending.{" "}
-      <a href="/pending-requests" style={{ color: "#007bff", textDecoration: "underline" }}>
-        Click here
-      </a>{" "}
-      to review.
-    </p>
-  </div>
-)}
+      {userType === "XEN" && (
+        <div
+          style={{
+            margin: "1rem auto",
+            padding: "1rem",
+            maxWidth: "1000px",
+            background: "#f0f0f0",
+            borderRadius: "8px",
+            textAlign: "center",
+          }}
+        >
+          <p style={{ margin: 0, color: "#000" }}>
+            There are currently <strong>{pendingCount}</strong> pending work
+            requests from other departments.{" "}
+            <a
+              href="/pendingRequests"
+              style={{ color: "#007bff", textDecoration: "underline" }}
+            >
+              Click here
+            </a>{" "}
+            to review them.
+          </p>
+        </div>
+      )}
 
       <div
         style={{

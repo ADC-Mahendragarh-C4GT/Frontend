@@ -1,5 +1,6 @@
 import axios from "axios";
 import BASE_URL from "./config";
+import type { UpdatePayload } from "vite/types/hmrPayload.js";
 axios.defaults.withCredentials = true;
 
 const api = axios.create({
@@ -87,6 +88,10 @@ export interface getOtherDepartmentRequestPayload{
   [key : string]: any;
 }
 
+export interface updateRequestStatusPayload{
+  id : number;
+  [key : string]: any;
+}
 
 export const fetchUserTypes = () => api.get<UserType[]>("/accounts/user-types/");
 
@@ -106,8 +111,10 @@ export const getProfile = () => {
   return api.get<Profile>("/accounts/profile/");
 };
 
-// Roads, Contractors, InfraWorks, Updates
-export const getRoads = () => api.get<Road[]>("/api/roads/");
+export const getRoads = async () => {
+  const response = await api.get("/api/roads/");
+  return response.data; 
+};
 export const getContractors = () => api.get<Contractor[]>("/api/contractors/");
 export const getInfraWorks = () => api.get<InfraWork[]>("/api/infra-works/");
 
@@ -196,8 +203,41 @@ export const submitOtherDepartmentRequest = (data: OtherDepartmentRequestPayload
   );
 };
 
-export const getPendingRequestsCount = async () => {
-  const response = await api.get("/api/other-department-requests/");
-  return response.data.length;
+export const getPendingRequests = async () => {
+    const token = localStorage.getItem("access_token");
+
+  const response = await api.get("/api/other-department-requests/",{
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  });
+  // filter only pending requests
+  const pending = response.data.filter((req: { status: string }) => req.status === "Pending");
+  return pending;
 };
 
+
+export const getOtherRequests = async () => {
+    const token = localStorage.getItem("access_token");
+
+  const response = await api.get("/api/other-department-requests/",{
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  });
+  // filter only pending requests
+  const pending = response.data.filter((req: { status: string }) => req.status != "Pending");
+  console.log("Pending -------------", pending);
+  return pending;
+};
+
+
+export const updateRequestStatus = (id: number,payload: { status: string; response_by: string }) => {
+  const token = localStorage.getItem("access_token");
+  console.log('-----------data-----------', status)
+  return api.patch(`/api/other-department-requests/${id}/`,payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  });
+};

@@ -4,6 +4,7 @@ import Login from './components/Login';
 import Home from "./components/home";
 import RoadDetail from "./components/RoadDetail";
 import OtherDepartmentForm from './components/OtherDepartmentForm';
+import PendingRequest from './components/pendingRequest';
 
 
 function App() {
@@ -14,7 +15,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/home" element={<Home />} />
         <Route path="/road/:id" element={<RoadDetail />} />
-        <Route path="/other-department-form" element={<OtherDepartmentForm />} />
+        <Route path="/OtherDepartmentForm" element={<OtherDepartmentForm />} />
+        <Route path="/pendingRequests" element={<PendingRequest/>} />
       </Routes>
     </Router>
   );

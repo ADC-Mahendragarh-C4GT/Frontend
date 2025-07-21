@@ -19,9 +19,9 @@ export default function OtherDepartmentForm() {
     const fetchRoads = async () => {
       try {
         const response = await getRoads();
-        setRoads(response.data);
+        setRoads(response);
         setError("");
-        console.log("Fetched Roads:", response.data);
+        console.log("Fetched Roads:", response);
       } catch (err) {
         console.error("Failed to fetch roads:", err);
         setError("Failed to fetch roads");

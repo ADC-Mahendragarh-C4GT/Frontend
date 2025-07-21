@@ -32,6 +32,8 @@ const Login = () => {
       localStorage.setItem("access_token", response.data.access);
       localStorage.setItem("refresh_token", response.data.refresh);
       localStorage.setItem("user_type", response.data.user_type);
+      localStorage.setItem("userFirstName", response.data.userFirstName);
+      localStorage.setItem("userLastName", response.data.userLastName);
       setError("");
 
       // Redirect to homepage
@@ -191,7 +193,7 @@ const Login = () => {
               OR
             </p>
             <p style={{ margin: "0.4em 0", fontSize: "16px" }}>
-              If you are from other department and want to request for work, then <a href="/other-department-form">click here</a>
+              If you are from other department and want to request for work, then <a href="/OtherDepartmentForm">click here</a>
             </p>
             
             {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
