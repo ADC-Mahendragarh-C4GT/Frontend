@@ -23,21 +23,22 @@ export default function Home() {
   const userType = localStorage.getItem("user_type");
 
   useEffect(() => {
-  if (userType === "XEN") {
-    console.log("Fetching pending requests count for XEN...");
-    getPendingRequests()
-      .then((data) => {
-        console.log("Fetched requests:", data);
-        const pendingCount = data.filter(req => req.status === "Pending").length;
-        console.log("Pending requests count:", pendingCount);
-        setPendingCount(pendingCount);
-      })
-      .catch((err) => {
-        console.error("Error fetching pending requests:", err);
-      });
-  }
-}, [userType]);
-
+    if (userType === "XEN") {
+      console.log("Fetching pending requests count for XEN...");
+      getPendingRequests()
+        .then((data) => {
+          console.log("Fetched requests:", data);
+          const pendingCount = data.filter(
+            (req) => req.status === "Pending"
+          ).length;
+          console.log("Pending requests count:", pendingCount);
+          setPendingCount(pendingCount);
+        })
+        .catch((err) => {
+          console.error("Error fetching pending requests:", err);
+        });
+    }
+  }, [userType]);
 
   const loadUpdates = async (pageNumber = 1, pageSize = 10) => {
     const finalSize = pageSize === -1 ? totalCount || 100000 : pageSize;
@@ -47,7 +48,13 @@ export default function Home() {
 
     try {
       const response = await getUpdates(pageNumber, finalSize);
-      setUpdates(response.data);
+      const sortedData = response.data.sort((a, b) => {
+  if (a.status === "Pending" && b.status !== "Pending") return -1;
+  if (a.status !== "Pending" && b.status === "Pending") return 1;
+
+});
+
+      setUpdates(sortedData);
       setTotalCount(response.data.length);
     } catch (error) {}
   };

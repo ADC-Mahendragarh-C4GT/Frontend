@@ -48,9 +48,9 @@ export default function PendingRequest() {
         console.error("Failed to fetch data", err);
       });
   };
-useEffect(() => {
-  fetchData();
-}, []);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   // useEffect(() => {
   //   console.log("Fetching other department requests...");
@@ -83,16 +83,18 @@ useEffect(() => {
 
   const handleUpdateStatus = (id) => {
     const status = selectedActions[id];
-    const userFirstName = localStorage.getItem('userFirstName')
-    const userLastName = localStorage.getItem('userLastName')
-    const user_type = localStorage.getItem('user_type')
-    const response_by = userFirstName +" "+ userLastName +" "+ "(" + user_type + ")";
+    const userFirstName = localStorage.getItem("userFirstName");
+    const userLastName = localStorage.getItem("userLastName");
+    const user_type = localStorage.getItem("user_type");
+    const response_by =
+      userFirstName + " " + userLastName + " " + "(" + user_type + ")";
+    const response_date = new Date().toISOString().split("T")[0];
     if (!status) {
       alert("Please select a status first.");
       return;
     }
 
-    updateRequestStatus(id, {status, response_by})
+    updateRequestStatus(id, { status, response_by, response_date })
       .then(() => {
         console.log("-------Status-----------------", status);
         fetchData(); // refresh both tables from backend
@@ -102,7 +104,7 @@ useEffect(() => {
       });
   };
 
-  console.log('-----------',otherRequests);
+  console.log("-----------", otherRequests);
 
   return (
     <>
@@ -141,7 +143,7 @@ useEffect(() => {
               pendingRequests.map((req, index) => (
                 <tr key={req.id}>
                   <td style={tdStyle}>{index + 1}</td>
-                  <td style={tdStyle}>{req.submitted_at}</td>
+                  <td style={tdStyle}>{req.submitted_at.split("T")[0]}</td>
                   <td style={tdStyle}>{req.department_name}</td>
                   <td style={tdStyle}>
                     {(() => {
@@ -214,7 +216,7 @@ useEffect(() => {
               otherRequests.map((req, index) => (
                 <tr key={req.id}>
                   <td style={tdStyle}>{index + 1}</td>
-                  <td style={tdStyle}>{req.submitted_at}</td>
+                  <td style={tdStyle}>{req.submitted_at.split("T")[0]}</td>
                   <td style={tdStyle}>{req.department_name}</td>
                   <td style={tdStyle}>
                     {(() => {
@@ -238,7 +240,9 @@ useEffect(() => {
                     {req.status}
                   </td>
                   <td style={tdStyle}>{req.response_by}</td>
-                  <td style={tdStyle}>{req.response_date || "N/A"}</td>
+                  <td style={tdStyle}>
+                    {req.response_date?.split("T")[0] || ""}
+                  </td>
                 </tr>
               ))
             )}

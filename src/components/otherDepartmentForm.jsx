@@ -119,7 +119,7 @@ export default function OtherDepartmentForm() {
           />
           <input
             type="text"
-            placeholder="Contact Info (Phone/Email)"
+            placeholder="Contact Email"
             value={contactInfo}
             onChange={(e) => setContactInfo(e.target.value)}
             required
