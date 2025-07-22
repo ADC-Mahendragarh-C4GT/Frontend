@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { submitOtherDepartmentRequest, getRoads } from "../api/api";
+import { submitOtherDepartmentRequest, getRoads } from "../../api/api";
 import { display, justifyContent } from "@mui/system";
 
 export default function NewRoad() {

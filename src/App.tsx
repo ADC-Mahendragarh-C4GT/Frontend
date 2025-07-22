@@ -4,8 +4,15 @@ import Login from './components/Login';
 import Home from "./components/home";
 import RoadDetail from "./components/RoadDetail";
 import OtherDepartmentForm from './components/OtherDepartmentForm';
-import PendingRequest from './components/pendingRequest';
-import NewRoad from './components/NewRoad';
+import PendingRequest from './components/Executive Engineer/pendingRequest';
+import NewRoad from './components/JuniorEngineer/NewRoad';
+import NewWork from './components/JuniorEngineer/NewWork';
+import NewUpdate from './components/JuniorEngineer/NewUpdate';
+import NewUser from './components/JuniorEngineer/NewUser';
+import NewContractor from './components/JuniorEngineer/NewContractor';
+import UpdateRoad from './components/JuniorEngineer/UpdateRoad';
+import UpdateUser from './components/JuniorEngineer/UpdateUser';
+import UpdateContractor from './components/JuniorEngineer/UpdateContractor';
 
 function App() {
   return (
@@ -18,6 +25,13 @@ function App() {
         <Route path="/OtherDepartmentForm" element={<OtherDepartmentForm />} />
         <Route path="/pendingRequests" element={<PendingRequest/>} />
         <Route path="/NewRoad" element={<NewRoad/>} />
+        <Route path="/NewWork" element={<NewWork/>} />
+        <Route path="/NewUpdate" element={<NewUpdate/>} />
+        <Route path="/NewUser" element={<NewUser/>} />
+        <Route path="/NewContractor" element={<NewContractor/>} />
+        <Route path="/UpdateRoad" element={<UpdateRoad/>} />
+        <Route path="/UpdateUser" element={<UpdateUser/>} />
+        <Route path="/UpdateContractor" element={<UpdateContractor/>} />
       </Routes>
     </Router>
   );

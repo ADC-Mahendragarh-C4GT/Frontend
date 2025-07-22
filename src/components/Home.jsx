@@ -112,21 +112,21 @@ export default function Home() {
   const handleClick = (label) => {
     if (label === "Add New Road") {
       navigate("/NewRoad");
-    } 
-    else if(label === "Add New Work") {
+    } else if (label === "Add New Work") {
       navigate("/NewWork");
-    }
-    else if(label === "Add New Update") {
+    } else if (label === "Add New Update") {
       navigate("/NewUpdate");
-    }
-    else if(label === "Add New User") {
+    } else if (label === "Add New User") {
       navigate("/NewUser");
-    }
-    else if(label === "Add New Work") {
-      navigate("/NewWork");
-    }
-    
-    else {
+    } else if (label === "Update Road Details") {
+      navigate("/UpdateRoad");
+    } else if (label === "Add New Contractor") {
+      navigate("/NewContractor");
+    } else if (label === "Update User Details") {
+      navigate("/UpdateUser");
+    } else if (label === "Update Contractor Details") {
+      navigate("/UpdateContractor");
+    } else {
       alert(`${label} clicked`);
     }
   };
@@ -168,7 +168,6 @@ export default function Home() {
             textAlign: "center",
           }}
         >
-
           <div
             style={{
               display: "flex",
@@ -182,8 +181,8 @@ export default function Home() {
               "Add New Work",
               "Add New Update",
               "Add New User",
-              "Update Road Details",
               "Add New Contractor",
+              "Update Road Details",
               "Update User Details",
               "Update Contractor Details",
             ].map((label) => (

@@ -4,8 +4,8 @@ import {
   getOtherRequests,
   getRoads,
   updateRequestStatus,
-} from "../api/api";
-import Header from "./header";
+} from "../../api/api";
+import Header from "../header";
 
 export default function PendingRequest() {
   const [pendingRequests, setPendingRequests] = useState([]);

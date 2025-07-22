@@ -1,6 +1,5 @@
 import axios from "axios";
 import BASE_URL from "./config";
-import type { UpdatePayload } from "vite/types/hmrPayload.js";
 axios.defaults.withCredentials = true;
 
 const api = axios.create({
