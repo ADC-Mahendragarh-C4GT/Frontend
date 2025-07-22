@@ -239,3 +239,16 @@ export const updateRequestStatus = (id: number,payload: { status: string; respon
     }
   });
 };
+
+
+export const uploadExcel = (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const token = localStorage.getItem("access_token");
+  return api.post("/upload-csv/", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
