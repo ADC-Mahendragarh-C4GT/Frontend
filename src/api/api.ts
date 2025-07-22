@@ -234,7 +234,6 @@ export const getOtherRequests = async () => {
 
 export const updateRequestStatus = (id: number,payload: { status: string; response_by: string, response_date:string  }) => {
   const token = localStorage.getItem("access_token");
-  console.log('-----------data-----------', status)
   return api.patch(`/api/other-department-requests/${id}/`,payload, {
     headers: {
       Authorization: `Bearer ${token}`,

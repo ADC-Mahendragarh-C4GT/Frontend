@@ -5,7 +5,7 @@ import Home from "./components/home";
 import RoadDetail from "./components/RoadDetail";
 import OtherDepartmentForm from './components/OtherDepartmentForm';
 import PendingRequest from './components/pendingRequest';
-
+import NewRoad from './components/NewRoad';
 
 function App() {
   return (
@@ -17,6 +17,7 @@ function App() {
         <Route path="/road/:id" element={<RoadDetail />} />
         <Route path="/OtherDepartmentForm" element={<OtherDepartmentForm />} />
         <Route path="/pendingRequests" element={<PendingRequest/>} />
+        <Route path="/NewRoad" element={<NewRoad/>} />
       </Routes>
     </Router>
   );

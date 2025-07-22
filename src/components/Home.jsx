@@ -40,6 +40,11 @@ export default function Home() {
     }
   }, [userType]);
 
+  useEffect(() => {
+    if (userType === "JE") {
+    }
+  }, [userType]);
+
   const loadUpdates = async (pageNumber = 1, pageSize = 10) => {
     const finalSize = pageSize === -1 ? totalCount || 100000 : pageSize;
     console.log(
@@ -49,10 +54,9 @@ export default function Home() {
     try {
       const response = await getUpdates(pageNumber, finalSize);
       const sortedData = response.data.sort((a, b) => {
-  if (a.status === "Pending" && b.status !== "Pending") return -1;
-  if (a.status !== "Pending" && b.status === "Pending") return 1;
-
-});
+        if (a.status === "Pending" && b.status !== "Pending") return -1;
+        if (a.status !== "Pending" && b.status === "Pending") return 1;
+      });
 
       setUpdates(sortedData);
       setTotalCount(response.data.length);
@@ -105,6 +109,27 @@ export default function Home() {
     navigate(`/road/${work.road.unique_code}`, { state: { work } });
   };
 
+  const handleClick = (label) => {
+    if (label === "Add New Road") {
+      navigate("/NewRoad");
+    } 
+    else if(label === "Add New Work") {
+      navigate("/NewWork");
+    }
+    else if(label === "Add New Update") {
+      navigate("/NewUpdate");
+    }
+    else if(label === "Add New User") {
+      navigate("/NewUser");
+    }
+    else if(label === "Add New Work") {
+      navigate("/NewWork");
+    }
+    
+    else {
+      alert(`${label} clicked`);
+    }
+  };
   return (
     <>
       <Header />
@@ -130,6 +155,62 @@ export default function Home() {
             </a>{" "}
             to review them.
           </p>
+        </div>
+      )}
+      {userType === "JE" && (
+        <div
+          style={{
+            margin: "1rem auto",
+            paddingleft: "0.5rem",
+            maxWidth: "1500px",
+            background: "#f9f9f9",
+            borderRadius: "8px",
+            textAlign: "center",
+          }}
+        >
+
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "10px",
+              justifyContent: "center",
+            }}
+          >
+            {[
+              "Add New Road",
+              "Add New Work",
+              "Add New Update",
+              "Add New User",
+              "Update Road Details",
+              "Add New Contractor",
+              "Update User Details",
+              "Update Contractor Details",
+            ].map((label) => (
+              <button
+                key={label}
+                style={{
+                  padding: "0.3rem 0.5rem",
+                  borderRadius: "20px",
+                  backgroundColor: "#4CAF50",
+                  color: "white",
+                  border: "none",
+                  cursor: "pointer",
+                  minWidth: "140px",
+                  flex: "1 1 150px",
+                  fontSize: "0.9rem",
+                  transition: "background 0.3s",
+                }}
+                onClick={() => handleClick(label)}
+                onMouseOver={(e) =>
+                  (e.target.style.backgroundColor = "#45a049")
+                }
+                onMouseOut={(e) => (e.target.style.backgroundColor = "#4CAF50")}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
