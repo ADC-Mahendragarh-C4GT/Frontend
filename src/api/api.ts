@@ -2,6 +2,8 @@ import axios from "axios";
 import BASE_URL from "./config";
 axios.defaults.withCredentials = true;
 
+const token = localStorage.getItem("access_token");
+
 const api = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
@@ -39,7 +41,6 @@ export interface Road {
   [key: string]: any;
 }
 
-
 export interface Contractor {
   id: number;
   name: string;
@@ -62,8 +63,8 @@ export interface Comment {
   id: number;
   comment_date: string;
   text: string;
-  update: any;      
-  infra_work: any;  
+  update: any;
+  infra_work: any;
   commenter: any;
   [key: string]: any;
 }
@@ -75,27 +76,32 @@ export interface AddCommentPayload {
 }
 
 export interface OtherDepartmentRequestPayload {
-  department_name : string;
-  work_description : string;
-  contact_info : string;
-  requested_by : string;
+  department_name: string;
+  work_description: string;
+  contact_info: string;
+  requested_by: string;
   [key: string]: any;
 }
 
-export interface getOtherDepartmentRequestPayload{
-  id : number;
-  [key : string]: any;
+export interface getOtherDepartmentRequestPayload {
+  id: number;
+  [key: string]: any;
 }
 
-export interface updateRequestStatusPayload{
-  id : number;
-  [key : string]: any;
+export interface updateRequestStatusPayload {
+  id: number;
+  [key: string]: any;
 }
 
-export const fetchUserTypes = () => api.get<UserType[]>("/accounts/user-types/");
+export const fetchUserTypes = () =>
+  api.get<UserType[]>("/accounts/user-types/");
 
 export const login = (email: string, password: string, userType: string) => {
-  return api.post<LoginResponse>("/accounts/login/", { email, password, user_type: userType });
+  return api.post<LoginResponse>("/accounts/login/", {
+    email,
+    password,
+    user_type: userType,
+  });
 };
 
 export const register = (data: RegisterData) => {
@@ -112,41 +118,45 @@ export const getProfile = () => {
 
 export const getRoads = async () => {
   const response = await api.get("/api/roads/");
-  return response.data; 
+  console.log('-------response--------', response.data);
+  return response.data;
 };
-export const getContractors = () => api.get<Contractor[]>("/api/contractors/");
+export const getContractors = () => api.get<Contractor[]>("/api/contractors/", {
+  headers:{
+    Authorization: `Bearer ${token}`,
+  }
+});
 export const getInfraWorks = () => api.get<InfraWork[]>("/api/infra-works/");
 
-export const  getUpdates = (page: number = 1, pageSize: number = 10) => {
-  const token = localStorage.getItem("access_token");
+export const getUpdates = (page: number = 1, pageSize: number = 10) => {
   console.log(`Fetching updates with token: ${token}`);
   return api.get("/api/updatesPage/", {
     params: {
       page,
       page_size: pageSize,
     },
-     headers: {
-    "Authorization": `Bearer ${token}`
-  }
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 };
 
-
-
 export const getUpdatesByWork = (workId: number) => {
-  const token = localStorage.getItem("access_token");
   const response = api.get(`/api/infra-works/${workId}/updates/`, {
     headers: {
-      "Authorization": `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   });
-  console.log('Fetching updates for work ID:', workId, response);
+  console.log("Fetching updates for work ID:", workId, response);
   return response;
 };
 
-
 export const createRoad = (data: Partial<Road>) => {
-  return api.post<Road>("/api/roads/", data);
+  return api.post<Road>("/api/roads/", data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };
 
 export const updateRoad = (id: number, data: Partial<Road>) => {
@@ -157,97 +167,103 @@ export const deleteRoad = (id: number) => {
   return api.delete<{ message: string }>(`/api/roads/${id}/`);
 };
 
-
 export const getCommentsByWork = (workId: number) => {
-  const token = localStorage.getItem("access_token");
   return api.get<Comment[]>("/api/comments/", {
     params: {
       work_id: workId,
     },
     headers: {
-      "Authorization": `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   });
 };
 
 export default api;
 
-
-
 export const addComment = (data: AddCommentPayload) => {
-  const token = localStorage.getItem("access_token");
-  return api.post("/api/comments/", {
-    infra_work: data.workId,
-    update: data.updateId,
-    comment_text: data.text,
-  }, {
-    withCredentials: true,
-    headers: {
-      "Authorization": `Bearer ${token}`
-    }
-  });
-};
-
-
-
-export const submitOtherDepartmentRequest = (data: OtherDepartmentRequestPayload) => {
-  return api.post("/api/other-department-requests/", 
+  return api.post(
+    "/api/comments/",
     {
-      road: data.road.id,
-      department_name: data.departmentName,
-      work_description: data.workDescription,
-      requested_by: data.requestedBy,
-      contact_info: data.contactInfo,
+      infra_work: data.workId,
+      update: data.updateId,
+      comment_text: data.text,
+    },
+    {
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 };
 
-export const getPendingRequests = async () => {
-    const token = localStorage.getItem("access_token");
+export const submitOtherDepartmentRequest = (
+  data: OtherDepartmentRequestPayload
+) => {
+  return api.post("/api/other-department-requests/", {
+    road: data.road.id,
+    department_name: data.departmentName,
+    work_description: data.workDescription,
+    requested_by: data.requestedBy,
+    contact_info: data.contactInfo,
+  });
+};
 
-  const response = await api.get("/api/other-department-requests/",{
+export const getPendingRequests = async () => {
+
+  const response = await api.get("/api/other-department-requests/", {
     headers: {
       Authorization: `Bearer ${token}`,
-    }
+    },
   });
   // filter only pending requests
-  const pending = response.data.filter((req: { status: string }) => req.status === "Pending");
+  const pending = response.data.filter(
+    (req: { status: string }) => req.status === "Pending"
+  );
   return pending;
 };
 
-
 export const getOtherRequests = async () => {
-    const token = localStorage.getItem("access_token");
 
-  const response = await api.get("/api/other-department-requests/",{
+  const response = await api.get("/api/other-department-requests/", {
     headers: {
       Authorization: `Bearer ${token}`,
-    }
+    },
   });
   // filter only pending requests
-  const pending = response.data.filter((req: { status: string }) => req.status != "Pending");
+  const pending = response.data.filter(
+    (req: { status: string }) => req.status != "Pending"
+  );
   console.log("Pending -------------", pending);
   return pending;
 };
 
-
-export const updateRequestStatus = (id: number,payload: { status: string; response_by: string, response_date:string  }) => {
-  const token = localStorage.getItem("access_token");
-  return api.patch(`/api/other-department-requests/${id}/`,payload, {
+export const updateRequestStatus = (
+  id: number,
+  payload: { status: string; response_by: string; response_date: string }
+) => {
+  return api.patch(`/api/other-department-requests/${id}/`, payload, {
     headers: {
       Authorization: `Bearer ${token}`,
-    }
+    },
   });
 };
-
 
 export const uploadExcel = (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
-  const token = localStorage.getItem("access_token");
   return api.post("/upload-csv/", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+
+export const createInfraWork = (data: Partial<InfraWork>) => {
+  return api.post<InfraWork>("/api/infra-works/", data, {
+    headers: {
       Authorization: `Bearer ${token}`,
     },
   });
