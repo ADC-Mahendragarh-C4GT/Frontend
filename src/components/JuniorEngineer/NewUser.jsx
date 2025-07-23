@@ -175,7 +175,7 @@ export default function NewUser() {
             <p
               style={{
                 ...styles.message,
-                color: message.startsWith("✅") ? "green" : "red",
+                color: message.startsWith("") ? "red" : "green",
               }}
             >
               {message}

@@ -127,6 +127,15 @@ export const getContractors = () => api.get<Contractor[]>("/api/contractors/", {
     Authorization: `Bearer ${token}`,
   }
 });
+
+export const createContractor = (data: Partial<Contractor>) => {
+  return api.post<Contractor>("/api/contractors/", data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const getInfraWorks = () => api.get<InfraWork[]>("/api/infra-works/", {
   headers: {
     Authorization: `Bearer ${token}`,

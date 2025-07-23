@@ -13,6 +13,12 @@ import NewContractor from './components/JuniorEngineer/NewContractor';
 import UpdateRoad from './components/JuniorEngineer/UpdateRoad';
 import UpdateUser from './components/JuniorEngineer/UpdateUser';
 import UpdateContractor from './components/JuniorEngineer/UpdateContractor';
+import axios from 'axios';
+
+const token = localStorage.getItem("access_token");
+if (token) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+}
 
 function App() {
   return (

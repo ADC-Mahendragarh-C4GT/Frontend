@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { login, fetchUserType } from "../api/api";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -34,9 +35,12 @@ const Login = () => {
       localStorage.setItem("user_type", response.data.user_type);
       localStorage.setItem("userFirstName", response.data.userFirstName);
       localStorage.setItem("userLastName", response.data.userLastName);
+      axios.defaults.headers.common[
+      "Authorization"
+    ] = `Bearer ${response.data.access}`;
+
       setError("");
 
-      // Redirect to homepage
       navigate("/home");
     } catch (err) {
       console.error(err);
@@ -193,9 +197,10 @@ const Login = () => {
               OR
             </p>
             <p style={{ margin: "0.4em 0", fontSize: "16px" }}>
-              If you are from other department and want to request for work, then <a href="/OtherDepartmentForm">click here</a>
+              If you are from other department and want to request for work,
+              then <a href="/OtherDepartmentForm">click here</a>
             </p>
-            
+
             {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
           </form>
         </div>
