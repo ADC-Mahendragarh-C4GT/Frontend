@@ -204,7 +204,8 @@ const NewRoad = () => {
                   }
 
                   return (
-                    <select
+                    <select 
+                    required
                       key={key}
                       name={key}
                       value={formData[key]}

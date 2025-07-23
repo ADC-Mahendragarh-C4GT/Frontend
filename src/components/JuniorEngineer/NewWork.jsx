@@ -45,9 +45,20 @@ const NewWork = () => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-    
+    const selectedRoad = roads.find((r) => r.id === Number(formData.road));
+    const selectedContractor = contractors.find(
+      (c) => c.id === Number(formData.contractor)
+    );
+console.log("Selected Road:----------------", selectedRoad);
+    console.log("Selected Contractor:---------------------", selectedContractor);
+    const payload = {
+      ...formData,
+      road: selectedRoad,
+      contractor: selectedContractor,
+    };
+    console.log("Payload:---------------------", payload);
     try {
-      const res = await createInfraWork(formData);
+      const res = await createInfraWork(payload);
       setMessage(`InfraWork for ${res.data.road} added successfully!`);
       setFormData({
         road: "",

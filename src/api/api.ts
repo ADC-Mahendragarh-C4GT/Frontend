@@ -130,7 +130,7 @@ export const getInfraWorks = () => api.get<InfraWork[]>("/api/infra-works/");
 
 export const getUpdates = (page: number = 1, pageSize: number = 10) => {
   console.log(`Fetching updates with token: ${token}`);
-  return api.get("/api/updatesPage/", {
+  const res =  api.get("/api/updatesPage/", {
     params: {
       page,
       page_size: pageSize,
@@ -139,6 +139,8 @@ export const getUpdates = (page: number = 1, pageSize: number = 10) => {
       Authorization: `Bearer ${token}`,
     },
   });
+  console.log('-------res--------', res);
+  return res;
 };
 
 export const getUpdatesByWork = (workId: number) => {

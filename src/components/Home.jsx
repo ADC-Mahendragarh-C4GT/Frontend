@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Header from "./header";
-import { getUpdates, getPendingRequests } from "../api/api";
+import {
+  getUpdates,
+  getPendingRequests,
+  getRoads,
+  getContractors,
+} from "../api/api";
 import { useNavigate } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -53,14 +58,46 @@ export default function Home() {
 
     try {
       const response = await getUpdates(pageNumber, finalSize);
-      const sortedData = response.data.sort((a, b) => {
-        if (a.status === "Pending" && b.status !== "Pending") return -1;
-        if (a.status !== "Pending" && b.status === "Pending") return 1;
+      console.log(
+        `[${new Date().toLocaleTimeString()}] Updates fetched:`,
+        response.data
+      );
+
+      const roadObj = await getRoads();
+      console.log("Roads fetched:", roadObj);
+
+      const contractorResponse = await getContractors();
+      const contractorObj = contractorResponse.data;
+      console.log("Contractors fetched:", contractorObj);
+
+      // 🪄 Enrich the data
+      const enrichedData = response.data.map((update) => {
+        const roadDetails = roadObj.find((road) => road.id === update.road);
+        const contractorDetails = contractorObj.find(
+          (c) => c.id === update.contractor
+        );
+
+        return {
+          ...update,
+          road: roadDetails || null,
+          contractor: contractorDetails || null,
+        };
       });
 
+      const sortedData = enrichedData.sort((a, b) => {
+        if (a.status === "Pending" && b.status !== "Pending") return -1;
+        if (a.status !== "Pending" && b.status === "Pending") return 1;
+        return 0; // ensure it returns 0 if equal
+      });
+      console.log(
+        `[${new Date().toLocaleTimeString()}] Updates sorted by status:`,
+        sortedData
+      );
       setUpdates(sortedData);
       setTotalCount(response.data.length);
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error fetching updates:", error);
+    }
   };
 
   useEffect(() => {
