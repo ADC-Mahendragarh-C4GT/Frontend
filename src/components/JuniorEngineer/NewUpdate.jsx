@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { getRoads, getInfraWorks, createUpdate } from "../../api/api";
+import { useNavigate } from "react-router-dom";
+
 
 export default function NewUpdate() {
   const [roads, setRoads] = useState([]);
-  const [works, setWorks] = useState([]);
+  const [InfraWorks, setInfraWorks] = useState([]);
   const [filteredWorks, setFilteredWorks] = useState([]);
   const [selectedRoad, setSelectedRoad] = useState("");
   const [selectedWork, setSelectedWork] = useState("");
@@ -11,6 +13,8 @@ export default function NewUpdate() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [statusNote, setStatusNote] = useState("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,7 +29,7 @@ export default function NewUpdate() {
           : worksRes.data ?? [];
 
         setRoads(roadsRes);
-        setWorks(worksArray);
+        setInfraWorks(worksArray);
         setFilteredWorks(worksArray);
       } catch (err) {
         console.error("Failed to fetch data", err);
@@ -37,19 +41,19 @@ export default function NewUpdate() {
 
   useEffect(() => {
     if (!selectedRoad) {
-      setFilteredWorks(works);
+      setFilteredWorks(InfraWorks);
       return;
     }
 
-    setFilteredWorks(works);
+    setFilteredWorks(InfraWorks);
 
     const timeout = setTimeout(() => {
       const selectedRoadObj = roads.find(
         (road) => road.id === Number(selectedRoad)
       );
       if (selectedRoadObj) {
-        const filtered = works.filter(
-          (work) => String(work.road) === String(selectedRoadObj.id)
+        const filtered = InfraWorks.filter(
+          (InfraWork) => String(InfraWork.road) === String(selectedRoadObj.id)
         );
         console.log("Filtered Works:", filtered);
         setFilteredWorks(filtered);
@@ -57,7 +61,7 @@ export default function NewUpdate() {
     }, 200);
 
     return () => clearTimeout(timeout);
-  }, [selectedRoad, works]);
+  }, [selectedRoad, InfraWorks]);
 
   const handleRoadChange = (e) => {
     const roadId = e.target.value;
@@ -90,6 +94,7 @@ export default function NewUpdate() {
       setMessage("Failed to create update.");
     } finally {
       setLoading(false);
+      navigate("/home/");
     }
   };
 
@@ -124,7 +129,7 @@ export default function NewUpdate() {
             </select>
 
             <select
-              name="work"
+              name="InfraWork"
               value={selectedWork}
               onChange={(e) => setSelectedWork(e.target.value)}
               style={styles.select}
@@ -140,7 +145,7 @@ export default function NewUpdate() {
               ) : (
                 filteredWorks.map((work) => (
                   <option key={work.id} value={work.id}>
-                    {work.phase} - {work.description}
+                    {work.description} - {work.phase} - {work.start_date} - {work.end_date} - {work.progress_percent}%
                   </option>
                 ))
               )}
@@ -198,7 +203,7 @@ export default function NewUpdate() {
             <p
               style={{
                 ...styles.message,
-                color: message.startsWith("") ? "green" : "red",
+                color: message.startsWith("") ? "red" : "green",
               }}
             >
               {message}

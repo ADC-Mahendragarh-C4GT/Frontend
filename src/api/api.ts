@@ -277,7 +277,7 @@ export const createInfraWork = (data: Partial<InfraWork>) => {
 
 
 export const createUpdate = async (payload: any) => {
-  const res = await api.post("/updates/", payload,{
+  const res = await api.post("/api/updates/", payload,{
     headers: {
       Authorization: `Bearer ${token}`,
     },
