@@ -126,7 +126,11 @@ export const getContractors = () => api.get<Contractor[]>("/api/contractors/", {
     Authorization: `Bearer ${token}`,
   }
 });
-export const getInfraWorks = () => api.get<InfraWork[]>("/api/infra-works/");
+export const getInfraWorks = () => api.get<InfraWork[]>("/api/infra-works/", {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
 
 export const getUpdates = (page: number = 1, pageSize: number = 10) => {
   console.log(`Fetching updates with token: ${token}`);
@@ -269,4 +273,14 @@ export const createInfraWork = (data: Partial<InfraWork>) => {
       Authorization: `Bearer ${token}`,
     },
   });
+};
+
+
+export const createUpdate = async (payload: any) => {
+  const res = await api.post("/updates/", payload,{
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
 };
