@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getRoads, getContractors, createInfraWork } from "../../api/api";
+import { useNavigate } from "react-router-dom";
 
 const NewWork = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +15,8 @@ const NewWork = () => {
     completedOrpending: "Pending",
     defect_liability_period: "",
   });
+
+  const navigate = useNavigate();
 
   const [roads, setRoads] = useState([]);
   const [contractors, setContractors] = useState([]);
@@ -77,6 +80,7 @@ console.log("Selected Road:----------------", selectedRoad);
       setMessage("Failed to add InfraWork.");
     } finally {
       setLoading(false);
+      navigate("/home/");
     }
   };
 

@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { uploadExcel, createRoad } from "../../api/api";
+import { useNavigate } from "react-router-dom";
 
 const NewRoad = () => {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState("");
   const [message2, setMessage2] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -94,6 +97,7 @@ const NewRoad = () => {
       setMessage(" Failed to add road.");
     } finally {
       setLoading(false);
+      navigate("/home/");
     }
   };
 
@@ -170,9 +174,7 @@ const NewRoad = () => {
           <p style={styles.or}>OR</p>
         </div>
 
-        <div
-      
-        >
+        <div>
           <form onSubmit={handleSubmitManually}>
             <div
               style={{
@@ -204,8 +206,8 @@ const NewRoad = () => {
                   }
 
                   return (
-                    <select 
-                    required
+                    <select
+                      required
                       key={key}
                       name={key}
                       value={formData[key]}
@@ -255,14 +257,11 @@ const NewRoad = () => {
               })}
             </div>
 
-<br />
-<div style={{display:'flex', justifyContent:"center"}}>
-            <button
-              type="submit"
-              style={styles.button}
-            >
-              Submit
-            </button>
+            <br />
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <button type="submit" style={styles.button}>
+                Submit
+              </button>
             </div>
           </form>
 
