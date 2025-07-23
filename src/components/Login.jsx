@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { login, fetchUserTypes } from "../api/api";
+import { login, fetchUserType } from "../api/api";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
@@ -11,7 +11,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchUserTypes()
+    fetchUserType()
       .then((res) => {
         setUserTypes(res.data);
         if (res.data.length) {

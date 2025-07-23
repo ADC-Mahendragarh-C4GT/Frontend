@@ -93,7 +93,7 @@ export interface updateRequestStatusPayload {
   [key: string]: any;
 }
 
-export const fetchUserTypes = () =>
+export const fetchUserType = () =>
   api.get<UserType[]>("/accounts/user-types/");
 
 export const login = (email: string, password: string, userType: string) => {
@@ -105,6 +105,7 @@ export const login = (email: string, password: string, userType: string) => {
 };
 
 export const register = (data: RegisterData) => {
+  console.log('--------data--------', data);
   return api.post<{ message: string }>("/accounts/register/", data);
 };
 
