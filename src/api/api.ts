@@ -93,6 +93,17 @@ export interface updateRequestStatusPayload {
   [key: string]: any;
 }
 
+
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  user_type: string;
+  phone_number?: string;
+  [key: string]: any;
+}
+
+
 export const fetchUserType = () =>
   api.get<UserType[]>("/accounts/user-types/");
 
@@ -114,9 +125,24 @@ export const logout = () => {
 };
 
 export const getProfile = () => {
-  return api.get<Profile>("/accounts/profile/");
+  const  res = api.get<Profile>("/accounts/profile/", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  });
+  console.log('-----res--------', res);
+  return res;
 };
 
+export const getUsers = () => {
+  const  res = api.get("/accounts/Users/", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  });
+  console.log('-----res--------', res);
+  return res;
+};
 export const getRoads = async () => {
   const response = await api.get("/api/roads/");
   console.log('-------response--------', response.data);
@@ -293,4 +319,10 @@ export const createUpdate = async (payload: any) => {
     },
   });
   return res.data;
+};
+
+
+export const updateUser = (id: number, data: Partial<User>) => {
+  console.log('--------data--------', data);
+  return api.patch(`/accounts/updateUser/${id}/`, data,);
 };
