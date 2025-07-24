@@ -176,7 +176,7 @@ export const createRoad = (data: Partial<Road>) => {
 };
 
 export const updateRoad = (id: number, data: Partial<Road>) => {
-  return api.put<Road>(`/api/roads/${id}/`, data);
+  return api.patch<Road>(`/api/roads/${id}/`, data);
 };
 
 export const deleteRoad = (id: number) => {

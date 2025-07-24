@@ -289,7 +289,6 @@ const styles = {
     borderRadius: "20px",
     border: "1px solid #ccc",
     backgroundColor: "#f9f9f9",
-    color: "#000",
     flex: "1 1 calc(20% - 10px)",
     minWidth: "150px",
   },
