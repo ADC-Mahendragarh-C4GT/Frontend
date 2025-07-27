@@ -38,7 +38,9 @@ const Login = () => {
       axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.access}`;
 
       setError("");
-      
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
       navigate("/home");
     } catch (err) {
       console.error(err);

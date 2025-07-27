@@ -333,3 +333,14 @@ export const updateContractor = (id : number, data: Partial<Contractor>) => {
     },
   });
 };
+
+
+export const getWorksonRoad = (roadId: number) => {
+  return api.get(`/api/InfraWorksbyRoad/?road_id=${roadId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+  
