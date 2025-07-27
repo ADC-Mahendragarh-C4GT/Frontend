@@ -5,6 +5,7 @@ import {
   getPendingRequests,
   getRoads,
   getContractors,
+  logoutUser
 } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import Paper from "@mui/material/Paper";
@@ -47,6 +48,10 @@ export default function Home() {
 
   useEffect(() => {
     if (userType === "JE") {
+    }
+  }, [userType]);
+  useEffect(() => {
+    if (userType != "JE" && userType != "XEN") {
     }
   }, [userType]);
 
@@ -167,6 +172,18 @@ export default function Home() {
       alert(`${label} clicked`);
     }
   };
+
+
+  const handleLogout = async () => {
+  try {
+    await logoutUser(); 
+    localStorage.clear(); 
+    navigate("/login"); 
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+};
+
   return (
     <>
       <Header />
@@ -246,6 +263,68 @@ export default function Home() {
                 {label}
               </button>
             ))}
+          </div>
+        </div>
+      )}
+      {userType !== "JE" && userType !== "XEN" && (
+        <div
+          style={{
+            margin: "1rem auto",
+            paddingLeft: "0.5rem",
+            maxWidth: "1500px",
+            background: "#f9f9f9",
+            borderRadius: "8px",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "10px",
+              justifyContent: "center",
+            }}
+          >
+            <button
+              style={{
+                padding: "0.3rem 0.5rem",
+                borderRadius: "20px",
+                backgroundColor: "#4CAF50",
+                color: "white",
+                border: "none",
+                cursor: "pointer",
+                minWidth: "140px",
+                flex: "1 1 150px",
+                fontSize: "0.9rem",
+                transition: "background 0.3s",
+              }}
+              onClick={() => navigate("/view-all-roads")}
+              onMouseOver={(e) => (e.target.style.backgroundColor = "#45a049")}
+              onMouseOut={(e) => (e.target.style.backgroundColor = "#4CAF50")}
+            >
+              View All Roads
+            </button>
+
+            {/* Logout Button */}
+            <button
+              style={{
+                padding: "0.3rem 0.5rem",
+                borderRadius: "20px",
+                backgroundColor: "#f44336",
+                color: "white",
+                border: "none",
+                cursor: "pointer",
+                minWidth: "140px",
+                flex: "1 1 150px",
+                fontSize: "0.9rem",
+                transition: "background 0.3s",
+              }}
+              onClick={handleLogout}
+              onMouseOver={(e) => (e.target.style.backgroundColor = "#d32f2f")}
+              onMouseOut={(e) => (e.target.style.backgroundColor = "#f44336")}
+            >
+              Logout
+            </button>
           </div>
         </div>
       )}

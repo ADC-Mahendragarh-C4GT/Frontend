@@ -343,4 +343,10 @@ export const getWorksonRoad = (roadId: number) => {
   });
 };
 
-  
+export const logoutUser = () => {
+  return api.post("/accounts/logout/", {}, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

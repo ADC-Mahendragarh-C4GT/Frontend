@@ -13,6 +13,7 @@ import NewContractor from './components/JuniorEngineer/NewContractor';
 import UpdateRoad from './components/JuniorEngineer/UpdateRoad';
 import UpdateUser from './components/JuniorEngineer/UpdateUser';
 import UpdateContractor from './components/JuniorEngineer/UpdateContractor';
+import ViewAllRoads from './components/ViewAllRoads';
 import axios from 'axios';
 
 const token = localStorage.getItem("access_token");
@@ -38,6 +39,7 @@ function App() {
         <Route path="/UpdateRoad" element={<UpdateRoad/>} />
         <Route path="/UpdateUser" element={<UpdateUser/>} />
         <Route path="/UpdateContractor" element={<UpdateContractor/>} />
+        <Route path="/view-all-roads" element={<ViewAllRoads/>} />
       </Routes>
     </Router>
   );
