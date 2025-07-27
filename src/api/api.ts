@@ -258,11 +258,9 @@ export const getPendingRequests = async () => {
       Authorization: `Bearer ${token}`,
     },
   });
-  // filter only pending requests
-  const pending = response.data.filter(
-    (req: { status: string }) => req.status === "Pending"
-  );
-  return pending;
+  return response.data.filter(
+      (req: { status: string }) => req.status === "Pending"
+    );
 };
 
 export const getOtherRequests = async () => {
@@ -325,4 +323,13 @@ export const createUpdate = async (payload: any) => {
 export const updateUser = (id: number, data: Partial<User>) => {
   console.log('--------data--------', data);
   return api.patch(`/accounts/updateUser/${id}/`, data,);
+};
+
+
+export const updateContractor = (id : number, data: Partial<Contractor>) => {
+  return api.patch(`/api/contractors/${id}/`, data,{
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };

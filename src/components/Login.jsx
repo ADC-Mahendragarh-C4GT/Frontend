@@ -14,10 +14,10 @@ const Login = () => {
   useEffect(() => {
     fetchUserType()
       .then((res) => {
-        setUserTypes(res.data);
-        if (res.data.length) {
+        if (!res.data.length) {
           setUserType("");
         }
+        setUserTypes(res.data);
       })
       .catch((err) => {
         console.error(err);
@@ -35,12 +35,10 @@ const Login = () => {
       localStorage.setItem("user_type", response.data.user_type);
       localStorage.setItem("userFirstName", response.data.userFirstName);
       localStorage.setItem("userLastName", response.data.userLastName);
-      axios.defaults.headers.common[
-      "Authorization"
-    ] = `Bearer ${response.data.access}`;
+      axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.access}`;
 
       setError("");
-
+      
       navigate("/home");
     } catch (err) {
       console.error(err);
