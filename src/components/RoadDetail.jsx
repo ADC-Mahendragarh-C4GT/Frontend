@@ -107,6 +107,7 @@ export default function RoadDetail() {
     }
   };
 
+  
   return (
     <>
       <Header />
@@ -215,6 +216,7 @@ export default function RoadDetail() {
           {/* Work Updates Table */}
           <div style={{ marginBottom: "2rem" }}>
             <h3>Update of Work</h3>
+            
             <table style={tableStyle}>
               <thead>
                 <tr>

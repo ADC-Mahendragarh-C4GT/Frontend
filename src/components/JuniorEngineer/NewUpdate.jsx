@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { getRoads, getInfraWorks, createUpdate } from "../../api/api";
+import React, { useState, useEffect, use } from "react";
+import { getRoads, getInfraWorks, createUpdate, getUpdatesByWork } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 
@@ -16,7 +16,8 @@ export default function NewUpdate() {
   const [statusNote, setStatusNote] = useState("");
 
   const navigate = useNavigate();
-
+  
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -70,36 +71,50 @@ export default function NewUpdate() {
     setSelectedWork("");
   };
   console.log("-----------------filteredWorks-----------------", filteredWorks);
+  
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
+  e.preventDefault();
+  setLoading(true);
+  setMessage("");
 
-    try {
-      const payload = {
-        work: selectedWork,
-        progress_percent: progressPercent,
-        status_note: statusNote,
-      };
+  // Find the selected work object from the list
+  const selectedWorkObj = InfraWorks.find(
+    (work) => String(work.id) === String(selectedWork)
+  );
 
-      console.log("Payload: ", payload);
+  // ✅ Check if the work is already completed (100%)
+  if (selectedWorkObj && Number(selectedWorkObj.progress_percent) === 100) {
+    alert("This work is already 100% complete. No more updates allowed.");
+    setLoading(false);
+    navigate("/home/");
+    return; // Exit early
+  }
 
-      await createUpdate(payload);
+  try {
+    const payload = {
+      work: selectedWork,
+      progress_percent: progressPercent,
+      status_note: statusNote,
+    };
 
-      setMessage("Update created successfully!");
-      setSelectedRoad("");
-      setSelectedWork("");
-      setProgressPercent("");
-    } catch (err) {
-      console.error(err);
-      setMessage("Failed to create update.");
-    } finally {
-      setLoading(false);
-      navigate("/home/");
-    }
-  };
+    console.log("Payload: ", payload);
 
-  return (
+    await createUpdate(payload);
+
+    setMessage("Update created successfully!");
+    setSelectedRoad("");
+    setSelectedWork("");
+    setProgressPercent("");
+  } catch (err) {
+    console.error(err);
+    setMessage("Failed to create update.");
+  } finally {
+    setLoading(false);
+    navigate("/home/");
+  }
+};
+
+return (
     <div style={styles.container}>
       <div style={styles.card}>
         <h2 style={styles.heading}>Add New Update</h2>

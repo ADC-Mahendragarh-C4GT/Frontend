@@ -8,7 +8,6 @@ import {
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 
-
 const NewWork = () => {
   const [formData, setFormData] = useState({
     road: "",
@@ -46,139 +45,159 @@ const NewWork = () => {
     fetchData();
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+ const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  if (name === "progress_percent") {
+    const num = Number(value);
+
+    if (isNaN(num) || num < 0 || num > 100) {
+      alert("Progress percent must be between 0 and 100.");
+      return; // Do NOT update state
+    }
+  }
+
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
 
   const [showConfirmation, setShowConfirmation] = useState(false);
-const [savedPayload, setSavedPayload] = useState(null);
+  const [savedPayload, setSavedPayload] = useState(null);
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setMessage("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
 
-  const selectedRoad = roads.find((r) => r.id === Number(formData.road));
-  const selectedContractor = contractors.find(
-    (c) => c.id === Number(formData.contractor)
-  );
+    const selectedRoad = roads.find((r) => r.id === Number(formData.road));
+    const selectedContractor = contractors.find(
+      (c) => c.id === Number(formData.contractor)
+    );
 
-  const payload = {
-    ...formData,
-    road: selectedRoad,
-    contractor: selectedContractor,
+    const payload = {
+      ...formData,
+      road: selectedRoad,
+      contractor: selectedContractor,
+    };
+
+    try {
+     
+      const existingWorks = await getWorksonRoad(selectedRoad.id);
+      const currentTime = new Date();
+
+      for (const work of existingWorks.data) {
+        const isPending = work.completedOrpending === "Pending";
+
+        const workEndDate = new Date(work.end_date);
+        const liabilityMonths = Number(work.defect_liability_period) || 0;
+
+        const defectLiabilityEndDate = new Date(workEndDate);
+        defectLiabilityEndDate.setMonth(
+          defectLiabilityEndDate.getMonth() + liabilityMonths
+        );
+
+        const isCompletedButInDefectPeriod =
+          work.progress_percent === 100 && currentTime < defectLiabilityEndDate;
+
+        if (isPending || isCompletedButInDefectPeriod) {
+          setSavedPayload(payload);
+          setShowConfirmation(true);
+          setLoading(false);
+          return;
+        }
+      }
+
+      await submitInfraWork(payload);
+    } catch (err) {
+      console.error(err);
+      setMessage("Failed to add InfraWork.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  try {
-    const existingWorks = await getWorksonRoad(selectedRoad.id);
-    const currentTime = new Date();
-
-    for (const work of existingWorks.data) {
-      const isPending = work.completedOrpending === "Pending";
-
-      const workEndDate = new Date(work.end_date);
-      const liabilityMonths = Number(work.defect_liability_period) || 0;
-
-      const defectLiabilityEndDate = new Date(workEndDate);
-      defectLiabilityEndDate.setMonth(defectLiabilityEndDate.getMonth() + liabilityMonths);
-
-      const isCompletedButInDefectPeriod =
-        work.progress_percent === 100 && currentTime < defectLiabilityEndDate;
-
-      if (isPending || isCompletedButInDefectPeriod) {
-        setSavedPayload(payload);
-        setShowConfirmation(true);
-        setLoading(false);
-        return;
-      }
+  const submitInfraWork = async (payload) => {
+    try {
+      const res = await createInfraWork(payload);
+      setMessage(`InfraWork for ${res.data.road} added successfully!`);
+      setFormData({
+        road: "",
+        phase: "",
+        description: "",
+        start_date: "",
+        end_date: "",
+        progress_percent: "",
+        cost: "",
+        contractor: "",
+        completedOrpending: "",
+        defect_liability_period: "",
+      });
+      navigate("/home/");
+    } catch (err) {
+      console.error(err);
+      setMessage("Failed to add InfraWork.");
     }
+  };
 
-    await submitInfraWork(payload);
-  } catch (err) {
-    console.error(err);
-    setMessage("Failed to add InfraWork.");
-  } finally {
+  const handleConfirmYes = async () => {
+    setShowConfirmation(false);
+    setLoading(true);
+    await submitInfraWork(savedPayload);
     setLoading(false);
-  }
-};
+  };
 
-const submitInfraWork = async (payload) => {
-  try {
-    const res = await createInfraWork(payload);
-    setMessage(`InfraWork for ${res.data.road} added successfully!`);
-    setFormData({
-      road: "",
-      phase: "",
-      description: "",
-      start_date: "",
-      end_date: "",
-      progress_percent: "",
-      cost: "",
-      contractor: "",
-      completedOrpending: "",
-      defect_liability_period: "",
-    });
+  const handleConfirmNo = () => {
+    setShowConfirmation(false);
     navigate("/home/");
-  } catch (err) {
-    console.error(err);
-    setMessage("Failed to add InfraWork.");
-  }
-};
+  };
 
-const handleConfirmYes = async () => {
-  setShowConfirmation(false);
-  setLoading(true);
-  await submitInfraWork(savedPayload);
-  setLoading(false);
-};
-
-const handleConfirmNo = () => {
-  setShowConfirmation(false);
-  navigate("/home/");
-};
-
-  return (   
+  return (
     <div style={styles.container}>
       <div style={styles.card}>
         {showConfirmation && (
-  <div
-    style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-      background: "rgba(0, 0, 0, 0.4)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      zIndex: 999,
-    }}
-  >
-    <div
-      style={{
-        backgroundColor: "#fff",
-        padding: "25px 30px",
-        borderRadius: "10px",
-        width: "400px",
-        textAlign: "center",
-        boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.25)",
-      }}
-    >
-      <h2 style={{ color: "#333" }}>Existing Work Alert</h2>
-      <p style={{ color: "#000" }}>
-        There is already a pending work or a recently completed work still under defect
-        liability period. Do you want to proceed with adding a new InfraWork?
-      </p>
-      <button onClick={handleConfirmYes} style={{ marginRight: "10px" }}>
-        Yes, Add New Work
-      </button>
-      <button onClick={handleConfirmNo}>No, Cancel</button>
-    </div>
-  </div>
-)}
-
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              background: "rgba(0, 0, 0, 0.4)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 999,
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "#fff",
+                padding: "25px 30px",
+                borderRadius: "10px",
+                width: "400px",
+                textAlign: "center",
+                boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.25)",
+              }}
+            >
+              <h2 style={{ color: "#333" }}>Existing Work Alert</h2>
+              <p style={{ color: "#000" }}>
+                There is already a pending work or a recently completed work
+                still under defect liability period. Do you want to proceed with
+                adding a new InfraWork?
+              </p>
+              <button
+                onClick={handleConfirmYes}
+                style={{ marginRight: "10px" }}
+              >
+                Yes, Add New Work
+              </button>
+              <button onClick={handleConfirmNo}>No, Cancel</button>
+            </div>
+          </div>
+        )}
 
         <h2 style={styles.heading}>Add New InfraWork</h2>
 
@@ -217,7 +236,6 @@ const handleConfirmNo = () => {
               style={styles.input}
             />
 
-            
             <div
               style={{
                 display: "flex",
@@ -247,16 +265,19 @@ const handleConfirmNo = () => {
             <TextField
               name="progress_percent"
               placeholder="PROGRESS %"
+              type="number"
               value={formData.progress_percent}
               label="Progress Percent"
               onChange={handleChange}
               style={styles.input}
+              inputProps={{ min: 0, max: 100 }}
             />
 
             <TextField
               name="cost"
               placeholder="COST"
               label="Cost"
+              type="Number"
               value={formData.cost}
               onChange={handleChange}
               style={styles.input}
@@ -313,7 +334,6 @@ const handleConfirmNo = () => {
                 textAlign: "start",
               }}
             />
-
           </div>
           <div style={{ display: "flex", justifyContent: "center" }}>
             <button
@@ -395,5 +415,4 @@ const styles = {
     textAlign: "center",
     fontWeight: "500",
   },
-  
 };
