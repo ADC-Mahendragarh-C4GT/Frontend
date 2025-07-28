@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { submitOtherDepartmentRequest, getRoads } from "../api/api";
 import { display, justifyContent } from "@mui/system";
+import TextField from "@mui/material/TextField";
 
 export default function OtherDepartmentForm() {
   const [roads, setRoads] = useState([]);
@@ -73,8 +74,10 @@ export default function OtherDepartmentForm() {
         }}
       >
         <form onSubmit={handleSubmit}>
-          <input
+          <TextField
+            list="road_unique_codes"
             type="text"
+            label="Department Name"
             placeholder="Your Department Name"
             value={departmentName}
             onChange={(e) => setDepartmentName(e.target.value)}
@@ -82,8 +85,9 @@ export default function OtherDepartmentForm() {
             style={inputStyle}
           />
 
-          <input
+          <TextField
             list="road_unique_codes"
+            label="Road Unique Code"
             placeholder="Road Unique Code"
             value={uniqueCode}
             onChange={(e) => setUniqueCode(e.target.value)}
@@ -102,29 +106,33 @@ export default function OtherDepartmentForm() {
             ))}
           </datalist>
 
-          <textarea
-            placeholder="Proposed Work Description"
-            value={workDescription}
-            onChange={(e) => setWorkDescription(e.target.value)}
-            required
-            style={inputStyle}
-          />
-          <input
+          <TextField
             type="text"
+            label="Requested By"
             placeholder="Requested By (Name and Designation)"
             value={requestedBy}
             onChange={(e) => setRequestedBy(e.target.value)}
             required
             style={inputStyle}
           />
-          <input
+          <TextField
             type="text"
+            label="Contact Email"
             placeholder="Contact Email"
             value={contactInfo}
             onChange={(e) => setContactInfo(e.target.value)}
             required
             style={inputStyle}
           />
+          <textarea
+            placeholder="Proposed Work Description"
+            value={workDescription}
+            label="Work Description"
+            onChange={(e) => setWorkDescription(e.target.value)}
+            required
+            style={inputStyle}
+          />
+          
           <button type="submit" style={buttonStyle}>
             Submit Request
           </button>
@@ -144,8 +152,6 @@ export default function OtherDepartmentForm() {
 const inputStyle = {
   padding: "1rem",
   margin: "0.5rem",
-  borderRadius: "20px",
-  border: "1px solid #ccc",
   width: "100%",
   backgroundColor: "#f9f9f9",
   color: "#000",

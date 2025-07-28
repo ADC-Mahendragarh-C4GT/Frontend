@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { register, fetchUserType } from "../../api/api"; 
+import { TextField } from "@mui/material";
 
 export default function NewUser() {
   const [formData, setFormData] = useState({
@@ -77,57 +78,64 @@ export default function NewUser() {
               justifyContent: "center",
             }}
           >
-            <input
+            <TextField
               name="username"
               placeholder="Username"
+              label="Username"
               value={formData.username}
               onChange={handleChange}
               style={styles.input}
               required
             />
-            <input
+            <TextField
               type="email"
               name="email"
+              label="Email"
               placeholder="Email"
               value={formData.email}
               onChange={handleChange}
               style={styles.input}
               required
             />
-            <input
+            <TextField
               name="first_name"
+              label="First Name"
               placeholder="First Name"
               value={formData.first_name}
               onChange={handleChange}
               style={styles.input}
             />
-            <input
+            <TextField
               name="last_name"
+              label="Last Name"
               placeholder="Last Name"
               value={formData.last_name}
               onChange={handleChange}
               style={styles.input}
             />
-            <input
+            <TextField
               type="password"
               name="password"
+              label="Password"
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
               style={styles.input}
               required
             />
-            <input
+            <TextField
               type="password"
               name="password2"
+              label="Confirm Password"
               placeholder="Confirm Password"
               value={formData.password2}
               onChange={handleChange}
               style={styles.input}
               required
             />
-            <input
+            <TextField
               name="phone_number"
+              label="Phone Number"
               placeholder="Phone Number"
               value={formData.phone_number}
               onChange={handleChange}
@@ -210,7 +218,6 @@ const styles = {
   input: {
     padding: "0.8rem",
     borderRadius: "20px",
-    border: "1px solid #ccc",
     backgroundColor: "#e0e0e0",
     color: "#000",
     textAlign: "center",

@@ -6,6 +6,7 @@ import {
   getWorksonRoad,
 } from "../../api/api";
 import { useNavigate } from "react-router-dom";
+import TextField from "@mui/material/TextField";
 
 
 const NewWork = () => {
@@ -207,27 +208,16 @@ const handleConfirmNo = () => {
               ))}
             </select>
 
-            <input
+            <TextField
               name="phase"
               placeholder="PHASE"
+              label="Phase"
               value={formData.phase}
               onChange={handleChange}
               style={styles.input}
             />
 
-            <textarea
-              name="description"
-              placeholder="DESCRIPTION"
-              value={formData.description}
-              onChange={handleChange}
-              style={{
-                ...styles.input,
-                minHeight: "60px",
-                flex: "1 1 90%",
-                textAlign: "start",
-              }}
-            />
-
+            
             <div
               style={{
                 display: "flex",
@@ -254,17 +244,19 @@ const handleConfirmNo = () => {
               />
             </div>
 
-            <input
+            <TextField
               name="progress_percent"
               placeholder="PROGRESS %"
               value={formData.progress_percent}
+              label="Progress Percent"
               onChange={handleChange}
               style={styles.input}
             />
 
-            <input
+            <TextField
               name="cost"
               placeholder="COST"
+              label="Cost"
               value={formData.cost}
               onChange={handleChange}
               style={styles.input}
@@ -299,13 +291,29 @@ const handleConfirmNo = () => {
               <option value="Pending">Pending</option>
             </select>
 
-            <input
+            <TextField
               name="defect_liability_period"
               placeholder="DEFECT LIABILITY PERIOD (months)"
+              label="Defect Liability Period"
               value={formData.defect_liability_period}
               onChange={handleChange}
               style={styles.input}
             />
+            <TextField
+              name="description"
+              placeholder="DESCRIPTION"
+              label="Description"
+              multiline
+              value={formData.description}
+              onChange={handleChange}
+              style={{
+                ...styles.input,
+                minHeight: "60px",
+                flex: "1 1 90%",
+                textAlign: "start",
+              }}
+            />
+
           </div>
           <div style={{ display: "flex", justifyContent: "center" }}>
             <button
@@ -368,12 +376,10 @@ const styles = {
   input: {
     padding: "0.8rem",
     borderRadius: "20px",
-    border: "1px solid #ccc",
     backgroundColor: "#e0e0e0",
     color: "#000",
     textAlign: "center",
     flex: "1 1 calc(20% - 10px)",
-    minWidth: "150px",
   },
   select: {
     color: "#000",

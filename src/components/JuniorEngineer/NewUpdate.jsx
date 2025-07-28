@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getRoads, getInfraWorks, createUpdate } from "../../api/api";
 import { useNavigate } from "react-router-dom";
+import TextField from "@mui/material/TextField";
 
 
 export default function NewUpdate() {
@@ -151,9 +152,10 @@ export default function NewUpdate() {
               )}
             </select>
 
-            <input
+            <TextField
               type="number"
               name="progressPercent"
+              label="Progress %"
               placeholder="Progress %"
               value={progressPercent}
               onChange={(e) => setProgressPercent(e.target.value)}
@@ -238,7 +240,6 @@ const styles = {
   input: {
     padding: "0.8rem",
     borderRadius: "20px",
-    border: "1px solid #ccc",
     backgroundColor: "#e0e0e0",
     color: "#000",
     textAlign: "center",

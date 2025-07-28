@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createContractor } from "../../api/api";
+import TextField from "@mui/material/TextField";
 
 export default function NewContractor() {
   const [formData, setFormData] = useState({
@@ -59,38 +60,44 @@ export default function NewContractor() {
               justifyContent: "center",
             }}
           >
-            <input
+            <TextField
               name="contractor_name"
+              label="Contractor Name"
               placeholder="Contractor Name"
               value={formData.contractor_name}
               onChange={handleChange}
               style={styles.input}
               required
             />
-            <input
+            <TextField
               name="contact_person"
               placeholder="Contact Person"
+              label="Contact Person"
               value={formData.contact_person}
               onChange={handleChange}
               style={styles.input}
             />
-            <input
+            <TextField
               name="contact_number"
               placeholder="Contact Number"
+              label="Contact Number"
               value={formData.contact_number}
               onChange={handleChange}
               style={styles.input}
             />
-            <input
+            <TextField
               type="email"
               name="email"
+              label="Email"
               placeholder="Email"
               value={formData.email}
               onChange={handleChange}
               style={styles.input}
             />
-            <textarea
+            <TextField
               name="address"
+              label="Address"
+              multiline
               placeholder="Address"
               value={formData.address}
               onChange={handleChange}
@@ -157,7 +164,6 @@ const styles = {
   input: {
     padding: "0.8rem",
     borderRadius: "20px",
-    border: "1px solid #ccc",
     backgroundColor: "#e0e0e0",
     color: "#000",
     textAlign: "center",

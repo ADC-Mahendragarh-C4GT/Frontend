@@ -187,7 +187,7 @@ const NewRoad = () => {
             >
               {Object.keys(formData).map((key) => {
                 if (key === "unique_code") {
-                  return null; // not render input for unique_code
+                  return null; 
                 }
                 if (
                   key === "road_type" ||
