@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { uploadExcel, createRoad } from "../../api/api";
 import { useNavigate } from "react-router-dom";
+import TextField from "@mui/material/TextField";
 
 const NewRoad = () => {
   const [file, setFile] = useState(null);
@@ -235,17 +236,18 @@ const NewRoad = () => {
                 }
 
                 return (
-                  <input
+                  <TextField
+                    required
                     key={key}
                     type="text"
                     name={key}
+                    label={key.replace("_", " ").toUpperCase()}
                     placeholder={key.replace("_", " ").toUpperCase()}
                     value={formData[key]}
                     onChange={handleChange}
                     style={{
                       padding: "0.8rem",
                       borderRadius: "20px",
-                      border: "1px solid #ccc",
                       backgroundColor: "#f9f9f9",
                       color: "#000",
                       textAlign: "center",
