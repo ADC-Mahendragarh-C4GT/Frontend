@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getContractors, updateContractor } from "../../api/api"; // You'll create these functions
 import { useNavigate } from "react-router-dom";
+import { TextField } from "@mui/material";
 
 export default function UpdateContractor() {
   const [contractors, setContractors] = useState([]);
@@ -100,37 +101,43 @@ export default function UpdateContractor() {
 
             {selectedContractorId && (
               <>
-                <input
+                <TextField
                   name="contractor_name"
                   placeholder="Contractor Name"
                   value={formData.contractor_name}
                   onChange={handleChange}
+                  label="Contractor Name"
                   style={styles.input}
                 />
-                <input
+                <TextField
                   name="contact_person"
                   placeholder="Contact Person"
                   value={formData.contact_person}
+                  label="Contact Person"
                   onChange={handleChange}
                   style={styles.input}
                 />
-                <input
+                <TextField
                   name="contact_number"
                   placeholder="Contact Number"
                   value={formData.contact_number}
+                  label="Contact Number"
                   onChange={handleChange}
                   style={styles.input}
                 />
-                <input
+                <TextField
                   name="email"
                   placeholder="Email"
                   value={formData.email}
+                  label="Email"
                   onChange={handleChange}
                   style={styles.input}
                 />
-                <input
+                <TextField
                   name="address"
                   placeholder="Address"
+                  label="Address"
+                  multiline
                   value={formData.address}
                   onChange={handleChange}
                   style={styles.input}
@@ -189,7 +196,6 @@ const styles = {
   input: {
     padding: "0.8rem",
     borderRadius: "20px",
-    border: "1px solid #ccc",
     backgroundColor: "#f9f9f9",
     color: "#000",
     textAlign: "center",

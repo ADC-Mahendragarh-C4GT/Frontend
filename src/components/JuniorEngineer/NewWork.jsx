@@ -6,7 +6,6 @@ import {
   getWorksonRoad,
 } from "../../api/api";
 import { useNavigate } from "react-router-dom";
-import TextField from "@mui/material/TextField";
 
 
 const NewWork = () => {
@@ -208,7 +207,7 @@ const handleConfirmNo = () => {
               ))}
             </select>
 
-            <TextField
+            <input
               name="phase"
               placeholder="PHASE"
               value={formData.phase}
@@ -246,7 +245,7 @@ const handleConfirmNo = () => {
               >
                 Start Date
               </label>
-              <TextField
+              <input
                 type="date"
                 name="start_date"
                 value={formData.start_date}
@@ -255,7 +254,7 @@ const handleConfirmNo = () => {
               />
             </div>
 
-            <TextField
+            <input
               name="progress_percent"
               placeholder="PROGRESS %"
               value={formData.progress_percent}
@@ -263,7 +262,7 @@ const handleConfirmNo = () => {
               style={styles.input}
             />
 
-            <TextField
+            <input
               name="cost"
               placeholder="COST"
               value={formData.cost}
@@ -300,7 +299,7 @@ const handleConfirmNo = () => {
               <option value="Pending">Pending</option>
             </select>
 
-            <TextField
+            <input
               name="defect_liability_period"
               placeholder="DEFECT LIABILITY PERIOD (months)"
               value={formData.defect_liability_period}

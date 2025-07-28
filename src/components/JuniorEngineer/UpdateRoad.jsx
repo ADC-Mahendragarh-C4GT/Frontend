@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getRoads, updateRoad } from "../../api/api"; // make sure updateRoad is implemented in your api
 import { useNavigate, useLocation } from "react-router-dom";
+import TextField from "@mui/material/TextField";
 
 export default function UpdateRoad() {
   const [roads, setRoads] = useState([]);
@@ -123,7 +124,7 @@ export default function UpdateRoad() {
                       name={key}
                       value={formData[key] || ""}
                       onChange={handleChange}
-                      style={styles.select}
+                      style={{...styles.select}}
                     >
                       <option value="" disabled>
                         {key.replace("_", " ").toUpperCase()}
@@ -138,10 +139,11 @@ export default function UpdateRoad() {
                 }
 
                 return (
-                  <input
+                  <TextField
                     key={key}
                     type="text"
                     name={key}
+                    label={key.replace("_", " ").toUpperCase()}
                     placeholder={key.replace("_", " ").toUpperCase()}
                     value={formData[key] || ""}
                     onChange={handleChange}
@@ -201,7 +203,6 @@ const styles = {
   input: {
     padding: "0.8rem",
     borderRadius: "20px",
-    border: "1px solid #ccc",
     backgroundColor: "#f9f9f9",
     color: "#000",
     textAlign: "center",
@@ -215,7 +216,6 @@ const styles = {
     border: "1px solid #ccc",
     backgroundColor: "#f9f9f9",
     flex: "1 1 calc(20% - 10px)",
-    minWidth: "150px",
   },
   button: {
     width: "40%",
