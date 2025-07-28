@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getRoads, updateRoad } from "../../api/api"; // make sure updateRoad is implemented in your api
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function UpdateRoad() {
   const [roads, setRoads] = useState([]);
@@ -8,22 +8,31 @@ export default function UpdateRoad() {
   const [formData, setFormData] = useState({});
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
+  const passedId = location.state?.id || "";
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchRoads = async () => {
-      try {
-        const res = await getRoads();
-        setRoads(res);
-      } catch (err) {
-        console.error("Failed to fetch roads", err);
+  const fetchRoads = async () => {
+    try {
+      const res = await getRoads();
+      setRoads(res);
+
+      if (passedId) {
+        const road = res.find((r) => String(r.id) === String(passedId));
+        if (road) {
+          setSelectedRoadId(passedId);
+          setFormData({ ...road });
+        }
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch roads", err);
+    }
+  };
 
-    fetchRoads();
-  }, []);
-
+  fetchRoads();
+}, []);
   const handleSelectRoad = (e) => {
     const roadId = e.target.value;
     setSelectedRoadId(roadId);
@@ -144,7 +153,11 @@ export default function UpdateRoad() {
 
           <br />
           <div style={{ display: "flex", justifyContent: "center" }}>
-            <button type="submit" disabled={!selectedRoadId} style={styles.button}>
+            <button
+              type="submit"
+              disabled={!selectedRoadId}
+              style={styles.button}
+            >
               {loading ? "Updating..." : "Update"}
             </button>
           </div>
