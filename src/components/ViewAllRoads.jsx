@@ -9,6 +9,7 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import { useNavigate } from "react-router-dom";
+import TextField from "@mui/material/TextField";
 
 
 export default function ViewAllRoads() {
@@ -18,6 +19,20 @@ export default function ViewAllRoads() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const totalCount = roads.length;
+  const [roadQuery, setRoadQuery] = useState("");
+
+  const filteredUpdates = roads?.filter((update) => {
+    const roadName = update?.road_name?.toLowerCase() ?? "";
+    const roadCode = update?.unique_code?.toLowerCase() ?? "";
+    
+    const roadQ = roadQuery.toLowerCase();
+
+    const matchesRoad =
+      !roadQ || roadName.includes(roadQ) || roadCode.includes(roadQ);
+    if (roadQuery === "") return true; // If no query, show all roads
+    return matchesRoad;
+  });
+
 
   const navigate = useNavigate();
 
@@ -61,7 +76,32 @@ navigate("/UpdateRoad", { state: { id } });
 
   return (
     <div>
+      <div style={{ textAlign: "center", margin: "20px 0" }}>
       <h1 style={{ color: "#333" }}>All Roads</h1>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          gap: "1rem",
+          margin: "1rem 0",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <TextField
+          type="text"
+          placeholder="Search by Road Name or Number"
+          value={roadQuery}
+          style={{
+            borderRadius: "20px",
+            width: "20%",
+            backgroundColor: "#cccc",
+            color: "#000",
+          }}
+          onChange={(e) => setRoadQuery(e.target.value)}
+        />
+      </div>
+
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
         <TableContainer sx={{ maxHeight: 450 }}>
           <Table stickyHeader aria-label="sticky table">
@@ -86,8 +126,8 @@ navigate("/UpdateRoad", { state: { id } });
               </TableRow>
             </TableHead>
             <TableBody>
-              {roads?.length > 0 ? (
-                roads.map((update, index) => (
+              {filteredUpdates?.length > 0 ? (
+                filteredUpdates.map((update, index) => (
                   <TableRow
                     hover
                     role="checkbox"
