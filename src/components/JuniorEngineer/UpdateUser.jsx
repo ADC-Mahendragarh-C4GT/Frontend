@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getUsers, updateUser, fetchUserType } from "../../api/api";
 import { useNavigate } from "react-router-dom";
+import { TextField } from "@mui/material";
 
 export default function UpdateUser() {
   const [users, setUsers] = useState([]);
@@ -106,37 +107,42 @@ export default function UpdateUser() {
 
             {selectedUserId && (
               <>
-                <input
+                <TextField
                   name="first_name"
                   placeholder="FIRST NAME"
+                  label="First Name"
                   value={formData.first_name}
                   onChange={handleChange}
                   style={styles.input}
                 />
-                <input
+                <TextField
                   name="last_name"
                   placeholder="LAST NAME"
+                  label="Last Name"
                   value={formData.last_name}
                   onChange={handleChange}
                   style={styles.input}
                 />
-                <input
+                <TextField
                   name="phone_number"
                   placeholder="PHONE NUMBER"
+                  label="Phone Number"
                   value={formData.phone_number}
                   onChange={handleChange}
                   style={styles.input}
                 />
-                <input
+                <TextField
                   name="username"
                   placeholder="USERNAME"
+                  label="Username"
                   value={formData.username}
                   onChange={handleChange}
                   style={styles.input}
                 />
-                <input
+                <TextField
                   name="password"
                   type="password"
+                  label="Password"
                   placeholder="PASSWORD"
                   value={formData.password}
                   onChange={handleChange}
@@ -201,12 +207,12 @@ const styles = {
   input: {
     padding: "0.8rem",
     borderRadius: "20px",
-    border: "1px solid #ccc",
     backgroundColor: "#f9f9f9",
     color: "#000",
     textAlign: "center",
     flex: "1 1 calc(20% - 10px)",
     minWidth: "150px",
+    alignSelf: "center",
   },
   select: {
     color: "#000",
