@@ -322,7 +322,7 @@ export const createUpdate = async (payload: any) => {
 
 export const updateUser = (id: number, data: Partial<User>) => {
   console.log('--------data--------', data);
-  return api.patch(`/accounts/updateUser/${id}/`, data,);
+  return api.patch(`/accounts/updateUser/${id}/`, data);
 };
 
 
