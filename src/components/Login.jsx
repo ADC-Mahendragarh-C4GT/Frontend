@@ -29,12 +29,13 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await login(email, password, userType);
-      console.log(response.data);
       localStorage.setItem("access_token", response.data.access);
       localStorage.setItem("refresh_token", response.data.refresh);
       localStorage.setItem("user_type", response.data.user_type);
       localStorage.setItem("userFirstName", response.data.userFirstName);
       localStorage.setItem("userLastName", response.data.userLastName);
+      localStorage.setItem("id", response.data.id);
+      localStorage.setItem("email", response.data.email);
       axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.access}`;
 
       setError("");

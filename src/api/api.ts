@@ -117,7 +117,11 @@ export const login = (email: string, password: string, userType: string) => {
 
 export const register = (data: RegisterData) => {
   console.log('--------data--------', data);
-  return api.post<{ message: string }>("/accounts/register/", data);
+  return api.post<{ message: string }>("/accounts/register/", data, {
+    headers:{
+      Authorization:`Bearer ${token}`,
+    }
+  });
 };
 
 export const logout = () => {
@@ -349,4 +353,11 @@ export const logoutUser = () => {
       Authorization: `Bearer ${token}`,
     },
   });
+};
+
+export const getLoginUser =async (id: number) => {
+  const response = await api.get<Profile>(`/accounts/get-login-user/?id=${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
 };

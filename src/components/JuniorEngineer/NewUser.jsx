@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { register, fetchUserType } from "../../api/api"; 
+import { register, fetchUserType,  getLoginUser} from "../../api/api"; 
 import { TextField } from "@mui/material";
 
 export default function NewUser() {
+
+  
+
+  
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -41,9 +45,18 @@ export default function NewUser() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-
+    
     try {
-      const res = await register(formData);
+      const loginUserId = localStorage.getItem('id');
+  
+      const loginUser = await getLoginUser(loginUserId);
+      console.log("---------loginUser------", loginUser);
+
+      const payload = {
+        ...formData,
+        login_user: loginUser,
+      };
+      const res = await register(payload);
       setMessage("User registered successfully!");
       setFormData({
         username: "",
