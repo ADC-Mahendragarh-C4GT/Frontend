@@ -361,3 +361,11 @@ export const getLoginUser =async (id: number) => {
   });
   return response.data;
 };
+
+export const deleteUser = (id: number) => {
+  return api.delete(`/accounts/deleteUser/${id}/`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};

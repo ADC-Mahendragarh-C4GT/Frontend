@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getUsers, updateUser, fetchUserType } from "../../api/api";
+import { getUsers, updateUser, fetchUserType, deleteUser } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import { TextField } from "@mui/material";
 
@@ -13,7 +13,8 @@ export default function UpdateUser() {
     phone_number: "",
     username: "",
     password: "",
-    user_type: "",  // for dropdown
+    password2: "",
+    user_type: "",
   });
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,7 +25,7 @@ export default function UpdateUser() {
     const fetchUsers = async () => {
       try {
         const res = await getUsers();
-        setUsers(Array.isArray(res.data) ? res.data : [res.data]);  
+        setUsers(Array.isArray(res.data) ? res.data : [res.data]);
       } catch (err) {
         console.error("Failed to fetch users", err);
       }
@@ -33,9 +34,9 @@ export default function UpdateUser() {
     // Fetch user types
     const fetchUserTypes = async () => {
       try {
-        const res = await fetchUserType();  
+        const res = await fetchUserType();
         setUserTypes(res.data);
-        console.log('----------User Types--------', res.data);
+        console.log("----------User Types--------", res.data);
       } catch (err) {
         console.error("Failed to fetch user types", err);
       }
@@ -50,13 +51,13 @@ export default function UpdateUser() {
     setSelectedUserId(userId);
     const user = users.find((u) => String(u.id) === String(userId));
     if (user) {
-      // Only pick required fields
       setFormData({
         first_name: user.first_name || "",
         last_name: user.last_name || "",
         phone_number: user.phone_number || "",
         username: user.username || "",
         password: "",
+        password2: "",
         user_type: user.user_type || "",
       });
     }
@@ -71,7 +72,11 @@ export default function UpdateUser() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-
+    if (formData.password !== formData.password2) {
+      setMessage("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
     try {
       const res = await updateUser(selectedUserId, formData);
       setMessage(`${res.first_name} updated successfully!`);
@@ -84,23 +89,100 @@ export default function UpdateUser() {
     }
   };
 
+  const handleDeleteUser = async () => {
+  if (!selectedUserId) {
+    setMessage("Please select a user to delete.");
+    return;
+  }
+
+  const user = users.find((u) => u.id === Number(selectedUserId));
+
+  const confirmDelete = window.confirm(
+    `Are you sure you want to delete the user "${user?.first_name} ${user?.last_name}"?\n\nYou will lose all their activities on this portal!`
+  );
+
+  if (!confirmDelete) {
+    return; 
+  }
+
+  setLoading(true);
+  setMessage("");
+
+  try {
+    await deleteUser(selectedUserId);
+    setMessage(`User deleted successfully!`);
+    setTimeout(() => navigate("/home/"), 1000);
+  } catch (err) {
+    console.error(err);
+    setMessage("Failed to delete user.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2 style={styles.heading}>Update User Details</h2>
+        <div
+          style={{
+            position: "relative",
+            textAlign: "center",
+            marginBottom: "1.5rem",
+          }}
+        >
+          <h2
+            style={{
+              margin: 0,
+              color: "#333",
+            }}
+          >
+            Update User Details
+          </h2>
+
+          {selectedUserId && (
+            <button
+              style={{
+                position: "absolute",
+                right: 0,
+                top: "50%",
+                transform: "translateY(-50%)",
+                backgroundColor: "red",
+                color: "white",
+                border: "none",
+                padding: "0.5rem 1rem",
+                borderRadius: "5px",
+                cursor: "pointer",
+              }}
+              onClick={handleDeleteUser}
+            >
+              Delete
+            </button>
+          )}
+        </div>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", justifyContent: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "10px",
+              justifyContent: "center",
+            }}
+          >
             <select
               required
               value={selectedUserId}
               onChange={handleSelectUser}
               style={styles.select}
             >
-              <option value="" disabled>Select User</option>
+              <option value="" disabled>
+                Select User
+              </option>
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
-                  {user.first_name} {user.last_name} ({user.user_type}) - {user.email}
+                  {user.first_name} {user.last_name} ({user.user_type}) -{" "}
+                  {user.email}
                 </option>
               ))}
             </select>
@@ -148,19 +230,29 @@ export default function UpdateUser() {
                   onChange={handleChange}
                   style={styles.input}
                 />
+                <TextField
+                  name="password2"
+                  type="password"
+                  label="Password2"
+                  placeholder="CONFIRM PASSWORD"
+                  value={formData.password2}
+                  onChange={handleChange}
+                  style={styles.input}
+                />
                 <select
                   name="user_type"
                   value={formData.user_type}
                   onChange={handleChange}
                   style={styles.select}
                 >
-                  <option value="" disabled>Select User Type</option>
+                  <option value="" disabled>
+                    Select User Type
+                  </option>
                   {userTypes.map((type) => (
-  <option key={type.value} value={type.value}>
-    {type.label}
-  </option>
-))}
-
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
                 </select>
               </>
             )}
@@ -168,14 +260,23 @@ export default function UpdateUser() {
 
           <br />
           <div style={{ display: "flex", justifyContent: "center" }}>
-            <button type="submit" disabled={!selectedUserId} style={styles.button}>
+            <button
+              type="submit"
+              disabled={!selectedUserId}
+              style={styles.button}
+            >
               {loading ? "Updating..." : "Update"}
             </button>
           </div>
         </form>
 
         {message && (
-          <p style={{ ...styles.message, color: message.startsWith("Failed") ? "red" : "green" }}>
+          <p
+            style={{
+              ...styles.message,
+              color: message.startsWith("Failed") || message.startsWith("Passwords") ? "red" : "green",
+            }}
+          >
             {message}
           </p>
         )}
