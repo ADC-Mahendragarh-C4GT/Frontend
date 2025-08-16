@@ -1,8 +1,14 @@
 import axios from "axios";
+
 import BASE_URL from "./config";
 axios.defaults.withCredentials = true;
 
-const token = localStorage.getItem("access_token");
+declare module "axios" {
+  export interface AxiosRequestConfig {
+    requiresAuth?: boolean;
+  }
+}
+
 const api = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
@@ -40,7 +46,7 @@ api.interceptors.response.use(
           return;
         }
 
-        const res = await axios.post(`${BASE_URL}/accounts/refresh/`, {
+        const res = await axios.post(`${BASE_URL}/token/refresh/`, {
           refresh: refreshToken,
         });
 
@@ -148,7 +154,6 @@ export interface updateRequestStatusPayload {
   [key: string]: any;
 }
 
-
 export interface User {
   id: number;
   username: string;
@@ -158,9 +163,7 @@ export interface User {
   [key: string]: any;
 }
 
-
-export const fetchUserType = () =>
-  api.get<UserType[]>("/accounts/user-types/");
+export const fetchUserType = () => api.get<UserType[]>("/accounts/user-types/");
 
 export const login = (email: string, password: string, userType: string) => {
   return api.post<LoginResponse>("/accounts/login/", {
@@ -171,11 +174,9 @@ export const login = (email: string, password: string, userType: string) => {
 };
 
 export const register = (data: RegisterData) => {
-  console.log('--------data--------', data);
+  console.log("--------data--------", data);
   return api.post<{ message: string }>("/accounts/register/", data, {
-    headers:{
-      Authorization:`Bearer ${token}`,
-    }
+    requiresAuth: true,
   });
 };
 
@@ -184,69 +185,56 @@ export const logout = () => {
 };
 
 export const getProfile = () => {
-  const  res = api.get<Profile>("/accounts/profile/", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    }
+  const res = api.get<Profile>("/accounts/profile/", {
+    requiresAuth: true,
   });
-  console.log('-----res--------', res);
+  console.log("-----res--------", res);
   return res;
 };
 
 export const getUsers = () => {
-  const  res = api.get("/accounts/Users/", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    }
+  const res = api.get("/accounts/Users/", {
+    requiresAuth: true,
   });
-  console.log('-----res--------', res);
+  console.log("-----res--------", res);
   return res;
 };
 export const getRoads = async () => {
   const response = await api.get("/api/roads/");
-  console.log('-------response--------', response.data);
+  console.log("-------response--------", response.data);
   return response.data;
 };
-export const getContractors = () => api.get<Contractor[]>("/api/contractors/", {
-  headers:{
-    Authorization: `Bearer ${token}`,
-  }
-});
+export const getContractors = () =>
+  api.get<Contractor[]>("/api/contractors/", {
+    requiresAuth: true,
+  });
 
 export const createContractor = (data: Partial<Contractor>) => {
   return api.post<Contractor>("/api/contractors/", data, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    requiresAuth: true,
   });
 };
 
-export const getInfraWorks = () => api.get<InfraWork[]>("/api/infra-works/", {
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-});
+export const getInfraWorks = () =>
+  api.get<InfraWork[]>("/api/infra-works/", {
+    requiresAuth: true,
+  });
 
 export const getUpdates = (page: number = 1, pageSize: number = 10) => {
-  console.log(`Fetching updates with token: ${token}`);
-  const res =  api.get("/api/updatesPage/", {
+  const res = api.get("/api/updatesPage/", {
     params: {
       page,
       page_size: pageSize,
     },
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    requiresAuth: true,
   });
-  console.log('-------res--------', res);
+  console.log("-------res--------", res);
   return res;
 };
 
 export const getUpdatesByWork = (workId: number) => {
   const response = api.get(`/api/infra-works/${workId}/updates/`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    requiresAuth: true,
   });
   console.log("Fetching updates for work ID:", workId, response);
   return response;
@@ -254,9 +242,7 @@ export const getUpdatesByWork = (workId: number) => {
 
 export const createRoad = (data: Partial<Road>) => {
   return api.post<Road>("/api/roads/", data, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    requiresAuth: true,
   });
 };
 
@@ -273,13 +259,9 @@ export const getCommentsByWork = (workId: number) => {
     params: {
       work_id: workId,
     },
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    requiresAuth: true,
   });
 };
-
-
 
 export const addComment = (data: AddCommentPayload) => {
   return api.post(
@@ -291,9 +273,7 @@ export const addComment = (data: AddCommentPayload) => {
     },
     {
       withCredentials: true,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      requiresAuth: true,
     }
   );
 };
@@ -311,23 +291,17 @@ export const submitOtherDepartmentRequest = (
 };
 
 export const getPendingRequests = async () => {
-
   const response = await api.get("/api/other-department-requests/", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    requiresAuth: true,
   });
   return response.data.filter(
-      (req: { status: string }) => req.status === "Pending"
-    );
+    (req: { status: string }) => req.status === "Pending"
+  );
 };
 
 export const getOtherRequests = async () => {
-
   const response = await api.get("/api/other-department-requests/", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    requiresAuth: true,
   });
   // filter only pending requests
   const pending = response.data.filter(
@@ -342,9 +316,7 @@ export const updateRequestStatus = (
   payload: { status: string; response_by: string; response_date: string }
 ) => {
   return api.patch(`/api/other-department-requests/${id}/`, payload, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    requiresAuth: true,
   });
 };
 
@@ -354,73 +326,61 @@ export const uploadExcel = (file: File) => {
   return api.post("/upload-csv/", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
-      Authorization: `Bearer ${token}`,
     },
-  });
+    requiresAuth: true,
+  } as any);
 };
-
 
 export const createInfraWork = (data: Partial<InfraWork>) => {
   return api.post<InfraWork>("/api/infra-works/", data, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    requiresAuth: true,
   });
 };
 
-
 export const createUpdate = async (payload: any) => {
-  const res = await api.post("/api/updates/", payload,{
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  const res = await api.post("/api/updates/", payload, {
+    requiresAuth: true,
   });
   return res.data;
 };
 
-
 export const updateUser = (id: number, data: Partial<User>) => {
-  console.log('--------data--------', data);
+  console.log("--------data--------", data);
   return api.patch(`/accounts/updateUser/${id}/`, data);
 };
 
-
-export const updateContractor = (id : number, data: Partial<Contractor>) => {
-  return api.patch(`/api/contractors/${id}/`, data,{
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const updateContractor = (id: number, data: Partial<Contractor>) => {
+  return api.patch(`/api/contractors/${id}/`, data, { requiresAuth: true });
 };
-
 
 export const getWorksonRoad = (roadId: number) => {
   return api.get(`/api/InfraWorksbyRoad/?road_id=${roadId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    requiresAuth: true,
   });
 };
 
 export const logoutUser = () => {
-  return api.post("/accounts/logout/", {}, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return api.post(
+    "/accounts/logout/",
+    {},
+    {
+      requiresAuth: true,
+    }
+  );
 };
 
-export const getLoginUser =async (id: number) => {
-  const response = await api.get<Profile>(`/accounts/get-login-user/?id=${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export const getLoginUser = async (id: number) => {
+  const response = await api.get<Profile>(
+    `/accounts/get-login-user/?id=${id}`,
+    {
+      requiresAuth: true,
+    }
+  );
   return response.data;
 };
 
 export const deleteUser = (id: number) => {
   return api.delete(`/accounts/deleteUser/${id}/`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    requiresAuth: true,
   });
 };
