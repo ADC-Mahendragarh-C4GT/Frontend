@@ -3,11 +3,66 @@ import BASE_URL from "./config";
 axios.defaults.withCredentials = true;
 
 const token = localStorage.getItem("access_token");
-
 const api = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
 });
+
+// Request Interceptor
+api.interceptors.request.use(
+  (config: any) => {
+    if (config.requiresAuth) {
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response Interceptor for refresh token
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshToken = localStorage.getItem("refresh_token");
+        if (!refreshToken) {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          window.location.href = "/login";
+          return;
+        }
+
+        const res = await axios.post(`${BASE_URL}/accounts/refresh/`, {
+          refresh: refreshToken,
+        });
+
+        const newAccessToken = res.data.access;
+        localStorage.setItem("access_token", newAccessToken);
+
+        // retry with new token
+        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+        return api(originalRequest);
+      } catch (err) {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        window.location.href = "/login";
+        return Promise.reject(err);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default api;
 
 export interface UserType {
   value: string;
@@ -224,7 +279,7 @@ export const getCommentsByWork = (workId: number) => {
   });
 };
 
-export default api;
+
 
 export const addComment = (data: AddCommentPayload) => {
   return api.post(

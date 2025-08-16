@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getUsers, updateUser, fetchUserType, deleteUser } from "../../api/api";
+import { getUsers, updateUser, fetchUserType, deleteUser,getLoginUser } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import { TextField } from "@mui/material";
 
@@ -12,8 +12,6 @@ export default function UpdateUser() {
     last_name: "",
     phone_number: "",
     username: "",
-    password: "",
-    password2: "",
     user_type: "",
   });
   const [message, setMessage] = useState("");
@@ -21,7 +19,6 @@ export default function UpdateUser() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch users
     const fetchUsers = async () => {
       try {
         const res = await getUsers();
@@ -31,7 +28,6 @@ export default function UpdateUser() {
       }
     };
 
-    // Fetch user types
     const fetchUserTypes = async () => {
       try {
         const res = await fetchUserType();
@@ -56,8 +52,6 @@ export default function UpdateUser() {
         last_name: user.last_name || "",
         phone_number: user.phone_number || "",
         username: user.username || "",
-        password: "",
-        password2: "",
         user_type: user.user_type || "",
       });
     }
@@ -72,13 +66,20 @@ export default function UpdateUser() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-    if (formData.password !== formData.password2) {
-      setMessage("Passwords do not match.");
-      setLoading(false);
-      return;
-    }
+    
     try {
-      const res = await updateUser(selectedUserId, formData);
+      const loginUserId = localStorage.getItem("id");
+
+      const loginUser = await getLoginUser(loginUserId);
+      console.log("---------loginUser------", loginUser);
+
+      const payload = {
+        ...formData,
+        login_user: loginUser,
+        id:selectedUserId,
+      };
+      
+      const res = await updateUser(selectedUserId, payload);
       setMessage(`${res.first_name} updated successfully!`);
       setTimeout(() => navigate("/home/"), 1500);
     } catch (err) {
@@ -90,36 +91,35 @@ export default function UpdateUser() {
   };
 
   const handleDeleteUser = async () => {
-  if (!selectedUserId) {
-    setMessage("Please select a user to delete.");
-    return;
-  }
+    if (!selectedUserId) {
+      setMessage("Please select a user to delete.");
+      return;
+    }
 
-  const user = users.find((u) => u.id === Number(selectedUserId));
+    const user = users.find((u) => u.id === Number(selectedUserId));
 
-  const confirmDelete = window.confirm(
-    `Are you sure you want to delete the user "${user?.first_name} ${user?.last_name}"?\n\nYou will lose all their activities on this portal!`
-  );
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the user "${user?.first_name} ${user?.last_name}"?\n\nYou will lose all their activities on this portal!`
+    );
 
-  if (!confirmDelete) {
-    return; 
-  }
+    if (!confirmDelete) {
+      return;
+    }
 
-  setLoading(true);
-  setMessage("");
+    setLoading(true);
+    setMessage("");
 
-  try {
-    await deleteUser(selectedUserId);
-    setMessage(`User deleted successfully!`);
-    setTimeout(() => navigate("/home/"), 1000);
-  } catch (err) {
-    console.error(err);
-    setMessage("Failed to delete user.");
-  } finally {
-    setLoading(false);
-  }
-};
-
+    try {
+      await deleteUser(selectedUserId);
+      setMessage(`User deleted successfully!`);
+      setTimeout(() => navigate("/home/"), 1000);
+    } catch (err) {
+      console.error(err);
+      setMessage("Failed to delete user.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div style={styles.container}>
@@ -221,24 +221,7 @@ export default function UpdateUser() {
                   onChange={handleChange}
                   style={styles.input}
                 />
-                <TextField
-                  name="password"
-                  type="password"
-                  label="Password"
-                  placeholder="PASSWORD"
-                  value={formData.password}
-                  onChange={handleChange}
-                  style={styles.input}
-                />
-                <TextField
-                  name="password2"
-                  type="password"
-                  label="Password2"
-                  placeholder="CONFIRM PASSWORD"
-                  value={formData.password2}
-                  onChange={handleChange}
-                  style={styles.input}
-                />
+                
                 <select
                   name="user_type"
                   value={formData.user_type}
@@ -274,7 +257,10 @@ export default function UpdateUser() {
           <p
             style={{
               ...styles.message,
-              color: message.startsWith("Failed") || message.startsWith("Passwords") ? "red" : "green",
+              color:
+                message.startsWith("Failed")
+                  ? "red"
+                  : "green",
             }}
           >
             {message}
