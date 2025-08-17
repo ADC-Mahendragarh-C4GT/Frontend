@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { uploadExcel, createRoad,getLoginUser } from "../../api/api";
+import { uploadExcel, createRoad } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 
@@ -30,7 +30,6 @@ const NewRoad = () => {
 
     try {
       const loginUserId = localStorage.getItem("id");
-
 
       const payload = {
         login_user: loginUserId,
@@ -85,15 +84,11 @@ const NewRoad = () => {
 
     try {
       const loginUserId = localStorage.getItem("id");
-      
-            const loginUser = await getLoginUser(loginUserId);
-            console.log("---------loginUser------", loginUser);
-      
-            const payload = {
-              ...formData,
-              login_user: loginUser,
-              id:selectedUserId,
-            };
+
+      const payload = {
+        ...formData,
+        login_user: loginUserId,
+      };
 
       const res = await createRoad(payload);
       setMessage(` ${res.data.road_name} added successfully!`);
