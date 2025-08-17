@@ -322,9 +322,18 @@ export const updateRequestStatus = (
   });
 };
 
-export const uploadExcel = (file: File) => {
+export const uploadExcel = (file: File, data:Partial<User>) => {
   const formData = new FormData();
   formData.append("file", file);
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      formData.append(key, String(value));
+    }
+  });
+
+  console.log("--------------formdata----------", formData);
+  console.log("--------------data----------", data);
+
   return api.post("/upload-csv/", formData, {
     headers: {
       "Content-Type": "multipart/form-data",

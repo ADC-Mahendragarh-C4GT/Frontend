@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { uploadExcel, createRoad } from "../../api/api";
+import { uploadExcel, createRoad,getLoginUser } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 
@@ -29,16 +29,22 @@ const NewRoad = () => {
     );
 
     try {
+      const loginUserId = localStorage.getItem("id");
+
+
+      const payload = {
+        login_user: loginUserId,
+      };
       setLoading(true);
       setMessage2("");
 
-      const response = await uploadExcel(file);
+      const response = await uploadExcel(file, payload);
 
       console.log(
         `[${new Date().toLocaleTimeString()}] Upload successful:`,
         response.data
       );
-       
+
       setMessage2(` ${response.data.message}`);
       setTimeout(() => navigate("/home/"), 1000);
     } catch (error) {
@@ -78,7 +84,18 @@ const NewRoad = () => {
     setMessage("");
 
     try {
-      const res = await createRoad(formData);
+      const loginUserId = localStorage.getItem("id");
+      
+            const loginUser = await getLoginUser(loginUserId);
+            console.log("---------loginUser------", loginUser);
+      
+            const payload = {
+              ...formData,
+              login_user: loginUser,
+              id:selectedUserId,
+            };
+
+      const res = await createRoad(payload);
       setMessage(` ${res.data.road_name} added successfully!`);
       setFormData({
         unique_code: "",
@@ -164,7 +181,10 @@ const NewRoad = () => {
           <p
             style={{
               ...styles.message,
-              color: message2.startsWith("Please") ? "red" : "green",
+              color:
+                message2.startsWith("Please") || message2.startsWith(" Upload")
+                  ? "red"
+                  : "green",
             }}
           >
             {message2}
@@ -188,7 +208,7 @@ const NewRoad = () => {
             >
               {Object.keys(formData).map((key) => {
                 if (key === "unique_code") {
-                  return null; 
+                  return null;
                 }
                 if (
                   key === "road_type" ||
