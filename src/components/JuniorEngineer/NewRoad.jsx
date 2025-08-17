@@ -38,8 +38,9 @@ const NewRoad = () => {
         `[${new Date().toLocaleTimeString()}] Upload successful:`,
         response.data
       );
-
+       
       setMessage2(` ${response.data.message}`);
+      setTimeout(() => navigate("/home/"), 1000);
     } catch (error) {
       console.error(
         `[${new Date().toLocaleTimeString()}] Upload failed:`,
@@ -163,7 +164,7 @@ const NewRoad = () => {
           <p
             style={{
               ...styles.message,
-              color: message2.startsWith("") ? "green" : "red",
+              color: message2.startsWith("Please") ? "red" : "green",
             }}
           >
             {message2}

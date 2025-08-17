@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getRoads } from "../api/api";
+import { getRoads, deleteRoad,getLoginUser } from "../api/api";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -29,7 +29,7 @@ export default function ViewAllRoads() {
 
     const matchesRoad =
       !roadQ || roadName.includes(roadQ) || roadCode.includes(roadQ);
-    if (roadQuery === "") return true; // If no query, show all roads
+    if (roadQuery === "") return true; 
     return matchesRoad;
   });
 
@@ -50,8 +50,46 @@ export default function ViewAllRoads() {
 
   const handleEdit = (id) => {
     console.log("Edit road with ID:", id);
-navigate("/UpdateRoad", { state: { id } });
+    navigate("/UpdateRoad", { state: { id } });
   };
+
+  const handleDelete = async (id) => {
+  
+
+  const road = roads.find((r) => r.id === Number(id));
+
+  const confirmDelete = window.confirm(
+    `Are you sure you want to delete the road "${road?.name}"?\n\nThis action cannot be undone!`
+  );
+
+  if (!confirmDelete) {
+    return;
+  }
+
+  setLoading(true);
+  
+
+  try {
+    const loginUserId = localStorage.getItem("id");
+
+    const loginUser = await getLoginUser(loginUserId);
+    console.log("---------loginUser------", loginUser);
+
+    const payload = {
+      login_user: loginUser,
+      id: id,
+    };
+
+    await deleteRoad(id, payload);
+    setRoads((prevRoads) => prevRoads.filter((r) => r.id !== id));
+
+  } catch (err) {
+    console.error(err);
+    
+  } finally {
+    setLoading(false);
+  }
+};
 
 
   useEffect(() => {
@@ -123,6 +161,7 @@ navigate("/UpdateRoad", { state: { id } });
                 <TableCell align="center">State</TableCell>
                 {userType === "JE" && 
                 <TableCell align="center">Update Details</TableCell> }
+                <TableCell align="center">Delete</TableCell> 
               </TableRow>
             </TableHead>
             <TableBody>
@@ -144,19 +183,24 @@ navigate("/UpdateRoad", { state: { id } });
                     <TableCell align="center">{update.location}</TableCell>
                     <TableCell align="center">{update.length_km}</TableCell>
                     <TableCell align="center">{update.width_m}</TableCell>
-                    <TableCell align="center">{update.road_type}%</TableCell>
+                    <TableCell align="center">{update.road_type}</TableCell>
                     <TableCell align="center">
-                      {update.material_type}%
+                      {update.material_type}
                     </TableCell>
                     <TableCell align="center">
-                      {update.road_category}%
+                      {update.road_category}
                     </TableCell>
-                    <TableCell align="center">{update.area_name}%</TableCell>
-                    <TableCell align="center">{update.district}%</TableCell>
-                    <TableCell align="center">{update.state}%</TableCell>
+                    <TableCell align="center">{update.area_name}</TableCell>
+                    <TableCell align="center">{update.district}</TableCell>
+                    <TableCell align="center">{update.state}</TableCell>
                     {userType === "JE" && <TableCell align="center">
                       <button onClick={() => handleEdit(update.id)}>
                         Edit
+                      </button>
+                    </TableCell>}
+                    {userType === "JE" && <TableCell align="center">
+                      <button style={{ backgroundColor: "#e74c3c", color: "white"}} onClick={() => handleDelete(update.id)}>
+                        Delete
                       </button>
                     </TableCell>}
                   </TableRow>

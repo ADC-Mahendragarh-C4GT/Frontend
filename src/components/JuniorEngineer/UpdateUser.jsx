@@ -110,7 +110,16 @@ export default function UpdateUser() {
     setMessage("");
 
     try {
-      await deleteUser(selectedUserId);
+      const loginUserId = localStorage.getItem("id");
+
+      const loginUser = await getLoginUser(loginUserId);
+      console.log("---------loginUser------", loginUser);
+
+      const payload = {
+        login_user: loginUser,
+        id:selectedUserId,
+      };
+      await deleteUser(selectedUserId, payload);
       setMessage(`User deleted successfully!`);
       setTimeout(() => navigate("/home/"), 1000);
     } catch (err) {

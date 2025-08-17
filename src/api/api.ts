@@ -250,8 +250,10 @@ export const updateRoad = (id: number, data: Partial<Road>) => {
   return api.patch<Road>(`/api/roads/${id}/`, data);
 };
 
-export const deleteRoad = (id: number) => {
-  return api.delete<{ message: string }>(`/api/roads/${id}/`);
+export const deleteRoad = (id: number, data:Partial<User>) => {
+  return api.delete<{ message: string }>(`/api/roads/${id}/`,{
+    data,  
+  });
 };
 
 export const getCommentsByWork = (workId: number) => {
@@ -379,8 +381,10 @@ export const getLoginUser = async (id: number) => {
   return response.data;
 };
 
-export const deleteUser = (id: number) => {
+export const deleteUser = (id: number, data:Partial<User>) => {
+  console.log('data---------------------', data);
   return api.delete(`/accounts/deleteUser/${id}/`, {
+    data,
     requiresAuth: true,
   });
 };
