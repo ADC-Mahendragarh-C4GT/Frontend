@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getRoads, updateRoad } from "../../api/api"; // make sure updateRoad is implemented in your api
+import { getRoads, updateRoad,getLoginUser } from "../../api/api"; // make sure updateRoad is implemented in your api
 import { useNavigate, useLocation } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 
@@ -56,7 +56,18 @@ export default function UpdateRoad() {
     setMessage("");
 
     try {
-      const res = await updateRoad(selectedRoadId, formData);
+      const loginUserId = localStorage.getItem("id");
+      
+            const loginUser = await getLoginUser(loginUserId);
+            console.log("---------loginUser------", loginUser);
+      
+            const payload = {
+              ...formData,
+              login_user: loginUser,
+              id:selectedRoadId,
+            };
+
+      const res = await updateRoad(selectedRoadId, payload);
       setMessage(`${res.data.road_name} updated successfully!`);
     } catch (err) {
       console.error(err);
