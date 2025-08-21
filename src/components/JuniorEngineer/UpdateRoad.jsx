@@ -74,7 +74,7 @@ export default function UpdateRoad() {
       setMessage("Failed to update road.");
     } finally {
       setLoading(false);
-      setTimeout(() => navigate("/home/"), 1500);
+      setTimeout(() => navigate("/home/"), 1000);
     }
   };
 
