@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getRoads, updateRoad,getLoginUser } from "../../api/api"; // make sure updateRoad is implemented in your api
+import { getRoads, updateRoad,getLoginUser, deleteRoad } from "../../api/api"; // make sure updateRoad is implemented in your api
 import { useNavigate, useLocation } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 
@@ -78,10 +78,80 @@ export default function UpdateRoad() {
     }
   };
 
+  const handleDelete = async (id) => {
+      const road = roads.find((r) => r.id === Number(id));
+  
+      const confirmDelete = window.confirm(
+        `Are you sure you want to delete the road ?\n\nThis action cannot be undone!`
+      );
+  
+      if (!confirmDelete) {
+        return;
+      }
+  
+      setLoading(true);
+  
+      try {
+        const loginUserId = localStorage.getItem("id");
+  
+        const loginUser = await getLoginUser(loginUserId);
+        console.log("---------loginUser------", loginUser);
+  
+        const payload = {
+          login_user: loginUser,
+          id: id,
+        };
+  
+        await deleteRoad(id, payload);
+        setRoads((prevRoads) => prevRoads.filter((r) => r.id !== id));
+        setTimeout(() => navigate("/home/"), 1000);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2 style={styles.heading}>Update Road Details</h2>
+        <div
+          style={{
+            position: "relative",
+            textAlign: "center",
+            marginBottom: "1.5rem",
+          }}
+        >
+          <h2
+            style={{
+              margin: 0,
+              color: "#333",
+            }}
+          >
+            Update Road Details
+          </h2>
+
+          {selectedRoadId && (
+            <button
+              style={{
+                position: "absolute",
+                right: 0,
+                top: "50%",
+                transform: "translateY(-50%)",
+                backgroundColor: "red",
+                color: "white",
+                border: "none",
+                padding: "0.5rem 1rem",
+                borderRadius: "5px",
+                cursor: "pointer",
+              }}
+              onClick={() => handleDelete(selectedRoadId)}
+            >
+              Delete
+            </button>
+          )}
+        </div>
 
         <form onSubmit={handleSubmit}>
           <div

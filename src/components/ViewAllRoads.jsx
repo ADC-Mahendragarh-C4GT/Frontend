@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getRoads, deleteRoad,getLoginUser } from "../api/api";
+import { getRoads, deleteRoad, getLoginUser } from "../api/api";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -10,7 +10,6 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
-
 
 export default function ViewAllRoads() {
   const [roads, setRoads] = useState([]);
@@ -24,20 +23,19 @@ export default function ViewAllRoads() {
   const filteredUpdates = roads?.filter((update) => {
     const roadName = update?.road_name?.toLowerCase() ?? "";
     const roadCode = update?.unique_code?.toLowerCase() ?? "";
-    
+
     const roadQ = roadQuery.toLowerCase();
 
     const matchesRoad =
       !roadQ || roadName.includes(roadQ) || roadCode.includes(roadQ);
-    if (roadQuery === "") return true; 
+    if (roadQuery === "") return true;
     return matchesRoad;
   });
-
 
   const navigate = useNavigate();
 
   const userType = localStorage.getItem("user_type");
-  console.log('userTpye --------------', userType);
+  console.log("userTpye --------------", userType);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -54,43 +52,37 @@ export default function ViewAllRoads() {
   };
 
   const handleDelete = async (id) => {
-  
+    const road = roads.find((r) => r.id === Number(id));
 
-  const road = roads.find((r) => r.id === Number(id));
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the road "${road?.name}"?\n\nThis action cannot be undone!`
+    );
 
-  const confirmDelete = window.confirm(
-    `Are you sure you want to delete the road "${road?.name}"?\n\nThis action cannot be undone!`
-  );
+    if (!confirmDelete) {
+      return;
+    }
 
-  if (!confirmDelete) {
-    return;
-  }
+    setLoading(true);
 
-  setLoading(true);
-  
+    try {
+      const loginUserId = localStorage.getItem("id");
 
-  try {
-    const loginUserId = localStorage.getItem("id");
+      const loginUser = await getLoginUser(loginUserId);
+      console.log("---------loginUser------", loginUser);
 
-    const loginUser = await getLoginUser(loginUserId);
-    console.log("---------loginUser------", loginUser);
+      const payload = {
+        login_user: loginUser,
+        id: id,
+      };
 
-    const payload = {
-      login_user: loginUser,
-      id: id,
-    };
-
-    await deleteRoad(id, payload);
-    setRoads((prevRoads) => prevRoads.filter((r) => r.id !== id));
-
-  } catch (err) {
-    console.error(err);
-    
-  } finally {
-    setLoading(false);
-  }
-};
-
+      await deleteRoad(id, payload);
+      setRoads((prevRoads) => prevRoads.filter((r) => r.id !== id));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchRoads = async () => {
@@ -115,7 +107,7 @@ export default function ViewAllRoads() {
   return (
     <div>
       <div style={{ textAlign: "center", margin: "20px 0" }}>
-      <h1 style={{ color: "#333" }}>All Roads</h1>
+        <h1 style={{ color: "#333" }}>All Roads</h1>
       </div>
       <div
         style={{
@@ -159,9 +151,10 @@ export default function ViewAllRoads() {
                 <TableCell align="center">Area name</TableCell>
                 <TableCell align="center">District</TableCell>
                 <TableCell align="center">State</TableCell>
-                {userType === "JE" && 
-                <TableCell align="center">Update Details</TableCell> }
-                <TableCell align="center">Delete</TableCell> 
+                {userType === "JE" && (
+                  <TableCell align="center">Update Details</TableCell>
+                )}
+                <TableCell align="center">Delete</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -184,25 +177,28 @@ export default function ViewAllRoads() {
                     <TableCell align="center">{update.length_km}</TableCell>
                     <TableCell align="center">{update.width_m}</TableCell>
                     <TableCell align="center">{update.road_type}</TableCell>
-                    <TableCell align="center">
-                      {update.material_type}
-                    </TableCell>
-                    <TableCell align="center">
-                      {update.road_category}
-                    </TableCell>
+                    <TableCell align="center">{update.material_type}</TableCell>
+                    <TableCell align="center">{update.road_category}</TableCell>
                     <TableCell align="center">{update.area_name}</TableCell>
                     <TableCell align="center">{update.district}</TableCell>
                     <TableCell align="center">{update.state}</TableCell>
-                    {userType === "JE" && <TableCell align="center">
-                      <button onClick={() => handleEdit(update.id)}>
-                        Edit
-                      </button>
-                    </TableCell>}
-                    {userType === "JE" && <TableCell align="center">
-                      <button style={{ backgroundColor: "#e74c3c", color: "white"}} onClick={() => handleDelete(update.id)}>
-                        Delete
-                      </button>
-                    </TableCell>}
+                    {userType === "JE" && (
+                      <TableCell align="center">
+                        <button onClick={() => handleEdit(update.id)}>
+                          Edit
+                        </button>
+                      </TableCell>
+                    )}
+                    {userType === "JE" && (
+                      <TableCell align="center">
+                        <button
+                          style={{ backgroundColor: "#e74c3c", color: "white" }}
+                          onClick={() => handleDelete(update.id)}
+                        >
+                          Delete
+                        </button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               ) : (
