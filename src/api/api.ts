@@ -134,6 +134,7 @@ export interface AddCommentPayload {
   workId: number;
   updateId: number;
   text: string;
+  [key: string]: any;
 }
 
 export interface OtherDepartmentRequestPayload {
@@ -250,9 +251,9 @@ export const updateRoad = (id: number, data: Partial<Road>) => {
   return api.patch<Road>(`/api/roads/${id}/`, data);
 };
 
-export const deleteRoad = (id: number, data:Partial<User>) => {
-  return api.delete<{ message: string }>(`/api/roads/${id}/`,{
-    data,  
+export const deleteRoad = (id: number, data: Partial<User>) => {
+  return api.delete<{ message: string }>(`/api/roads/${id}/`, {
+    data,
   });
 };
 
@@ -266,18 +267,10 @@ export const getCommentsByWork = (workId: number) => {
 };
 
 export const addComment = (data: AddCommentPayload) => {
-  return api.post(
-    "/api/comments/",
-    {
-      infra_work: data.workId,
-      update: data.updateId,
-      comment_text: data.text,
-    },
-    {
-      withCredentials: true,
-      requiresAuth: true,
-    }
-  );
+  return api.post("/api/comments/", data, {
+    withCredentials: true,
+    requiresAuth: true,
+  });
 };
 
 export const submitOtherDepartmentRequest = (
@@ -322,7 +315,7 @@ export const updateRequestStatus = (
   });
 };
 
-export const uploadExcel = (file: File, data:Partial<User>) => {
+export const uploadExcel = (file: File, data: Partial<User>) => {
   const formData = new FormData();
   formData.append("file", file);
   Object.entries(data).forEach(([key, value]) => {
@@ -390,17 +383,16 @@ export const getLoginUser = async (id: number) => {
   return response.data;
 };
 
-export const deleteUser = (id: number, data:Partial<User>) => {
-  console.log('data---------------------', data);
+export const deleteUser = (id: number, data: Partial<User>) => {
+  console.log("data---------------------", data);
   return api.delete(`/accounts/deleteUser/${id}/`, {
     data,
     requiresAuth: true,
   });
 };
 
-
-export const deleteContractor = (id: number, data:Partial<User>) => {
-  return api.delete<{ message: string }>(`/api/contractors/${id}/`,{
+export const deleteContractor = (id: number, data: Partial<User>) => {
+  return api.delete<{ message: string }>(`/api/contractors/${id}/`, {
     data,
     requiresAuth: true,
   });

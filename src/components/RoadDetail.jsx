@@ -1,7 +1,7 @@
 import React, { use } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./header";
-import { getUpdatesByWork, getCommentsByWork, addComment } from "../api/api";
+import { getUpdatesByWork, getCommentsByWork, addComment, getLoginUser } from "../api/api";
 import { useState, useEffect } from "react";
 
 export default function RoadDetail() {
@@ -91,11 +91,20 @@ export default function RoadDetail() {
     }
 
     try {
-      await addComment({
-        workId: work.id,
-        updateId: latestUpdate.id,
-        text: commentText,
-      });
+      const loginUserId = localStorage.getItem("id");
+
+      const loginUser = await getLoginUser(loginUserId);
+      console.log("---------loginUser------", loginUser);
+
+      const payload = {
+        login_user: loginUser,
+        infra_work : work.id,
+        update: latestUpdate.id,
+        commenter: loginUserId,
+        comment_text: commentText,
+      };
+
+      await addComment(payload);
 
       console.log("Comment added");
       setCommentText("");
@@ -107,7 +116,6 @@ export default function RoadDetail() {
     }
   };
 
-  
   return (
     <>
       <Header />
@@ -216,7 +224,7 @@ export default function RoadDetail() {
           {/* Work Updates Table */}
           <div style={{ marginBottom: "2rem" }}>
             <h3>Update of Work</h3>
-            
+
             <table style={tableStyle}>
               <thead>
                 <tr>
