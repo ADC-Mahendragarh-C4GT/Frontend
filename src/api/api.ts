@@ -397,3 +397,11 @@ export const deleteUser = (id: number, data:Partial<User>) => {
     requiresAuth: true,
   });
 };
+
+
+export const deleteContractor = (id: number, data:Partial<User>) => {
+  return api.delete<{ message: string }>(`/api/contractors/${id}/`,{
+    data,
+    requiresAuth: true,
+  });
+};
