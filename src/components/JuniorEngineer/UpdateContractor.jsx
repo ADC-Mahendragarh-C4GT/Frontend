@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getContractors, updateContractor } from "../../api/api"; // You'll create these functions
+import { getContractors, updateContractor, getLoginUser } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import { TextField } from "@mui/material";
 
@@ -58,7 +58,16 @@ export default function UpdateContractor() {
     setMessage("");
 
     try {
-      const res = await updateContractor(selectedContractorId, formData);
+      const loginUserId = localStorage.getItem("id");
+
+      const loginUser = await getLoginUser(loginUserId);
+      console.log("---------loginUser------", loginUser);
+
+      const payload = {
+        ...formData,
+        login_user: loginUser,
+      };
+      const res = await updateContractor(selectedContractorId, payload);
       setMessage(`${res.contractor_name} updated successfully!`);
       setTimeout(() => navigate("/home/"), 1500);
     } catch (err) {
