@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createContractor } from "../../api/api";
+import { createContractor, getLoginUser } from "../../api/api";
 import TextField from "@mui/material/TextField";
 
 export default function NewContractor() {
@@ -28,7 +28,17 @@ export default function NewContractor() {
     setMessage("");
 
     try {
-      await createContractor(formData);
+      const loginUserId = localStorage.getItem("id");
+
+      const loginUser = await getLoginUser(loginUserId);
+      console.log("---------loginUser------", loginUser);
+
+      const payload = {
+        ...formData,
+        login_user: loginUser,
+      };
+
+      await createContractor(payload);
       setMessage("Contractor registered successfully!");
       setFormData({
         contractor_name: "",
@@ -40,7 +50,9 @@ export default function NewContractor() {
       setTimeout(() => navigate("/home/"), 1500);
     } catch (err) {
       console.error(err);
-      setMessage(err.response?.data?.message || "Failed to register contractor.");
+      setMessage(
+        err.response?.data?.message || "Failed to register contractor."
+      );
     } finally {
       setLoading(false);
     }
