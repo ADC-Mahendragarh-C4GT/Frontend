@@ -4,6 +4,7 @@ import {
   getContractors,
   createInfraWork,
   getWorksonRoad,
+  getLoginUser,
 } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
@@ -45,24 +46,23 @@ const NewWork = () => {
     fetchData();
   }, []);
 
- const handleChange = (e) => {
-  const { name, value } = e.target;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
 
-  if (name === "progress_percent") {
-    const num = Number(value);
+    if (name === "progress_percent") {
+      const num = Number(value);
 
-    if (isNaN(num) || num < 0 || num > 100) {
-      alert("Progress percent must be between 0 and 100.");
-      return; // Do NOT update state
+      if (isNaN(num) || num < 0 || num > 100) {
+        alert("Progress percent must be between 0 and 100.");
+        return; // Do NOT update state
+      }
     }
-  }
 
-  setFormData((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
-};
-
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [savedPayload, setSavedPayload] = useState(null);
@@ -84,7 +84,6 @@ const NewWork = () => {
     };
 
     try {
-     
       const existingWorks = await getWorksonRoad(selectedRoad.id);
       const currentTime = new Date();
 
@@ -110,7 +109,17 @@ const NewWork = () => {
         }
       }
 
-      await submitInfraWork(payload);
+      const loginUserId = localStorage.getItem("id");
+
+      const loginUser = await getLoginUser(loginUserId);
+      console.log("---------loginUser------", loginUser);
+
+      const pay = {
+        ...payload,
+        login_user: loginUser,
+      };
+
+      await submitInfraWork(pay);
     } catch (err) {
       console.error(err);
       setMessage("Failed to add InfraWork.");
