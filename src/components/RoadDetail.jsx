@@ -1,7 +1,12 @@
 import React, { use } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./header";
-import { getUpdatesByWork, getCommentsByWork, addComment, getLoginUser } from "../api/api";
+import {
+  getUpdatesByWork,
+  getCommentsByWork,
+  addComment,
+  getLoginUser,
+} from "../api/api";
 import { useState, useEffect } from "react";
 
 export default function RoadDetail() {
@@ -98,7 +103,7 @@ export default function RoadDetail() {
 
       const payload = {
         login_user: loginUser,
-        infra_work : work.id,
+        infra_work: work.id,
         update: latestUpdate.id,
         commenter: loginUserId,
         comment_text: commentText,

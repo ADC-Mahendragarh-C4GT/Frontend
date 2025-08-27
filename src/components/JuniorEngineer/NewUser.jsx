@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { register, fetchUserType,  getLoginUser} from "../../api/api"; 
+import { register, fetchUserType, getLoginUser } from "../../api/api";
 import { TextField } from "@mui/material";
 
 export default function NewUser() {
-
-  
-
-  
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -45,10 +41,10 @@ export default function NewUser() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-    
+
     try {
-      const loginUserId = localStorage.getItem('id');
-  
+      const loginUserId = localStorage.getItem("id");
+
       const loginUser = await getLoginUser(loginUserId);
       console.log("---------loginUser------", loginUser);
 
@@ -70,8 +66,32 @@ export default function NewUser() {
       });
       setTimeout(() => navigate("/home/"), 1500);
     } catch (err) {
-      console.error(err);
-      setMessage(err.response?.data?.message || "Failed to register user.");
+      let errorMsg = "Failed to register user.";
+      const data = err.response?.data;
+
+      if (Array.isArray(data)) {
+        // Case: data = ["Email is already taken"]
+        errorMsg = data[0];
+      } else if (data && typeof data === "object") {
+        const errors = data.errors || {}; // nested errors object
+
+        if (errors.username) {
+          errorMsg = errors.username[0] || "Username already taken.";
+        } else if (errors.email) {
+          errorMsg = errors.email[0] || "Email already taken.";
+        } else if (Object.keys(errors).length > 0) {
+          // fallback → first field’s first error
+          const firstKey = Object.keys(errors)[0];
+          errorMsg = errors[firstKey][0];
+        } else if (data.message) {
+          // generic message
+          errorMsg = data.message;
+        }
+      } else if (typeof data === "string") {
+        errorMsg = data;
+      }
+
+      setMessage(errorMsg);
     } finally {
       setLoading(false);
     }

@@ -20,6 +20,7 @@ export default function OtherDepartmentForm() {
     const fetchRoads = async () => {
       try {
         const response = await getRoads();
+
         setRoads(response);
         setError("");
         console.log("Fetched Roads:", response);
@@ -84,25 +85,25 @@ export default function OtherDepartmentForm() {
             required
             style={inputStyle}
           />
-
           <TextField
-            list="road_unique_codes"
             label="Road Unique Code"
             placeholder="Road Unique Code"
             value={uniqueCode}
             onChange={(e) => setUniqueCode(e.target.value)}
             required
             style={inputStyle}
+            inputProps={{
+              list: "road_unique_codes", 
+            }}
           />
+
           <datalist id="road_unique_codes">
             {roads.map((road) => (
               <option
                 key={road.id}
                 value={road.unique_code}
                 label={`${road.unique_code} - ${road.name || road.road_name}`}
-              >
-                {road.unique_code} - {road.name || road.road_name}
-              </option>
+              />
             ))}
           </datalist>
 
@@ -132,7 +133,7 @@ export default function OtherDepartmentForm() {
             required
             style={inputStyle}
           />
-          
+
           <button type="submit" style={buttonStyle}>
             Submit Request
           </button>

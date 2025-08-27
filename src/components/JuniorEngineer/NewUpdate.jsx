@@ -118,7 +118,7 @@ export default function NewUpdate() {
       navigate("/home/");
     } catch (err) {
       console.error(err);
-      setMessage("Failed to create update.");
+      setMessage(err.response?.data?.progress_percent[0] || "Failed to create update.");
     } finally {
       setLoading(false);
     }

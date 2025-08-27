@@ -20,6 +20,7 @@ import TableRow from "@mui/material/TableRow";
 export default function Home() {
   const [roadQuery, setRoadQuery] = useState("");
   const [contractorQuery, setContractorQuery] = useState("");
+  const [statusQuery, setStatusQuery] = useState("");
   const [updates, setUpdates] = useState([]);
   const [page, setPage] = useState(0); // MUI is 0-based
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -125,9 +126,11 @@ export default function Home() {
     const roadCode = update?.road?.unique_code?.toLowerCase() ?? "";
     const contractorName =
       update?.contractor?.contractor_name?.toLowerCase() ?? "";
+    const status = update?.completedOrpending?.toLowerCase() ?? "";
 
     const roadQ = roadQuery.toLowerCase();
     const contractorQ = contractorQuery.toLowerCase();
+    const statusQ = statusQuery.toLowerCase();
 
     const matchesRoad =
       !roadQ || roadName.includes(roadQ) || roadCode.includes(roadQ);
@@ -135,7 +138,10 @@ export default function Home() {
     const matchesContractor =
       !contractorQ || contractorName.includes(contractorQ);
 
-    return matchesRoad && matchesContractor;
+    const matchesStatus = !statusQ || status.includes(statusQ);
+    console.log(`Filtering by status: ${statusQ}, Matches: ${matchesStatus}`);
+
+    return matchesRoad && matchesContractor && matchesStatus;
   });
 
   const navigate = useNavigate();
@@ -362,6 +368,20 @@ export default function Home() {
             color: "#000",
           }}
           onChange={(e) => setContractorQuery(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Status"
+          value={statusQuery}
+          style={{
+            padding: "0.8rem",
+            borderRadius: "20px",
+            border: "1px solid #ccc",
+            width: "20%",
+            backgroundColor: "#f9f9f9",
+            color: "#000",
+          }}
+          onChange={(e) => setStatusQuery(e.target.value)}
         />
       </div>
 
