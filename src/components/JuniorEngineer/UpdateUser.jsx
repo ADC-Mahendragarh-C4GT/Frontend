@@ -22,6 +22,7 @@ export default function UpdateUser() {
     const fetchUsers = async () => {
       try {
         const res = await getUsers();
+        res.data = res.data.filter((user) => user.isActive);
         setUsers(Array.isArray(res.data) ? res.data : [res.data]);
       } catch (err) {
         console.error("Failed to fetch users", err);

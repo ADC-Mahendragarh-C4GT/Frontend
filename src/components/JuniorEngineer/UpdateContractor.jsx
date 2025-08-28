@@ -21,6 +21,7 @@ export default function UpdateContractor() {
     const fetchContractors = async () => {
       try {
         const res = await getContractors();
+        res.data = res.data.filter((contractor) => contractor.isActive);
         setContractors(Array.isArray(res.data) ? res.data : [res.data]);
       } catch (err) {
         console.error("Failed to fetch contractors", err);

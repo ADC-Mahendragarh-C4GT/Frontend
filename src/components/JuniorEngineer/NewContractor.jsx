@@ -141,7 +141,7 @@ export default function NewContractor() {
             <p
               style={{
                 ...styles.message,
-                color: message.startsWith("") ? "red" : "green",
+                color: message.startsWith("") ? "green" : "red",
               }}
             >
               {message}
