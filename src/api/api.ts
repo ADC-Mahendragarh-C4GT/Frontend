@@ -411,3 +411,11 @@ export const deleteContractor = (id: number, data: Partial<User>) => {
     requiresAuth: true,
   });
 };
+
+
+export const deleteComment = (id: number, data: Partial<User>) => {
+  return api.delete<{ message: string }>(`/api/comments/${id}/`, {
+    data,
+    requiresAuth: true,
+  });
+};

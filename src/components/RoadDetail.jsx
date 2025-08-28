@@ -7,6 +7,7 @@ import {
   addComment,
   getLoginUser,
   getUsers,
+  deleteComment,
 } from "../api/api";
 import { useState, useEffect } from "react";
 
@@ -19,6 +20,7 @@ export default function RoadDetail() {
   const [commentText, setCommentText] = useState("");
   const [showAllUpdates, setShowAllUpdates] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // load from state or fallback to localStorage
   let work = location.state?.work;
@@ -103,6 +105,7 @@ export default function RoadDetail() {
 
       const loginUser = await getLoginUser(loginUserId);
       console.log("---------loginUser------", loginUser);
+      setCurrentUser(loginUser);
 
       const payload = {
         login_user: loginUser,
@@ -123,6 +126,46 @@ export default function RoadDetail() {
       console.error("Failed to add comment:", err);
     }
   };
+   
+  
+  
+
+  const handleDeleteComment = async (commentId) => {
+
+  if (!commentId) return;
+  const confirmDelete = window.confirm(
+          `Are you sure you want to delete comment ?\n\nThis action cannot be undone!`
+        );
+    
+        if (!confirmDelete) {
+          return;
+        }
+
+  try {
+    const loginUserId = localStorage.getItem("id");
+
+    const loginUser = await getLoginUser(loginUserId);
+    console.log("---------loginUser------", loginUser);
+    setCurrentUser(loginUser);
+
+    // Call delete API
+    await deleteComment(commentId, { login_user: loginUser });
+
+    console.log("Comment deleted");
+
+    // Refresh comments after delete
+    AllComments(work.id);
+  } catch (err) {
+    console.error("Failed to delete comment:", err);
+  }
+};
+
+useEffect(() => {
+    const loginUserId = localStorage.getItem("id");
+    if (loginUserId) {
+      getLoginUser(loginUserId).then(setCurrentUser);
+    }
+  }, []);
 
   useEffect(() => {
     fetchAllUsers();
@@ -261,8 +304,8 @@ export default function RoadDetail() {
                     <th style={thStyle}>Date</th>
                     <th style={thStyle}>Progress Percentage</th>
                     <th style={thStyle}>Short Description</th>
-                    <th style={thStyle}>Image</th> 
-                    <th style={thStyle}>Description(PDF)</th> 
+                    <th style={thStyle}>Image</th>
+                    <th style={thStyle}>Description(PDF)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -399,6 +442,7 @@ export default function RoadDetail() {
                   <th style={thStyle}>Progress Percentage</th>
                   <th style={thStyle}>Work Update Description</th>
                   <th style={thStyle}>Date when Commented</th>
+                  <th style={thStyle}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -414,7 +458,6 @@ export default function RoadDetail() {
                       ? allComments
                       : allComments.slice(0, 5)
                     ).map((comment, index) => {
-                      //Find update and commenter at runtime
                       const update = allUpdates.find(
                         (u) => u.id === comment.update
                       );
@@ -442,9 +485,25 @@ export default function RoadDetail() {
                               <td style={tdStyle}>
                                 {comment.comment_date ?? "N/A"}
                               </td>
+                              <td style={tdStyle}>
+                                {commenter?.id === currentUser?.id && (
+                                  <span
+                                    style={{
+                                      cursor: "pointer",
+                                      color: "red",
+                                      textDecoration: "underline",
+                                    }}
+                                    onClick={() =>
+                                      handleDeleteComment(comment.id)
+                                    }
+                                  >
+                                    Delete
+                                  </span>
+                                )}
+                              </td>
                             </>
                           ) : (
-                            <td colSpan={5} style={tdStyleCenter}>
+                            <td colSpan={6} style={tdStyleCenter}>
                               This comment was deleted by commenter or
                               administrator.
                             </td>

@@ -214,12 +214,13 @@ export default function PendingRequest() {
               <th style={thStyle}>Status</th>
               <th style={thStyle}>Response by</th>
               <th style={thStyle}>Response Date</th>
+              <th style={thStyle}>PDF Description</th>
             </tr>
           </thead>
           <tbody>
             {otherRequests.length === 0 ? (
               <tr>
-                <td colSpan={10} style={tdStyleCenter}>
+                <td colSpan={11} style={tdStyleCenter}>
                   No requests found.
                 </td>
               </tr>
@@ -253,6 +254,25 @@ export default function PendingRequest() {
                   <td style={tdStyle}>{req.response_by}</td>
                   <td style={tdStyle}>
                     {req.response_date?.split("T")[0] || ""}
+                  </td>
+                  <td style={tdStyle}>
+                    {req.pdfDescription ? (
+                      <button
+                        style={{
+                          backgroundColor: "#007bff",
+                          color: "white",
+                          border: "none",
+                          padding: "5px 10px",
+                          borderRadius: "5px",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => window.open(req.pdfDescription, "_blank")}
+                      >
+                        View PDF
+                      </button>
+                    ) : (
+                      "No Description available"
+                    )}
                   </td>
                 </tr>
               ))
