@@ -286,6 +286,7 @@ export const submitOtherDepartmentRequest = (
     work_description: data.workDescription,
     requested_by: data.requestedBy,
     contact_info: data.contactInfo,
+    pdfDescription: data.pdfDescription,
   });
 };
 

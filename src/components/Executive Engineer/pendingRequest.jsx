@@ -127,7 +127,7 @@ export default function PendingRequest() {
               <th style={thStyle}>Work Description</th>
               <th style={thStyle}>Requested By</th>
               <th style={thStyle}>Contact Info</th>
-              <th style={thStyle}>Status</th>
+              <th style={thStyle}>Detail Description (PDF)</th>
               <th style={thStyle}>Action</th>
               <th style={thStyle}>Update</th>
             </tr>
@@ -158,13 +158,24 @@ export default function PendingRequest() {
                   <td style={tdStyle}>{req.work_description}</td>
                   <td style={tdStyle}>{req.requested_by}</td>
                   <td style={tdStyle}>{req.contact_info}</td>
-                  <td
-                    style={{
-                      ...tdStyle,
-                      fontWeight: req.status === "Pending" ? "bold" : "normal",
-                    }}
-                  >
-                    {req.status}
+                  <td style={tdStyle}>
+                    {req.pdfDescription ? (
+                      <button
+                        style={{
+                          backgroundColor: "#007bff",
+                          color: "white",
+                          border: "none",
+                          padding: "5px 10px",
+                          borderRadius: "5px",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => window.open(req.pdfDescription, "_blank")}
+                      >
+                        View PDF
+                      </button>
+                    ) : (
+                      "No Description available"
+                    )}
                   </td>
                   <td style={tdStyle}>
                     <select

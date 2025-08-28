@@ -12,6 +12,7 @@ export default function OtherDepartmentForm() {
   const [requestedBy, setRequestedBy] = useState("");
   const [contactInfo, setContactInfo] = useState("");
   const [error, setError] = useState("");
+  const [pdfDescription, setPdfDescription] = useState("");
 
   const navigate = useNavigate();
   console.log("HI --------------");
@@ -48,6 +49,7 @@ export default function OtherDepartmentForm() {
         workDescription,
         requestedBy,
         contactInfo,
+        pdfDescription,
       });
 
       setError("");
@@ -133,6 +135,50 @@ export default function OtherDepartmentForm() {
             required
             style={inputStyle}
           />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: "1 1 calc(20% - 10px)",
+              minWidth: "150px",
+              marginTop: "1rem",
+            }}
+          >
+            <label
+              style={{
+                marginBottom: "4px",
+                fontWeight: "500",
+                color: "#333",
+              }}
+            >
+              Upload Detailed Update/Description (Optional)
+            </label>
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setPdfDescription(reader.result);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+              placeholder="Please upload PDF only"
+              style={{
+                padding: "0.8rem",
+                borderRadius: "20px",
+                backgroundColor: "#e0e0e0",
+                color: "#000",
+                textAlign: "center",
+                flex: "1 1 calc(20% - 10px)",
+              }}
+            />
+          </div>
+
+
 
           <button type="submit" style={buttonStyle}>
             Submit Request

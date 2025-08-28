@@ -330,7 +330,7 @@ export default function RoadDetail() {
 
                       {allUpdates.length > 2 && !showAllUpdates && (
                         <tr>
-                          <td colSpan={5} style={tdStyleCenter}>
+                          <td colSpan={6} style={tdStyleCenter}>
                             <span
                               style={{
                                 cursor: "pointer",
