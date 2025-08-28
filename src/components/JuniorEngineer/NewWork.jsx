@@ -34,11 +34,13 @@ const NewWork = () => {
     const fetchData = async () => {
       try {
         const roadRes = await getRoads();
-        const contractorRes = await getContractors();
-        console.log("-----------contracoter----------", contractorRes.data);
+        const contractors = await getContractors();
+        const contractorRes = contractors.data.filter((contractor) => contractor.isActive);
+
+        console.log("-----------contracoter----------", contractorRes);
         console.log("-----------roadRes----------", roadRes);
         setRoads(roadRes);
-        setContractors(contractorRes.data);
+        setContractors(contractorRes);
       } catch (err) {
         console.error(err);
       }
@@ -301,7 +303,7 @@ const NewWork = () => {
               <option value="" disabled>
                 Select Contractor
               </option>
-              {contractors.map((con) => (
+              {contractors?.map((con) => (
                 <option key={con.id} value={con.id} style={{ color: "#000" }}>
                   {con.contractor_name} - {con.contact_person}
                 </option>
