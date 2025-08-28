@@ -21,6 +21,7 @@ const NewWork = () => {
     contractor: "",
     completedOrpending: "Pending",
     defect_liability_period: "",
+    image: null,
   });
 
   const navigate = useNavigate();
@@ -35,7 +36,9 @@ const NewWork = () => {
       try {
         const roadRes = await getRoads();
         const contractors = await getContractors();
-        const contractorRes = contractors.data.filter((contractor) => contractor.isActive);
+        const contractorRes = contractors.data.filter(
+          (contractor) => contractor.isActive
+        );
 
         console.log("-----------contracoter----------", contractorRes);
         console.log("-----------roadRes----------", roadRes);
@@ -56,7 +59,7 @@ const NewWork = () => {
 
       if (isNaN(num) || num < 0 || num > 100) {
         alert("Progress percent must be between 0 and 100.");
-        return; // Do NOT update state
+        return; 
       }
     }
 
@@ -129,6 +132,16 @@ const NewWork = () => {
       setLoading(false);
     }
   };
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      setFormData((prev) => ({ ...prev, image: reader.result }));
+    };
+  };
 
   const submitInfraWork = async (payload) => {
     try {
@@ -165,6 +178,7 @@ const NewWork = () => {
     navigate("/home/");
   };
 
+ 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
@@ -326,7 +340,7 @@ const NewWork = () => {
             <TextField
               name="defect_liability_period"
               placeholder="DEFECT LIABILITY PERIOD (months)"
-              label="Defect Liability Period"
+              label="Defect Liability Period (months)"
               value={formData.defect_liability_period}
               onChange={handleChange}
               style={styles.input}
@@ -334,7 +348,7 @@ const NewWork = () => {
             <TextField
               name="description"
               placeholder="DESCRIPTION"
-              label="Description"
+              label="Short description in 1 or 2 line"
               multiline
               value={formData.description}
               onChange={handleChange}
@@ -345,6 +359,33 @@ const NewWork = () => {
                 textAlign: "start",
               }}
             />
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                flex: "1 1 calc(20% - 10px)",
+                minWidth: "150px",
+              }}
+            >
+              <label
+                style={{
+                  marginBottom: "4px",
+                  fontWeight: "500",
+                  color: "#333",
+                }}
+              >
+                Upload Image
+              </label>
+              <input
+                type="file"
+                name="image"
+                accept="image/*,application/pdf"
+                onChange={handleFileChange}
+                style={styles.input}
+              />
+            </div>
+
+            
           </div>
           <div style={{ display: "flex", justifyContent: "center" }}>
             <button

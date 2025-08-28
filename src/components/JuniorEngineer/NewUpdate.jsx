@@ -26,7 +26,8 @@ export default function NewUpdate() {
     const fetchData = async () => {
       try {
         const roadsRes = await getRoads();
-        const worksRes = await getInfraWorks();
+        const works = await getInfraWorks();
+        const worksRes = works.data.filter((work) => work.isActive);
         console.log("Fetched Roads:", roadsRes);
         console.log("Fetched Works:", worksRes);
 
@@ -166,7 +167,7 @@ export default function NewUpdate() {
               </option>
               {filteredWorks.length === 0 ? (
                 <option value="" disabled>
-                  No works available for this road
+                  No past works available for this road
                 </option>
               ) : (
                 filteredWorks.map((work) => (

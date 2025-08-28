@@ -342,6 +342,9 @@ export const uploadExcel = (file: File, data: Partial<User>) => {
 export const createInfraWork = (data: Partial<InfraWork>) => {
   return api.post<InfraWork>("/api/infra-works/", data, {
     requiresAuth: true,
+    // headers: {
+    //   "Content-Type": "multipart/form-data",
+    // },
   });
 };
 

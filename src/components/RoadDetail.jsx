@@ -6,6 +6,7 @@ import {
   getCommentsByWork,
   addComment,
   getLoginUser,
+  getUsers,
 } from "../api/api";
 import { useState, useEffect } from "react";
 
@@ -13,10 +14,12 @@ export default function RoadDetail() {
   const navigate = useNavigate();
   const location = useLocation();
   const [allUpdates, setAllUpdates] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [allComments, setAllComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [showAllUpdates, setShowAllUpdates] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
+
   // load from state or fallback to localStorage
   let work = location.state?.work;
   if (!work) {
@@ -118,6 +121,20 @@ export default function RoadDetail() {
       AllComments(work.id);
     } catch (err) {
       console.error("Failed to add comment:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllUsers();
+  }, []);
+
+  const fetchAllUsers = async () => {
+    try {
+      const response = await getUsers();
+      console.log("All users:", response.data);
+      setAllUsers(response.data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
     }
   };
 
@@ -343,24 +360,46 @@ export default function RoadDetail() {
                     {(showAllComments
                       ? allComments
                       : allComments.slice(0, 5)
-                    ).map((comment, index) => (
-                      <tr key={comment.id}>
-                        <td style={tdStyle}>{index + 1}</td>
-                        <td style={tdStyle}>
-                          {comment.commenter?.first_name}{" "}
-                          {comment.commenter?.last_name}(
-                          {comment.commenter?.user_type}){" "}
-                        </td>
-                        <td style={tdStyle}>{comment.comment_text}</td>
-                        <td style={tdStyle}>
-                          {comment.update?.progress_percent ?? "N/A"}%
-                        </td>
-                        <td style={tdStyle}>
-                          {comment.update?.status_note ?? "N/A"}
-                        </td>
-                        <td style={tdStyle}>{comment.comment_date ?? "N/A"}</td>
-                      </tr>
-                    ))}
+                    ).map((comment, index) => {
+                      // 🔹 Find update and commenter at runtime
+                      const update = allUpdates.find(
+                        (u) => u.id === comment.update
+                      );
+                      const commenter = allUsers.find(
+                        (u) => u.id === comment.commenter
+                      );
+
+                      return (
+                        <tr key={comment.id}>
+                                                        <td style={tdStyle}>{index + 1}</td>
+
+                          {comment.isActive ? (
+                            <>
+                              <td style={tdStyle}>
+                                {commenter?.first_name} {commenter?.last_name} (
+                                {commenter?.user_type})
+                              </td>
+                              <td style={tdStyle}>{comment.comment_text}</td>
+                              <td style={tdStyle}>
+                                {update?.progress_percent ?? "N/A"}%
+                              </td>
+                              <td style={tdStyle}>
+                                {update?.status_note ?? "N/A"}
+                              </td>
+                              <td style={tdStyle}>
+                                {comment.comment_date ?? "N/A"}
+                              </td>
+                            </>
+                          ) : (
+                            <td colSpan={5} style={tdStyleCenter}>
+                              This comment was deleted by commenter or
+                              administrator.
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
+
                     {allComments.length > 5 && !showAllComments && (
                       <tr>
                         <td colSpan={7} style={tdStyleCenter}>
