@@ -1,9 +1,8 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import {
   getRoads,
   getInfraWorks,
   createUpdate,
-  getUpdatesByWork,
   getLoginUser,
 } from "../../api/api";
 import { useNavigate } from "react-router-dom";
@@ -16,9 +15,10 @@ export default function NewUpdate() {
   const [selectedRoad, setSelectedRoad] = useState("");
   const [selectedWork, setSelectedWork] = useState("");
   const [progressPercent, setProgressPercent] = useState("");
+  const [statusNote, setStatusNote] = useState("");
+  const [imageBase64, setImageBase64] = useState(""); // <-- for storing base64 string
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [statusNote, setStatusNote] = useState("");
 
   const navigate = useNavigate();
 
@@ -28,8 +28,6 @@ export default function NewUpdate() {
         const roadsRes = await getRoads();
         const works = await getInfraWorks();
         const worksRes = works.data.filter((work) => work.isActive);
-        console.log("Fetched Roads:", roadsRes);
-        console.log("Fetched Works:", worksRes);
 
         const worksArray = Array.isArray(worksRes)
           ? worksRes
@@ -52,52 +50,53 @@ export default function NewUpdate() {
       return;
     }
 
-    setFilteredWorks(InfraWorks);
-
-    const timeout = setTimeout(() => {
-      const selectedRoadObj = roads.find(
-        (road) => road.id === Number(selectedRoad)
+    const selectedRoadObj = roads.find(
+      (road) => road.id === Number(selectedRoad)
+    );
+    if (selectedRoadObj) {
+      const filtered = InfraWorks.filter(
+        (InfraWork) => String(InfraWork.road) === String(selectedRoadObj.id)
       );
-      if (selectedRoadObj) {
-        const filtered = InfraWorks.filter(
-          (InfraWork) => String(InfraWork.road) === String(selectedRoadObj.id)
-        );
-        console.log("Filtered Works:", filtered);
-        setFilteredWorks(filtered);
-      }
-    }, 200);
-
-    return () => clearTimeout(timeout);
-  }, [selectedRoad, InfraWorks]);
+      setFilteredWorks(filtered);
+    }
+  }, [selectedRoad, InfraWorks, roads]);
 
   const handleRoadChange = (e) => {
     const roadId = e.target.value;
     setSelectedRoad(roadId);
     setSelectedWork("");
   };
-  console.log("-----------------filteredWorks-----------------", filteredWorks);
+
+  // Convert uploaded image to Base64
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageBase64(reader.result); // stores Base64 string
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    // Find the selected work object from the list
     const selectedWorkObj = InfraWorks.find(
       (work) => String(work.id) === String(selectedWork)
     );
 
-    // Check if the work is already completed (100%)
     if (selectedWorkObj && Number(selectedWorkObj.progress_percent) === 100) {
       alert("This work is already 100% complete. No more updates allowed.");
       setLoading(false);
       navigate("/home/");
-      return; // Exit early
+      return;
     }
 
     try {
       const loginUserId = localStorage.getItem("id");
-
       const loginUser = await getLoginUser(loginUserId);
 
       const payload = {
@@ -106,6 +105,7 @@ export default function NewUpdate() {
         work: selectedWork,
         progress_percent: progressPercent,
         status_note: statusNote,
+        image: imageBase64,
       };
 
       console.log("Payload: ", payload);
@@ -116,10 +116,14 @@ export default function NewUpdate() {
       setSelectedRoad("");
       setSelectedWork("");
       setProgressPercent("");
+      setStatusNote("");
+      setImageBase64("");
       navigate("/home/");
     } catch (err) {
       console.error(err);
-      setMessage(err.response?.data?.progress_percent[0] || "Failed to create update.");
+      setMessage(
+        err.response?.data?.progress_percent?.[0] || "Failed to create update."
+      );
     } finally {
       setLoading(false);
     }
@@ -139,6 +143,7 @@ export default function NewUpdate() {
               justifyContent: "center",
             }}
           >
+            {/* Road Dropdown */}
             <select
               name="road"
               value={selectedRoad}
@@ -155,6 +160,7 @@ export default function NewUpdate() {
               ))}
             </select>
 
+            {/* Work Dropdown */}
             <select
               name="InfraWork"
               value={selectedWork}
@@ -179,6 +185,7 @@ export default function NewUpdate() {
               )}
             </select>
 
+            {/* Progress % */}
             <TextField
               type="number"
               name="progressPercent"
@@ -190,6 +197,41 @@ export default function NewUpdate() {
               required
             />
           </div>
+
+          {/* Image Upload */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: "1 1 calc(20% - 10px)",
+              minWidth: "150px",
+            }}
+          >
+            <label
+              style={{
+                marginBottom: "4px",
+                fontWeight: "500",
+                color: "#333",
+              }}
+            >
+              Upload Image
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              style={{
+                padding: "0.8rem",
+                borderRadius: "20px",
+                backgroundColor: "#e0e0e0",
+                color: "#000",
+                textAlign: "center",
+                flex: "1 1 calc(20% - 10px)",
+              }}
+            />
+          </div>
+
+          {/* Short Description */}
           <div
             style={{
               display: "flex",
@@ -201,13 +243,14 @@ export default function NewUpdate() {
             <textarea
               type="text"
               name="statusNote"
-              placeholder="Status Note"
+              placeholder="Short description (1–2 lines)"
               value={statusNote}
               onChange={(e) => setStatusNote(e.target.value)}
               style={{ ...styles.input, textAlign: "start" }}
               required
             />
           </div>
+
           <div style={{ display: "flex", justifyContent: "center" }}>
             <button
               type="submit"
@@ -232,7 +275,7 @@ export default function NewUpdate() {
             <p
               style={{
                 ...styles.message,
-                color: message.startsWith("") ? "red" : "green",
+                color: message.startsWith("Failed") ? "red" : "green",
               }}
             >
               {message}

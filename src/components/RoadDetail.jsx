@@ -247,55 +247,86 @@ export default function RoadDetail() {
           <div style={{ marginBottom: "2rem" }}>
             <h3>Update of Work</h3>
 
-            <table style={tableStyle}>
-              <thead>
-                <tr>
-                  <th style={thStyle}>S. No.</th>
-                  <th style={thStyle}>Date</th>
-                  <th style={thStyle}>Progress Percentage</th>
-                  <th style={thStyle}>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allUpdates.length === 0 ? (
+            <div style={{ overflowX: "auto" }}>
+              <table
+                style={{
+                  ...tableStyle,
+                  width: "100%",
+                  borderCollapse: "collapse",
+                }}
+              >
+                <thead>
                   <tr>
-                    <td colSpan={4} style={tdStyleCenter}>
-                      No updates available on this road.
-                    </td>
+                    <th style={thStyle}>S. No.</th>
+                    <th style={thStyle}>Date</th>
+                    <th style={thStyle}>Progress Percentage</th>
+                    <th style={thStyle}>Description</th>
+                    <th style={thStyle}>Image</th> 
                   </tr>
-                ) : (
-                  <>
-                    {(showAllUpdates ? allUpdates : allUpdates.slice(0, 2)).map(
-                      (update, index) => (
+                </thead>
+                <tbody>
+                  {allUpdates.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} style={tdStyleCenter}>
+                        No updates available on this road.
+                      </td>
+                    </tr>
+                  ) : (
+                    <>
+                      {(showAllUpdates
+                        ? allUpdates
+                        : allUpdates.slice(0, 2)
+                      ).map((update, index) => (
                         <tr key={update.id}>
                           <td style={tdStyle}>{index + 1}</td>
                           <td style={tdStyle}>{update.update_date}</td>
                           <td style={tdStyle}>{update.progress_percent}%</td>
                           <td style={tdStyle}>{update.status_note}</td>
+                          <td style={tdStyle}>
+                            {update.image ? (
+                              <button
+                                style={{
+                                  backgroundColor: "#007bff",
+                                  color: "white",
+                                  border: "none",
+                                  padding: "5px 10px",
+                                  borderRadius: "5px",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() =>
+                                  window.open(update.image_url, "_blank")
+                                }
+                              >
+                                Preview
+                              </button>
+                            ) : (
+                              "No Image"
+                            )}
+                          </td>
                         </tr>
-                      )
-                    )}
+                      ))}
 
-                    {allUpdates.length > 2 && !showAllUpdates && (
-                      <tr>
-                        <td colSpan={4} style={tdStyleCenter}>
-                          <span
-                            style={{
-                              cursor: "pointer",
-                              color: "blue",
-                              textDecoration: "underline",
-                            }}
-                            onClick={() => setShowAllUpdates(true)}
-                          >
-                            See all ⬇
-                          </span>
-                        </td>
-                      </tr>
-                    )}
-                  </>
-                )}
-              </tbody>
-            </table>
+                      {allUpdates.length > 2 && !showAllUpdates && (
+                        <tr>
+                          <td colSpan={5} style={tdStyleCenter}>
+                            <span
+                              style={{
+                                cursor: "pointer",
+                                color: "blue",
+                                textDecoration: "underline",
+                              }}
+                              onClick={() => setShowAllUpdates(true)}
+                            >
+                              See all ⬇
+                            </span>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Comments Table */}
@@ -361,7 +392,7 @@ export default function RoadDetail() {
                       ? allComments
                       : allComments.slice(0, 5)
                     ).map((comment, index) => {
-                      // 🔹 Find update and commenter at runtime
+                      //Find update and commenter at runtime
                       const update = allUpdates.find(
                         (u) => u.id === comment.update
                       );
@@ -371,7 +402,7 @@ export default function RoadDetail() {
 
                       return (
                         <tr key={comment.id}>
-                                                        <td style={tdStyle}>{index + 1}</td>
+                          <td style={tdStyle}>{index + 1}</td>
 
                           {comment.isActive ? (
                             <>
