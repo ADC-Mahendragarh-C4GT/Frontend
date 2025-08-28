@@ -4,6 +4,7 @@ import {
   getOtherRequests,
   getRoads,
   updateRequestStatus,
+  getLoginUser,
 } from "../../api/api";
 import Header from "../header";
 
@@ -81,7 +82,7 @@ export default function PendingRequest() {
     setSelectedActions((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleUpdateStatus = (id) => {
+  const handleUpdateStatus = async (id) => {
     const status = selectedActions[id];
     const userFirstName = localStorage.getItem("userFirstName");
     const userLastName = localStorage.getItem("userLastName");
@@ -94,7 +95,12 @@ export default function PendingRequest() {
       return;
     }
 
-    updateRequestStatus(id, { status, response_by, response_date })
+    const loginUserId = localStorage.getItem("id");
+    
+    const login_user = await getLoginUser(loginUserId);
+    console.log("---------loginUser------", login_user);
+
+    updateRequestStatus(id, { status, response_by, response_date, login_user })
       .then(() => {
         console.log("-------Status-----------------", status);
         fetchData(); // refresh both tables from backend

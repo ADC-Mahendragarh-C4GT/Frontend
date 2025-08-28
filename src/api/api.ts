@@ -313,7 +313,7 @@ export const getOtherRequests = async () => {
 
 export const updateRequestStatus = (
   id: number,
-  payload: { status: string; response_by: string; response_date: string }
+  payload: { status: string; response_by: string; response_date: string , login_user: string }
 ) => {
   return api.patch(`/api/other-department-requests/${id}/`, payload, {
     requiresAuth: true,

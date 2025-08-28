@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { submitOtherDepartmentRequest, getRoads } from "../api/api";
+import { submitOtherDepartmentRequest, getRoads, getLoginUser  } from "../api/api";
 import { display, justifyContent } from "@mui/system";
 import TextField from "@mui/material/TextField";
 
@@ -37,7 +37,9 @@ export default function OtherDepartmentForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    
     try {
+
       const road = roads?.find((r) => r?.unique_code === uniqueCode);
       if (!road) {
         setError("Invalid Road Unique Code");
@@ -95,7 +97,7 @@ export default function OtherDepartmentForm() {
             required
             style={inputStyle}
             inputProps={{
-              list: "road_unique_codes", 
+              list: "road_unique_codes",
             }}
           />
 
@@ -177,8 +179,6 @@ export default function OtherDepartmentForm() {
               }}
             />
           </div>
-
-
 
           <button type="submit" style={buttonStyle}>
             Submit Request
