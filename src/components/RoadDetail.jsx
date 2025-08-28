@@ -260,8 +260,9 @@ export default function RoadDetail() {
                     <th style={thStyle}>S. No.</th>
                     <th style={thStyle}>Date</th>
                     <th style={thStyle}>Progress Percentage</th>
-                    <th style={thStyle}>Description</th>
+                    <th style={thStyle}>Short Description</th>
                     <th style={thStyle}>Image</th> 
+                    <th style={thStyle}>Description(PDF)</th> 
                   </tr>
                 </thead>
                 <tbody>
@@ -301,6 +302,27 @@ export default function RoadDetail() {
                               </button>
                             ) : (
                               "No Image"
+                            )}
+                          </td>
+                          <td style={tdStyle}>
+                            {update.pdf_url ? (
+                              <button
+                                style={{
+                                  backgroundColor: "#007bff",
+                                  color: "white",
+                                  border: "none",
+                                  padding: "5px 10px",
+                                  borderRadius: "5px",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() =>
+                                  window.open(update.pdf_url, "_blank")
+                                }
+                              >
+                                View PDF
+                              </button>
+                            ) : (
+                              "No Description available"
                             )}
                           </td>
                         </tr>

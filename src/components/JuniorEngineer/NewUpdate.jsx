@@ -16,9 +16,11 @@ export default function NewUpdate() {
   const [selectedWork, setSelectedWork] = useState("");
   const [progressPercent, setProgressPercent] = useState("");
   const [statusNote, setStatusNote] = useState("");
-  const [imageBase64, setImageBase64] = useState(""); // <-- for storing base64 string
+  const [imageBase64, setImageBase64] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pdfDescription, setPdfDescription] = useState("");
+
 
   const navigate = useNavigate();
 
@@ -127,6 +129,7 @@ export default function NewUpdate() {
         image: imageBase64,
         latitude: FinalLatitude,
         longitude: FinalLongitude,
+        pdfDescription: pdfDescription,
       };
 
       console.log("Payload: ", payload);
@@ -269,6 +272,49 @@ export default function NewUpdate() {
               onChange={(e) => setStatusNote(e.target.value)}
               style={{ ...styles.input, textAlign: "start" }}
               required
+            />
+          </div>
+          {/* PDF Upload */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: "1 1 calc(20% - 10px)",
+              minWidth: "150px",
+              marginTop: "1rem",
+            }}
+          >
+            <label
+              style={{
+                marginBottom: "4px",
+                fontWeight: "500",
+                color: "#333",
+              }}
+            >
+              Upload Detailed Update/Description (Optional)
+            </label>
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setPdfDescription(reader.result);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+              placeholder="Please upload PDF only"
+              style={{
+                padding: "0.8rem",
+                borderRadius: "20px",
+                backgroundColor: "#e0e0e0",
+                color: "#000",
+                textAlign: "center",
+                flex: "1 1 calc(20% - 10px)",
+              }}
             />
           </div>
 

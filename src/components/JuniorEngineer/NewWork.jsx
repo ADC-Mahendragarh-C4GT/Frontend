@@ -30,9 +30,10 @@ const NewWork = () => {
   const [contractors, setContractors] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-    const [FinalLatitude, setFinalLatitude] = useState(null);
+  const [FinalLatitude, setFinalLatitude] = useState(null);
   const [FinalLongitude, setFinalLongitude] = useState(null);
-  
+  const [pdfDescription, setPdfDescription] = useState("");
+
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -48,7 +49,6 @@ const NewWork = () => {
       console.log("Geolocation not supported by this browser.");
     }
   }, []);
-  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,7 +78,7 @@ const NewWork = () => {
 
       if (isNaN(num) || num < 0 || num > 100) {
         alert("Progress percent must be between 0 and 100.");
-        return; 
+        return;
       }
     }
 
@@ -107,6 +107,7 @@ const NewWork = () => {
       contractor: selectedContractor,
       latitude: FinalLatitude,
       longitude: FinalLongitude,
+      pdfDescription: pdfDescription,
     };
 
     try {
@@ -199,7 +200,6 @@ const NewWork = () => {
     navigate("/home/");
   };
 
- 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
@@ -405,8 +405,41 @@ const NewWork = () => {
                 style={styles.input}
               />
             </div>
-
-            
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                flex: "1 1 calc(20% - 10px)",
+                minWidth: "150px",
+                marginTop: "1rem",
+              }}
+            >
+              <label
+                style={{
+                  marginBottom: "4px",
+                  fontWeight: "500",
+                  color: "#333",
+                }}
+              >
+                Upload Detailed Update/Description (Optional)
+              </label>
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setPdfDescription(reader.result);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                placeholder="Please upload PDF only"
+                style={styles.input}
+              />
+            </div>
           </div>
           <div style={{ display: "flex", justifyContent: "center" }}>
             <button
