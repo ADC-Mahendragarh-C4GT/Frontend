@@ -99,7 +99,7 @@ export default function UpdateUser() {
     const user = users.find((u) => u.id === Number(selectedUserId));
 
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete the user "${user?.first_name} ${user?.last_name}"?\n\nYou will lose all their activities on this portal!`
+      `Are you sure you want to delete the user "${user?.first_name} ${user?.last_name}"?\n\nThis action cannot be undone!`
     );
 
     if (!confirmDelete) {
