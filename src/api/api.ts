@@ -203,6 +203,10 @@ export const getUsers = () => {
 export const getRoads = async () => {
   const response = await api.get("/api/roads/");
   console.log("-------response--------", response.data);
+  response.data = response.data.filter((road: { isActive: boolean }) => road.isActive);
+  response.data = Array.isArray(response.data)
+    ? response.data.sort((a, b) => (a.road_name || '').localeCompare(b.road_name || ''))
+    : response.data;
   return response.data;
 };
 export const getContractors = () =>
@@ -358,9 +362,15 @@ export const updateContractor = (id: number, data: Partial<Contractor>) => {
 };
 
 export const getWorksonRoad = (roadId: number) => {
-  return api.get(`/api/InfraWorksbyRoad/?road_id=${roadId}`, {
+  const response =  api.get(`/api/InfraWorksbyRoad/?road_id=${roadId}`, {
     requiresAuth: true,
   });
+  response.then(res => {
+    res.data = Array.isArray(res.data)
+      ? res.data.sort((a, b) => (a.road_name || '').localeCompare(b.road_name || ''))
+      : res.data;
+  });
+  return response;
 };
 
 export const logoutUser = () => {
