@@ -22,6 +22,25 @@ export default function NewUpdate() {
 
   const navigate = useNavigate();
 
+  const [FinalLatitude, setFinalLatitude] = useState(null);
+  const [FinalLongitude, setFinalLongitude] = useState(null);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setFinalLatitude(position.coords.latitude);
+          setFinalLongitude(position.coords.longitude);
+        },
+        (error) => {
+          console.error("Error fetching location:", error);
+        }
+      );
+    } else {
+      console.log("Geolocation not supported by this browser.");
+    }
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -106,6 +125,8 @@ export default function NewUpdate() {
         progress_percent: progressPercent,
         status_note: statusNote,
         image: imageBase64,
+        latitude: FinalLatitude,
+        longitude: FinalLongitude,
       };
 
       console.log("Payload: ", payload);

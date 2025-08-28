@@ -30,6 +30,25 @@ const NewWork = () => {
   const [contractors, setContractors] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+    const [FinalLatitude, setFinalLatitude] = useState(null);
+  const [FinalLongitude, setFinalLongitude] = useState(null);
+  
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setFinalLatitude(position.coords.latitude);
+          setFinalLongitude(position.coords.longitude);
+        },
+        (error) => {
+          console.error("Error fetching location:", error);
+        }
+      );
+    } else {
+      console.log("Geolocation not supported by this browser.");
+    }
+  }, []);
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -86,6 +105,8 @@ const NewWork = () => {
       ...formData,
       road: selectedRoad,
       contractor: selectedContractor,
+      latitude: FinalLatitude,
+      longitude: FinalLongitude,
     };
 
     try {
