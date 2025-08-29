@@ -3,7 +3,7 @@ import Header from "./header";
 import {
   getUpdates,
   getPendingRequests,
-  getRoads,
+  getAllRoads,
   getContractors,
   logoutUser
 } from "../api/api";
@@ -69,7 +69,7 @@ export default function Home() {
         response.data
       );
 
-      const roadObj = await getRoads();
+      const roadObj = await getAllRoads();
       console.log("Roads fetched:", roadObj);
 
       const contractorResponse = await getContractors();
@@ -416,14 +416,14 @@ export default function Home() {
                       {page * rowsPerPage + index + 1}
                     </TableCell>
                     <TableCell align="center">
-                      {update.road.unique_code}
+                      {update.road?.unique_code}
                     </TableCell>
                     <TableCell align="center">
-                      {update.road.road_name}
+                      {update.road?.road_name}
                     </TableCell>
                     <TableCell align="center">{update.description}</TableCell>
                     <TableCell align="center">
-                      {update.contractor.contractor_name}
+                      {update.contractor?.contractor_name}
                     </TableCell>
                     <TableCell align="center">{update.start_date}</TableCell>
                     <TableCell align="center">

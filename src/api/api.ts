@@ -209,6 +209,11 @@ export const getRoads = async () => {
     : response.data;
   return response.data;
 };
+export const getAllRoads = async () => {
+  const response = await api.get("/api/roads/");
+  console.log("-------response--------", response.data);
+  return response.data;
+};
 export const getContractors = () =>
   api.get<Contractor[]>("/api/contractors/", {
     requiresAuth: true,
