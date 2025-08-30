@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 import Header from "./header";
 import {
   getUpdates,
   getPendingRequests,
   getAllRoads,
   getContractors,
-  logoutUser
+  logoutUser,
+  fetchAuditReport,
 } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import Paper from "@mui/material/Paper";
@@ -16,6 +20,9 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import "../auditLog.css";
 
 export default function Home() {
   const [roadQuery, setRoadQuery] = useState("");
@@ -26,6 +33,8 @@ export default function Home() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const userType = localStorage.getItem("user_type");
 
@@ -52,7 +61,11 @@ export default function Home() {
     }
   }, [userType]);
   useEffect(() => {
-    if (userType != "JE" && userType != "XEN") {
+    if (userType === "CMC") {
+    }
+  }, [userType]);
+  useEffect(() => {
+    if (userType != "JE" && userType != "XEN" && userType != "CMC") {
     }
   }, [userType]);
 
@@ -178,79 +191,164 @@ export default function Home() {
     }
   };
 
-
   const handleLogout = async () => {
+    try {
+      await logoutUser();
+      localStorage.clear();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
+
+const handleAudit = async (startDate, endDate) => {
   try {
-    await logoutUser(); 
-    localStorage.clear(); 
-    navigate("/login"); 
+    const response = await fetchAuditReport(startDate, endDate);
+    const logs = response.data; 
+
+    const rows = logs.map((item) => {
+      return {
+        ID: item.id,
+        Action: item.action,
+        Timestamp: new Date(item.timestamp).toLocaleString(),
+        Performed_By: item.performed_by?.first_name + " " + item.performed_by?.last_name + " (" + item.performed_by?.user_type + ")" || "system",
+        Old_Details: typeof item.old_details === "string" ? item.old_details : JSON.stringify(item.old_details),
+        New_Details: typeof item.new_details === "string" ? item.new_details : JSON.stringify(item.new_details),
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Audit Report");
+
+    XLSX.writeFile(workbook, "audit_report.xlsx");
   } catch (error) {
-    console.error("Logout failed:", error);
+    console.error("Error fetching audit report:", error);
   }
 };
 
   return (
     <>
       <Header />
+      <div
+        style={{
+          margin: "1rem auto",
+          paddingLeft: "0.5rem",
+          maxWidth: "1500px",
+          background: "#f9f9f9",
+          borderRadius: "8px",
+          textAlign: "center",
+        }}
+      >
         <div
           style={{
-            margin: "1rem auto",
-            paddingLeft: "0.5rem",
-            maxWidth: "1500px",
-            background: "#f9f9f9",
-            borderRadius: "8px",
-            textAlign: "center",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "10px",
+            justifyContent: "center",
+          }}
+        >
+          <button
+            style={{
+              padding: "0.3rem 0.5rem",
+              borderRadius: "20px",
+              backgroundColor: "#4CAF50",
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+              minWidth: "140px",
+              flex: "1 1 150px",
+              fontSize: "0.9rem",
+              transition: "background 0.3s",
+            }}
+            onClick={() => navigate("/view-all-roads")}
+            onMouseOver={(e) => (e.target.style.backgroundColor = "#45a049")}
+            onMouseOut={(e) => (e.target.style.backgroundColor = "#4CAF50")}
+          >
+            View All Roads
+          </button>
+
+          <button
+            style={{
+              padding: "0.3rem 0.5rem",
+              borderRadius: "20px",
+              backgroundColor: "#f44336",
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+              minWidth: "140px",
+              flex: "1 1 150px",
+              fontSize: "0.9rem",
+              transition: "background 0.3s",
+            }}
+            onClick={handleLogout}
+            onMouseOver={(e) => (e.target.style.backgroundColor = "#d32f2f")}
+            onMouseOut={(e) => (e.target.style.backgroundColor = "#f44336")}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+
+      {userType === "CMC" && (
+        <div
+          style={{
+            backgroundColor: "#f5f7fa",
+            padding: "1rem",
+            borderRadius: "12px",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
           }}
         >
           <div
+            style={{ marginBottom: "1rem", fontWeight: "600", color: "#333" }}
+          >
+            Download Audit Report
+          </div>
+
+          <div
             style={{
               display: "flex",
+              gap: "1rem",
               flexWrap: "wrap",
-              gap: "10px",
+              alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <button
-              style={{
-                padding: "0.3rem 0.5rem",
-                borderRadius: "20px",
-                backgroundColor: "#4CAF50",
-                color: "white",
-                border: "none",
-                cursor: "pointer",
-                minWidth: "140px",
-                flex: "1 1 150px",
-                fontSize: "0.9rem",
-                transition: "background 0.3s",
-              }}
-              onClick={() => navigate("/view-all-roads")}
-              onMouseOver={(e) => (e.target.style.backgroundColor = "#45a049")}
-              onMouseOut={(e) => (e.target.style.backgroundColor = "#4CAF50")}
-            >
-              View All Roads
-            </button>
+            <ReactDatePicker
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              placeholderText="Select Start Date"
+              className="custom-date-picker"
+              required
+              
+            />
+
+            <ReactDatePicker
+              selected={endDate}
+              onChange={(date) => setEndDate(date)}
+              placeholderText="Select End Date"
+              className="custom-date-picker"
+              required
+            />
 
             <button
+              onClick={() => handleAudit(startDate, endDate)}
               style={{
-                padding: "0.3rem 0.5rem",
-                borderRadius: "20px",
-                backgroundColor: "#f44336",
-                color: "white",
+                padding: "0.8rem 1.5rem",
+                borderRadius: "8px",
                 border: "none",
+                backgroundColor: "#007bff",
+                color: "#fff",
                 cursor: "pointer",
-                minWidth: "140px",
-                flex: "1 1 150px",
-                fontSize: "0.9rem",
-                transition: "background 0.3s",
+                fontWeight: "600",
               }}
-              onClick={handleLogout}
-              onMouseOver={(e) => (e.target.style.backgroundColor = "#d32f2f")}
-              onMouseOut={(e) => (e.target.style.backgroundColor = "#f44336")}
             >
-              Logout
+              Generate Report
             </button>
           </div>
         </div>
+      )}
 
       {userType === "XEN" && (
         <div
@@ -331,7 +429,7 @@ export default function Home() {
           </div>
         </div>
       )}
-      
+
       <div
         style={{
           display: "flex",
@@ -387,9 +485,9 @@ export default function Home() {
 
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
         <TableContainer sx={{ maxHeight: 450 }}>
-          <Table stickyHeader aria-label="sticky table">
+          <Table aria-label="sticky table">
             <TableHead>
-              <TableRow>
+              <TableRow style={{ backgroundColor: "#f0f0f0" }}>
                 <TableCell align="center">S. No.</TableCell>
                 <TableCell align="center">Road Number</TableCell>
                 <TableCell align="center">Road Name</TableCell>

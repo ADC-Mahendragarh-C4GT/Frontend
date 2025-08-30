@@ -21,7 +21,7 @@ const NewWork = () => {
     contractor: "",
     completedOrpending: "Pending",
     defect_liability_period: "",
-    image: null,
+    image: "+",
   });
 
   const navigate = useNavigate();
@@ -154,15 +154,32 @@ const NewWork = () => {
       setLoading(false);
     }
   };
-  const handleFileChange = (e) => {
+
+  const handlePdfChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData((prev) => ({ ...prev, pdfDescription: reader.result }));
+    };
     reader.readAsDataURL(file);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload only image files (jpg, png, jpeg, etc.).");
+      return;
+    }
+
+    const reader = new FileReader();
     reader.onloadend = () => {
       setFormData((prev) => ({ ...prev, image: reader.result }));
     };
+    reader.readAsDataURL(file);
   };
 
   const submitInfraWork = async (payload) => {
@@ -197,7 +214,6 @@ const NewWork = () => {
 
   const handleConfirmNo = () => {
     setShowConfirmation(false);
-    navigate("/home/");
   };
 
   return (
@@ -280,6 +296,7 @@ const NewWork = () => {
               value={formData.phase}
               onChange={handleChange}
               style={styles.input}
+              required
             />
 
             <div
@@ -305,6 +322,7 @@ const NewWork = () => {
                 value={formData.start_date}
                 onChange={handleChange}
                 style={styles.input}
+                required
               />
             </div>
 
@@ -317,6 +335,7 @@ const NewWork = () => {
               onChange={handleChange}
               style={styles.input}
               inputProps={{ min: 0, max: 100 }}
+              required
             />
 
             <TextField
@@ -327,6 +346,7 @@ const NewWork = () => {
               value={formData.cost}
               onChange={handleChange}
               style={styles.input}
+              required
             />
 
             <select
@@ -334,6 +354,7 @@ const NewWork = () => {
               value={formData.contractor}
               onChange={handleChange}
               style={styles.select}
+              required
             >
               <option value="" disabled>
                 Select Contractor
@@ -350,6 +371,7 @@ const NewWork = () => {
               value={formData.completedOrpending}
               onChange={handleChange}
               style={styles.select}
+              required
             >
               <option value="" disabled>
                 COMPLETED / PENDING
@@ -365,6 +387,8 @@ const NewWork = () => {
               value={formData.defect_liability_period}
               onChange={handleChange}
               style={styles.input}
+              type="Number"
+              required
             />
             <TextField
               name="description"
@@ -379,6 +403,7 @@ const NewWork = () => {
                 flex: "1 1 90%",
                 textAlign: "start",
               }}
+              required
             />
             <div
               style={{
@@ -395,13 +420,13 @@ const NewWork = () => {
                   color: "#333",
                 }}
               >
-                Upload Image
+                Upload Image (Optional)
               </label>
               <input
                 type="file"
                 name="image"
                 accept="image/*,application/pdf"
-                onChange={handleFileChange}
+                onChange={handleImageChange}
                 style={styles.input}
               />
             </div>
@@ -426,16 +451,7 @@ const NewWork = () => {
               <input
                 type="file"
                 accept="application/pdf"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setPdfDescription(reader.result);
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
+                onChange={handlePdfChange}
                 placeholder="Please upload PDF only"
                 style={styles.input}
               />

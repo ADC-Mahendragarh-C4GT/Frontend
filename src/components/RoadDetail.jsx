@@ -486,7 +486,7 @@ useEffect(() => {
                                 {comment.comment_date ?? "N/A"}
                               </td>
                               <td style={tdStyle}>
-                                {commenter?.id === currentUser?.id && (
+                                {commenter?.id === currentUser?.id &&  (
                                   <span
                                     style={{
                                       cursor: "pointer",

@@ -1,0 +1,23 @@
+.custom-date-picker {
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #000;
+  font-size: 14px;
+  width: 180px;
+  cursor: pointer;
+}
+
+.custom-date-picker::placeholder {
+  color: #888;
+}
+.react-datepicker {
+  z-index: 9999 !important; /* make sure it stays above */
+}
+
+
+.custom-date-picker::-webkit-calendar-picker-indicator {
+  filter: invert(0); 
+  cursor: pointer;
+}

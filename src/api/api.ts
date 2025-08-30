@@ -424,3 +424,14 @@ export const deleteComment = (id: number, data: Partial<User>) => {
     requiresAuth: true,
   });
 };
+
+
+export const fetchAuditReport = async (startDate : string, endDate: string) => {
+  const response = await api.get("/audit/report/", {
+    params: { start_date: startDate, end_date: endDate },
+    requiresAuth: true,
+  });
+
+  console.log("object----------------------------------------------------------------", response.data)
+  return response.data;
+};

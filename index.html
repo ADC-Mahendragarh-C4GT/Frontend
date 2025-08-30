@@ -8,7 +8,14 @@
     <link rel="icon" type="image/jpg" href="public/images/HaryanaGovWhiteBackground.jpg" />
   </head>
   <body>
+    <style>input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0); /* black icon */
+  cursor: pointer;
+}
+</style>
+    
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
   </body>
 </html>
