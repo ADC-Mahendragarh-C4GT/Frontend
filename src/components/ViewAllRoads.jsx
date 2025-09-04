@@ -15,7 +15,6 @@ import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
-
 export default function ViewAllRoads() {
   const [roads, setRoads] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,13 +23,11 @@ export default function ViewAllRoads() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const totalCount = roads.length;
   const [roadQuery, setRoadQuery] = useState("");
-       const [districtFilter, setDistrictFilter] = useState("");
+  const [districtFilter, setDistrictFilter] = useState("");
 
-   const [anchorEl, setAnchorEl] = useState(null);
-   const [stateFilter, setStateFilter] = useState("All State");
-const [stateAnchorEl, setStateAnchorEl] = useState(null);
-
-
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [stateFilter, setStateFilter] = useState("All State");
+  const [stateAnchorEl, setStateAnchorEl] = useState(null);
 
   const filteredUpdates = roads?.filter((update) => {
     const roadName = update?.road_name?.toLowerCase() ?? "";
@@ -116,22 +113,20 @@ const [stateAnchorEl, setStateAnchorEl] = useState(null);
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
-
-
   const filteredFinalUpdates = filteredUpdates.filter((update) => {
-  let districtMatch = true;
-  let stateMatch = true;
+    let districtMatch = true;
+    let stateMatch = true;
 
-  if (districtFilter && districtFilter !== "All State") {
-    districtMatch = update.district === districtFilter;
-  }
+    if (districtFilter && districtFilter !== "All State") {
+      districtMatch = update.district === districtFilter;
+    }
 
-  if (stateFilter && stateFilter !== "All State") {
-    stateMatch = update.state === stateFilter;
-  }
+    if (stateFilter && stateFilter !== "All State") {
+      stateMatch = update.state === stateFilter;
+    }
 
-  return districtMatch && stateMatch;
-});
+    return districtMatch && stateMatch;
+  });
 
   const districtOptions = [
     { value: "All State", label: "All State" },
@@ -142,12 +137,12 @@ const [stateAnchorEl, setStateAnchorEl] = useState(null);
   ];
 
   const stateOptions = [
-  { value: "All State", label: "All State" },
-  ...Array.from(new Set(roads.map((r) => r.state))).map((s) => ({
-    value: s,
-    label: s,
-  })),
-];
+    { value: "All State", label: "All State" },
+    ...Array.from(new Set(roads.map((r) => r.state))).map((s) => ({
+      value: s,
+      label: s,
+    })),
+  ];
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -161,7 +156,6 @@ const [stateAnchorEl, setStateAnchorEl] = useState(null);
     setDistrictFilter(option.value);
     setAnchorEl(null);
   };
-
 
   return (
     <div>
@@ -207,7 +201,10 @@ const [stateAnchorEl, setStateAnchorEl] = useState(null);
                 <TableCell align="center">Material type</TableCell>
                 <TableCell align="center">Road category</TableCell>
                 <TableCell align="center">Area name</TableCell>
-                <TableCell style={{ paddingRight: "0px", paddingLeft : "0px"}} align="center">
+                <TableCell
+                  style={{ paddingRight: "0px", paddingLeft: "0px" }}
+                  align="center"
+                >
                   District
                   <IconButton size="small" onClick={handleMenuClick}>
                     <ArrowDropDownIcon />
@@ -227,7 +224,37 @@ const [stateAnchorEl, setStateAnchorEl] = useState(null);
                     ))}
                   </Menu>
                 </TableCell>
-                <TableCell align="center">State</TableCell>
+
+                <TableCell
+                  style={{ paddingRight: "0px", paddingLeft: "0px" }}
+                  align="center"
+                >
+                  State
+                  <IconButton
+                    size="small"
+                    onClick={(e) => setStateAnchorEl(e.currentTarget)}
+                  >
+                    <ArrowDropDownIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={stateAnchorEl}
+                    open={Boolean(stateAnchorEl)}
+                    onClose={() => setStateAnchorEl(null)}
+                  >
+                    {stateOptions.map((option) => (
+                      <MenuItem
+                        key={option.value}
+                        onClick={() => {
+                          setStateFilter(option.value);
+                          setStateAnchorEl(null);
+                        }}
+                      >
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </TableCell>
+
                 {userType === "JE" && (
                   <TableCell align="center">Update Details</TableCell>
                 )}
