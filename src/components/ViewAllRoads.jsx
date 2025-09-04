@@ -38,8 +38,18 @@ export default function ViewAllRoads() {
   const [roadTypeAnchorEl, setRoadTypeAnchorEl] = useState(null);
   const [locationFilter, setLocationFilter] = useState("");
   const [locationAnchorEl, setLocationAnchorEl] = useState(null);
-  const [wardFilter, setWardFilter] = useState("All Wards");
+  const [wardFilter, setWardFilter] = useState("");
   const [wardAnchorEl, setWardAnchorEl] = useState(null);
+  const [widthFilter, setWidthFilter] = useState("");
+  const [widthAnchorEl, setWidthAnchorEl] = useState(null);
+
+  const widthOptions = [
+    { value: "All", label: "All" },
+    { value: "0-10", label: "0 - 10 m" },
+    { value: "10-50", label: "10 - 50 m" },
+    { value: "50-100", label: "50 - 100 m" },
+    { value: "100+", label: "Greater than 100 m" },
+  ];
 
   const wardOptions = [
     { value: "All Wards", label: "All Wards" },
@@ -213,6 +223,23 @@ export default function ViewAllRoads() {
       wardMatch = update.ward_number === wardFilter;
     }
 
+    if (widthFilter && widthFilter !== "All") {
+      const width = update?.width_m ?? 0;
+
+      if (widthFilter === "0-10" && !(width >= 0 && width <= 10)) {
+        return false;
+      }
+      if (widthFilter === "10-50" && !(width > 10 && width <= 50)) {
+        return false;
+      }
+      if (widthFilter === "50-100" && !(width > 50 && width <= 100)) {
+        return false;
+      }
+      if (widthFilter === "100+" && !(width > 100)) {
+        return false;
+      }
+    }
+
     return (
       districtMatch &&
       stateMatch &&
@@ -352,7 +379,35 @@ export default function ViewAllRoads() {
                 </TableCell>
 
                 <TableCell align="center">Length (km)</TableCell>
-                <TableCell align="center">Width (m)</TableCell>
+                <TableCell
+                  style={{ paddingRight: "0px", paddingLeft: "0px" }}
+                  align="center"
+                >
+                  {widthFilter !== "All" ? widthFilter : <span>Width (m)</span>}
+                  <IconButton
+                    size="small"
+                    onClick={(e) => setWidthAnchorEl(e.currentTarget)}
+                  >
+                    <ArrowDropDownIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={widthAnchorEl}
+                    open={Boolean(widthAnchorEl)}
+                    onClose={() => setWidthAnchorEl(null)}
+                  >
+                    {widthOptions.map((option) => (
+                      <MenuItem
+                        key={option.value}
+                        onClick={() => {
+                          setWidthFilter(option.value);
+                          setWidthAnchorEl(null);
+                        }}
+                      >
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </TableCell>
 
                 <TableCell
                   style={{ paddingRight: "0px", paddingLeft: "0px" }}
