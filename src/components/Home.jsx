@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import { Menu, MenuItem, IconButton } from "@mui/material";
+import { Menu, MenuItem, IconButton, Dialog, DialogTitle } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 import Header from "./header";
 import {
@@ -42,7 +45,7 @@ export default function Home() {
 
   const userType = localStorage.getItem("user_type");
   const ranges = [
-     { label: "All", value: "All" },
+    { label: "All", value: "All" },
     { label: "0 - 30%", min: 0, max: 30 },
     { label: "31 - 60%", min: 31, max: 60 },
     { label: "61 - 90%", min: 61, max: 90 },
@@ -53,7 +56,7 @@ export default function Home() {
   const [statusFilter, setStatusFilter] = useState("");
 
   const statusOptions = [
-     { label: "All", value: "All" },
+    { label: "All", value: "All" },
     { label: "Pending", value: "Pending" },
     { label: "Completed", value: "Completed" },
   ];
@@ -82,13 +85,16 @@ export default function Home() {
   };
 
   const startDateOptions = [
-  { value: "1m", label: "Starting within a month" },
-  { value: "3m", label: "Starting within 3 months" },
-  { value: "1y", label: "Starting within a year" },
-  { value: "all", label: "All" },
-];
- const [startDateFilter, setStartDateFilter] = useState(null);
+    { value: "1m", label: "Starting within a month" },
+    { value: "3m", label: "Starting within 3 months" },
+    { value: "1y", label: "Starting within a year" },
+    { value: "year", label: "Select a specific year" },
+    { value: "all", label: "All" },
+  ];
+  const [startDateFilter, setStartDateFilter] = useState(null);
   const [startDateAnchorEl, setStartDateAnchorEl] = useState(null);
+  const [selectedYear, setSelectedYear] = useState(null);
+  const [yearDialogOpen, setYearDialogOpen] = useState(false);
 
   const handleStartDateMenuClick = (event) => {
     setStartDateAnchorEl(event.currentTarget);
@@ -99,10 +105,13 @@ export default function Home() {
   };
 
   const handleStartDateSelect = (option) => {
-    setStartDateFilter(option.label);
+    if (option.value === "year") {
+      setYearDialogOpen(true);
+    } else {
+      setStartDateFilter(option.label);
+    }
     setStartDateAnchorEl(null);
   };
-
 
   useEffect(() => {
     if (userType === "XEN") {
@@ -201,14 +210,13 @@ export default function Home() {
   };
 
   useEffect(() => {
-  if (
-    statusFilter?.toLowerCase() === "all" ||
-    workCompletedRange?.value === "All"
-  ) {
-    loadUpdates(page + 1, rowsPerPage);
-  }
-}, [statusFilter, workCompletedRange, page, rowsPerPage]);
-
+    if (
+      statusFilter?.toLowerCase() === "all" ||
+      workCompletedRange?.value === "All"
+    ) {
+      loadUpdates(page + 1, rowsPerPage);
+    }
+  }, [statusFilter, workCompletedRange, page, rowsPerPage]);
 
   const filteredUpdates = updates?.filter((update) => {
     const roadName = update?.road?.road_name?.toLowerCase() ?? "";
@@ -232,10 +240,6 @@ export default function Home() {
 
     return matchesRoad && matchesContractor && matchesWork;
   });
-
-
-  
-
 
   const navigate = useNavigate();
   const timestamp = new Date().toLocaleString();
@@ -320,43 +324,44 @@ export default function Home() {
   };
 
   const finalFilteredUpdates = filteredUpdates?.filter((update) => {
-
     if (statusFilter && statusFilter !== "All") {
-    if (update.completedOrpending !== statusFilter) return false;
-  }
-
-  if (workCompletedRange) {
-    const { min, max } = workCompletedRange;
-    const percent = update?.progress_percent ?? 0;
-    if (percent < min || (max !== undefined && percent > max)) {
-      return false;
+      if (update.completedOrpending !== statusFilter) return false;
     }
-  }
 
-   if (startDateFilter && startDateFilter !== "All") {
+    if (workCompletedRange) {
+      const { min, max } = workCompletedRange;
+      const percent = update?.progress_percent ?? 0;
+      if (percent < min || (max !== undefined && percent > max)) {
+        return false;
+      }
+    }
+
+    if (startDateFilter && startDateFilter !== "All") {
       const today = new Date();
-      const updateDate = new Date(update.start_date); 
+      const updateDate = new Date(update.start_date);
 
       let startRange;
       if (startDateFilter === "Starting within a month") {
         startRange = new Date(today);
         startRange.setDate(today.getDate() - 30);
+        if (updateDate < startRange || updateDate > today) return false;
       } else if (startDateFilter === "Starting within 3 months") {
         startRange = new Date(today);
         startRange.setMonth(today.getMonth() - 3);
+        if (updateDate < startRange || updateDate > today) return false;
       } else if (startDateFilter === "Starting within a year") {
         startRange = new Date(today);
         startRange.setFullYear(today.getFullYear() - 1);
-      }
-
-      if (startRange && (updateDate < startRange || updateDate > today)) {
-        return false;
+        if (updateDate < startRange || updateDate > today) return false;
+      } else if (startDateFilter === "Select a specific year" && selectedYear) {
+        if (updateDate.getFullYear() !== selectedYear.getFullYear()) {
+          return false;
+        }
       }
     }
 
-  return true;
-});
-
+    return true;
+  });
 
   return (
     <>
@@ -610,7 +615,6 @@ export default function Home() {
           }}
           onChange={(e) => setContractorQuery(e.target.value)}
         />
-        
       </div>
 
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
@@ -643,6 +647,7 @@ export default function Home() {
                     ))}
                   </Menu>
                 </TableCell>
+
                 <TableCell align="center">
                   {statusFilter ? statusFilter : "Status"}
                   <IconButton size="small" onClick={handleStatusMenuClick}>
@@ -665,7 +670,9 @@ export default function Home() {
                 </TableCell>
 
                 <TableCell align="center">
-                  {workCompletedRange ? workCompletedRange.label : "Work Completed (%)"}
+                  {workCompletedRange
+                    ? workCompletedRange.label
+                    : "Work Completed (%)"}
                   <IconButton size="small" onClick={handleMenuClick}>
                     <ArrowDropDownIcon />
                   </IconButton>
@@ -685,7 +692,9 @@ export default function Home() {
                   </Menu>
                 </TableCell>
               </TableRow>
+              
             </TableHead>
+            
             <TableBody>
               {finalFilteredUpdates?.length > 0 ? (
                 finalFilteredUpdates.map((update, index) => (
@@ -740,6 +749,31 @@ export default function Home() {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
+      <Dialog
+                  open={yearDialogOpen}
+                  onClose={() => setYearDialogOpen(false)}
+                >
+                  <DialogTitle>Select Year</DialogTitle>
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                      views={["year"]}
+                      value={selectedYear}
+                      onChange={(newValue) => {
+                        setSelectedYear(newValue);
+                        setStartDateFilter("Select a specific year");
+                        setYearDialogOpen(false);
+                      }}
+                      slotProps={{
+                        textField: { variant: "outlined", fullWidth: true },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </Dialog>
+
+                {finalFilteredUpdates.map((u) => (
+                  <div key={u.id}>{u.name}</div>
+                ))}
+
     </>
   );
 }

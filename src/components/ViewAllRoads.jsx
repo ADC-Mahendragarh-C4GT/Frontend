@@ -10,6 +10,11 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import IconButton from "@mui/material/IconButton";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+
 
 export default function ViewAllRoads() {
   const [roads, setRoads] = useState([]);
@@ -19,6 +24,13 @@ export default function ViewAllRoads() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const totalCount = roads.length;
   const [roadQuery, setRoadQuery] = useState("");
+       const [districtFilter, setDistrictFilter] = useState("");
+
+   const [anchorEl, setAnchorEl] = useState(null);
+   const [stateFilter, setStateFilter] = useState("All State");
+const [stateAnchorEl, setStateAnchorEl] = useState(null);
+
+
 
   const filteredUpdates = roads?.filter((update) => {
     const roadName = update?.road_name?.toLowerCase() ?? "";
@@ -104,6 +116,53 @@ export default function ViewAllRoads() {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
+
+
+  const filteredFinalUpdates = filteredUpdates.filter((update) => {
+  let districtMatch = true;
+  let stateMatch = true;
+
+  if (districtFilter && districtFilter !== "All State") {
+    districtMatch = update.district === districtFilter;
+  }
+
+  if (stateFilter && stateFilter !== "All State") {
+    stateMatch = update.state === stateFilter;
+  }
+
+  return districtMatch && stateMatch;
+});
+
+  const districtOptions = [
+    { value: "All State", label: "All State" },
+    ...Array.from(new Set(roads.map((r) => r.district))).map((d) => ({
+      value: d,
+      label: d,
+    })),
+  ];
+
+  const stateOptions = [
+  { value: "All State", label: "All State" },
+  ...Array.from(new Set(roads.map((r) => r.state))).map((s) => ({
+    value: s,
+    label: s,
+  })),
+];
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleSelect = (option) => {
+    setDistrictFilter(option.value);
+    setAnchorEl(null);
+  };
+
+
   return (
     <div>
       <div style={{ textAlign: "center", margin: "20px 0" }}>
@@ -145,11 +204,29 @@ export default function ViewAllRoads() {
                 <TableCell align="center">Length (km)</TableCell>
                 <TableCell align="center">Width (m)</TableCell>
                 <TableCell align="center">Road type</TableCell>
-
                 <TableCell align="center">Material type</TableCell>
                 <TableCell align="center">Road category</TableCell>
                 <TableCell align="center">Area name</TableCell>
-                <TableCell align="center">District</TableCell>
+                <TableCell style={{ paddingRight: "0px", paddingLeft : "0px"}} align="center">
+                  District
+                  <IconButton size="small" onClick={handleMenuClick}>
+                    <ArrowDropDownIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                  >
+                    {districtOptions.map((option) => (
+                      <MenuItem
+                        key={option.value}
+                        onClick={() => handleSelect(option)}
+                      >
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </TableCell>
                 <TableCell align="center">State</TableCell>
                 {userType === "JE" && (
                   <TableCell align="center">Update Details</TableCell>
@@ -158,8 +235,8 @@ export default function ViewAllRoads() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredUpdates?.length > 0 ? (
-                filteredUpdates.map((update, index) => (
+              {filteredFinalUpdates?.length > 0 ? (
+                filteredFinalUpdates.map((update, index) => (
                   <TableRow
                     hover
                     role="checkbox"
