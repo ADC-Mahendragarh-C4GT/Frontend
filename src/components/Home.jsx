@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { Menu, MenuItem, IconButton } from "@mui/material";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 import Header from "./header";
 import {
@@ -23,11 +25,12 @@ import TableRow from "@mui/material/TableRow";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../auditLog.css";
+import { Refresh } from "@mui/icons-material";
 
 export default function Home() {
   const [roadQuery, setRoadQuery] = useState("");
   const [contractorQuery, setContractorQuery] = useState("");
-  const [statusQuery, setStatusQuery] = useState("");
+  const [workQuery, setWorkQuery] = useState("");
   const [updates, setUpdates] = useState([]);
   const [page, setPage] = useState(0); // MUI is 0-based
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -35,8 +38,71 @@ export default function Home() {
   const [pendingCount, setPendingCount] = useState(0);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [workCompletedRange, setWorkCompletedRange] = useState(null);
 
   const userType = localStorage.getItem("user_type");
+  const ranges = [
+     { label: "All", value: "All" },
+    { label: "0 - 30%", min: 0, max: 30 },
+    { label: "31 - 60%", min: 31, max: 60 },
+    { label: "61 - 90%", min: 61, max: 90 },
+    { label: "91 - 100%", min: 91, max: 100 },
+  ];
+
+  const [statusAnchorEl, setStatusAnchorEl] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const statusOptions = [
+     { label: "All", value: "All" },
+    { label: "Pending", value: "Pending" },
+    { label: "Completed", value: "Completed" },
+  ];
+
+  const handleStatusMenuClick = (event) => {
+    setStatusAnchorEl(event.currentTarget);
+  };
+
+  const handleStatusMenuClose = () => {
+    setStatusAnchorEl(null);
+  };
+
+  const handleStatusSelect = (option) => {
+    setStatusFilter(option.value);
+    setStatusAnchorEl(null);
+  };
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
+
+  const handleRangeSelect = (range) => {
+    setWorkCompletedRange(range);
+    setAnchorEl(null);
+  };
+
+  const startDateOptions = [
+  { value: "1m", label: "Starting within a month" },
+  { value: "3m", label: "Starting within 3 months" },
+  { value: "1y", label: "Starting within a year" },
+  { value: "all", label: "All" },
+];
+ const [startDateFilter, setStartDateFilter] = useState(null);
+  const [startDateAnchorEl, setStartDateAnchorEl] = useState(null);
+
+  const handleStartDateMenuClick = (event) => {
+    setStartDateAnchorEl(event.currentTarget);
+  };
+
+  const handleStartDateMenuClose = () => {
+    setStartDateAnchorEl(null);
+  };
+
+  const handleStartDateSelect = (option) => {
+    setStartDateFilter(option.label);
+    setStartDateAnchorEl(null);
+  };
+
 
   useEffect(() => {
     if (userType === "XEN") {
@@ -105,7 +171,7 @@ export default function Home() {
       const sortedData = enrichedData.sort((a, b) => {
         if (a.status === "Pending" && b.status !== "Pending") return -1;
         if (a.status !== "Pending" && b.status === "Pending") return 1;
-        return 0; // ensure it returns 0 if equal
+        return 0;
       });
       console.log(
         `[${new Date().toLocaleTimeString()}] Updates sorted by status:`,
@@ -134,16 +200,26 @@ export default function Home() {
     setPage(0);
   };
 
+  useEffect(() => {
+  if (
+    statusFilter?.toLowerCase() === "all" ||
+    workCompletedRange?.value === "All"
+  ) {
+    loadUpdates(page + 1, rowsPerPage);
+  }
+}, [statusFilter, workCompletedRange, page, rowsPerPage]);
+
+
   const filteredUpdates = updates?.filter((update) => {
     const roadName = update?.road?.road_name?.toLowerCase() ?? "";
     const roadCode = update?.road?.unique_code?.toLowerCase() ?? "";
     const contractorName =
       update?.contractor?.contractor_name?.toLowerCase() ?? "";
-    const status = update?.completedOrpending?.toLowerCase() ?? "";
+    const work = update?.description?.toLowerCase() ?? "";
 
     const roadQ = roadQuery.toLowerCase();
     const contractorQ = contractorQuery.toLowerCase();
-    const statusQ = statusQuery.toLowerCase();
+    const workQ = workQuery.toLowerCase();
 
     const matchesRoad =
       !roadQ || roadName.includes(roadQ) || roadCode.includes(roadQ);
@@ -151,11 +227,15 @@ export default function Home() {
     const matchesContractor =
       !contractorQ || contractorName.includes(contractorQ);
 
-    const matchesStatus = !statusQ || status.includes(statusQ);
-    console.log(`Filtering by status: ${statusQ}, Matches: ${matchesStatus}`);
+    const matchesWork = !workQ || work.includes(workQ);
+    console.log(`Filtering by work: ${workQ}, Matches: ${matchesWork}`);
 
-    return matchesRoad && matchesContractor && matchesStatus;
+    return matchesRoad && matchesContractor && matchesWork;
   });
+
+
+  
+
 
   const navigate = useNavigate();
   const timestamp = new Date().toLocaleString();
@@ -201,32 +281,82 @@ export default function Home() {
     }
   };
 
+  const handleAudit = async (startDate, endDate) => {
+    try {
+      const response = await fetchAuditReport(startDate, endDate);
+      const logs = response.data;
 
-const handleAudit = async (startDate, endDate) => {
-  try {
-    const response = await fetchAuditReport(startDate, endDate);
-    const logs = response.data; 
+      const rows = logs.map((item) => {
+        return {
+          ID: item.id,
+          Action: item.action,
+          Timestamp: new Date(item.timestamp).toLocaleString(),
+          Performed_By:
+            item.performed_by?.first_name +
+              " " +
+              item.performed_by?.last_name +
+              " (" +
+              item.performed_by?.user_type +
+              ")" || "system",
+          Old_Details:
+            typeof item.old_details === "string"
+              ? item.old_details
+              : JSON.stringify(item.old_details),
+          New_Details:
+            typeof item.new_details === "string"
+              ? item.new_details
+              : JSON.stringify(item.new_details),
+        };
+      });
 
-    const rows = logs.map((item) => {
-      return {
-        ID: item.id,
-        Action: item.action,
-        Timestamp: new Date(item.timestamp).toLocaleString(),
-        Performed_By: item.performed_by?.first_name + " " + item.performed_by?.last_name + " (" + item.performed_by?.user_type + ")" || "system",
-        Old_Details: typeof item.old_details === "string" ? item.old_details : JSON.stringify(item.old_details),
-        New_Details: typeof item.new_details === "string" ? item.new_details : JSON.stringify(item.new_details),
-      };
-    });
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Audit Report");
 
-    const worksheet = XLSX.utils.json_to_sheet(rows);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Audit Report");
+      XLSX.writeFile(workbook, "audit_report.xlsx");
+    } catch (error) {
+      console.error("Error fetching audit report:", error);
+    }
+  };
 
-    XLSX.writeFile(workbook, "audit_report.xlsx");
-  } catch (error) {
-    console.error("Error fetching audit report:", error);
+  const finalFilteredUpdates = filteredUpdates?.filter((update) => {
+
+    if (statusFilter && statusFilter !== "All") {
+    if (update.completedOrpending !== statusFilter) return false;
   }
-};
+
+  if (workCompletedRange) {
+    const { min, max } = workCompletedRange;
+    const percent = update?.progress_percent ?? 0;
+    if (percent < min || (max !== undefined && percent > max)) {
+      return false;
+    }
+  }
+
+   if (startDateFilter && startDateFilter !== "All") {
+      const today = new Date();
+      const updateDate = new Date(update.start_date); 
+
+      let startRange;
+      if (startDateFilter === "Starting within a month") {
+        startRange = new Date(today);
+        startRange.setDate(today.getDate() - 30);
+      } else if (startDateFilter === "Starting within 3 months") {
+        startRange = new Date(today);
+        startRange.setMonth(today.getMonth() - 3);
+      } else if (startDateFilter === "Starting within a year") {
+        startRange = new Date(today);
+        startRange.setFullYear(today.getFullYear() - 1);
+      }
+
+      if (startRange && (updateDate < startRange || updateDate > today)) {
+        return false;
+      }
+    }
+
+  return true;
+});
+
 
   return (
     <>
@@ -321,7 +451,6 @@ const handleAudit = async (startDate, endDate) => {
               placeholderText="Select Start Date"
               className="custom-date-picker"
               required
-              
             />
 
             <ReactDatePicker
@@ -455,6 +584,20 @@ const handleAudit = async (startDate, endDate) => {
         />
         <input
           type="text"
+          placeholder="Select by Work Name"
+          value={workQuery}
+          style={{
+            padding: "0.8rem",
+            borderRadius: "20px",
+            border: "1px solid #ccc",
+            width: "20%",
+            backgroundColor: "#f9f9f9",
+            color: "#000",
+          }}
+          onChange={(e) => setWorkQuery(e.target.value)}
+        />
+        <input
+          type="text"
           placeholder="Search by Contractor Name"
           value={contractorQuery}
           style={{
@@ -467,20 +610,7 @@ const handleAudit = async (startDate, endDate) => {
           }}
           onChange={(e) => setContractorQuery(e.target.value)}
         />
-        <input
-          type="text"
-          placeholder="Status"
-          value={statusQuery}
-          style={{
-            padding: "0.8rem",
-            borderRadius: "20px",
-            border: "1px solid #ccc",
-            width: "20%",
-            backgroundColor: "#f9f9f9",
-            color: "#000",
-          }}
-          onChange={(e) => setStatusQuery(e.target.value)}
-        />
+        
       </div>
 
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
@@ -493,15 +623,72 @@ const handleAudit = async (startDate, endDate) => {
                 <TableCell align="center">Road Name</TableCell>
                 <TableCell align="center">Work</TableCell>
                 <TableCell align="center">Contractor</TableCell>
-                <TableCell align="center">Start Date</TableCell>
-                <TableCell align="center">Status</TableCell>
+                <TableCell align="center">
+                  {startDateFilter ? startDateFilter : "Start Date"}
+                  <IconButton size="small" onClick={handleStartDateMenuClick}>
+                    <ArrowDropDownIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={startDateAnchorEl}
+                    open={Boolean(startDateAnchorEl)}
+                    onClose={handleStartDateMenuClose}
+                  >
+                    {startDateOptions.map((option) => (
+                      <MenuItem
+                        key={option.value}
+                        onClick={() => handleStartDateSelect(option)}
+                      >
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </TableCell>
+                <TableCell align="center">
+                  {statusFilter ? statusFilter : "Status"}
+                  <IconButton size="small" onClick={handleStatusMenuClick}>
+                    <ArrowDropDownIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={statusAnchorEl}
+                    open={Boolean(statusAnchorEl)}
+                    onClose={handleStatusMenuClose}
+                  >
+                    {statusOptions.map((option) => (
+                      <MenuItem
+                        key={option.value}
+                        onClick={() => handleStatusSelect(option)}
+                      >
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </TableCell>
 
-                <TableCell align="center">Work Completed (%)</TableCell>
+                <TableCell align="center">
+                  {workCompletedRange ? workCompletedRange.label : "Work Completed (%)"}
+                  <IconButton size="small" onClick={handleMenuClick}>
+                    <ArrowDropDownIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                  >
+                    {ranges.map((range) => (
+                      <MenuItem
+                        key={range.label}
+                        onClick={() => handleRangeSelect(range)}
+                      >
+                        {range.label}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredUpdates?.length > 0 ? (
-                filteredUpdates.map((update, index) => (
+              {finalFilteredUpdates?.length > 0 ? (
+                finalFilteredUpdates.map((update, index) => (
                   <TableRow
                     hover
                     role="checkbox"

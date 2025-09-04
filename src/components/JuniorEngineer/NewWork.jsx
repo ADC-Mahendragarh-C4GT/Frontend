@@ -21,7 +21,7 @@ const NewWork = () => {
     contractor: "",
     completedOrpending: "Pending",
     defect_liability_period: "",
-    image: "+",
+    image: "",
   });
 
   const navigate = useNavigate();
