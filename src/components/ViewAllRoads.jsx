@@ -36,6 +36,16 @@ export default function ViewAllRoads() {
   const [materialTypeAnchorEl, setMaterialTypeAnchorEl] = useState(null);
   const [roadTypeFilter, setRoadTypeFilter] = useState("");
   const [roadTypeAnchorEl, setRoadTypeAnchorEl] = useState(null);
+  const [locationFilter, setLocationFilter] = useState("");
+  const [locationAnchorEl, setLocationAnchorEl] = useState(null);
+
+  const locationOptions = [
+    { value: "All Locations", label: "All Locations" },
+    ...Array.from(new Set(roads.map((r) => r.location))).map((loc) => ({
+      value: loc,
+      label: loc,
+    })),
+  ];
 
   const roadTypeOptions = [
     { value: "All Road Types", label: "All Road Types" },
@@ -159,6 +169,7 @@ export default function ViewAllRoads() {
     let categoryMatch = true;
     let materialMatch = true;
     let roadTypeMatch = true;
+    let locationMatch = true;
 
     if (districtFilter && districtFilter !== "All State") {
       districtMatch = update.district === districtFilter;
@@ -183,13 +194,18 @@ export default function ViewAllRoads() {
       roadTypeMatch = update.road_type === roadTypeFilter;
     }
 
+    if (locationFilter && locationFilter !== "All Locations") {
+      locationMatch = update.location === locationFilter;
+    }
+
     return (
       districtMatch &&
       stateMatch &&
       areaMatch &&
       categoryMatch &&
       materialMatch &&
-      roadTypeMatch
+      roadTypeMatch &&
+      locationMatch
     );
   });
 
@@ -259,7 +275,36 @@ export default function ViewAllRoads() {
                 <TableCell align="center">Road Number</TableCell>
                 <TableCell align="center">Road Name</TableCell>
                 <TableCell align="center">Ward Number</TableCell>
-                <TableCell align="center">Location</TableCell>
+                <TableCell
+                  style={{ paddingRight: "0px", paddingLeft: "0px" }}
+                  align="center"
+                >
+                  Location
+                  <IconButton
+                    size="small"
+                    onClick={(e) => setLocationAnchorEl(e.currentTarget)}
+                  >
+                    <ArrowDropDownIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={locationAnchorEl}
+                    open={Boolean(locationAnchorEl)}
+                    onClose={() => setLocationAnchorEl(null)}
+                  >
+                    {locationOptions.map((option) => (
+                      <MenuItem
+                        key={option.value}
+                        onClick={() => {
+                          setLocationFilter(option.value);
+                          setLocationAnchorEl(null);
+                        }}
+                      >
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </TableCell>
+
                 <TableCell align="center">Length (km)</TableCell>
                 <TableCell align="center">Width (m)</TableCell>
 
