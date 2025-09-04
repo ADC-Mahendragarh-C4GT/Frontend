@@ -38,6 +38,16 @@ export default function ViewAllRoads() {
   const [roadTypeAnchorEl, setRoadTypeAnchorEl] = useState(null);
   const [locationFilter, setLocationFilter] = useState("");
   const [locationAnchorEl, setLocationAnchorEl] = useState(null);
+  const [wardFilter, setWardFilter] = useState("All Wards");
+  const [wardAnchorEl, setWardAnchorEl] = useState(null);
+
+  const wardOptions = [
+    { value: "All Wards", label: "All Wards" },
+    ...Array.from(new Set(roads.map((r) => r.ward_number))).map((w) => ({
+      value: w,
+      label: w,
+    })),
+  ];
 
   const locationOptions = [
     { value: "All Locations", label: "All Locations" },
@@ -170,6 +180,7 @@ export default function ViewAllRoads() {
     let materialMatch = true;
     let roadTypeMatch = true;
     let locationMatch = true;
+    let wardMatch = true;
 
     if (districtFilter && districtFilter !== "All State") {
       districtMatch = update.district === districtFilter;
@@ -198,6 +209,10 @@ export default function ViewAllRoads() {
       locationMatch = update.location === locationFilter;
     }
 
+    if (wardFilter && wardFilter !== "All Wards") {
+      wardMatch = update.ward_number === wardFilter;
+    }
+
     return (
       districtMatch &&
       stateMatch &&
@@ -205,7 +220,8 @@ export default function ViewAllRoads() {
       categoryMatch &&
       materialMatch &&
       roadTypeMatch &&
-      locationMatch
+      locationMatch &&
+      wardMatch
     );
   });
 
@@ -274,7 +290,37 @@ export default function ViewAllRoads() {
                 <TableCell align="center">S. No.</TableCell>
                 <TableCell align="center">Road Number</TableCell>
                 <TableCell align="center">Road Name</TableCell>
-                <TableCell align="center">Ward Number</TableCell>
+
+                <TableCell
+                  style={{ paddingRight: "0px", paddingLeft: "0px" }}
+                  align="center"
+                >
+                  Ward Number
+                  <IconButton
+                    size="small"
+                    onClick={(e) => setWardAnchorEl(e.currentTarget)}
+                  >
+                    <ArrowDropDownIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={wardAnchorEl}
+                    open={Boolean(wardAnchorEl)}
+                    onClose={() => setWardAnchorEl(null)}
+                  >
+                    {wardOptions.map((option) => (
+                      <MenuItem
+                        key={option.value}
+                        onClick={() => {
+                          setWardFilter(option.value);
+                          setWardAnchorEl(null);
+                        }}
+                      >
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </TableCell>
+
                 <TableCell
                   style={{ paddingRight: "0px", paddingLeft: "0px" }}
                   align="center"
