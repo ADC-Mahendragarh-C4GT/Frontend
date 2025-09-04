@@ -26,8 +26,29 @@ export default function ViewAllRoads() {
   const [districtFilter, setDistrictFilter] = useState("");
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const [stateFilter, setStateFilter] = useState("All State");
+  const [stateFilter, setStateFilter] = useState("");
   const [stateAnchorEl, setStateAnchorEl] = useState(null);
+  const [areaFilter, setAreaFilter] = useState("");
+  const [areaAnchorEl, setAreaAnchorEl] = useState(null);
+  const [roadCategoryFilter, setRoadCategoryFilter] = useState("");
+const [roadCategoryAnchorEl, setRoadCategoryAnchorEl] = useState(null);
+
+
+const roadCategoryOptions = [
+  { value: "All Categories", label: "All Categories" },
+  ...Array.from(new Set(roads.map((r) => r.road_category))).map((c) => ({
+    value: c,
+    label: c,
+  })),
+];
+
+  const areaOptions = [
+    { value: "All Area", label: "All Area" },
+    ...Array.from(new Set(roads.map((r) => r.area_name))).map((a) => ({
+      value: a,
+      label: a,
+    })),
+  ];
 
   const filteredUpdates = roads?.filter((update) => {
     const roadName = update?.road_name?.toLowerCase() ?? "";
@@ -116,6 +137,8 @@ export default function ViewAllRoads() {
   const filteredFinalUpdates = filteredUpdates.filter((update) => {
     let districtMatch = true;
     let stateMatch = true;
+     let areaMatch = true;
+     
 
     if (districtFilter && districtFilter !== "All State") {
       districtMatch = update.district === districtFilter;
@@ -124,8 +147,11 @@ export default function ViewAllRoads() {
     if (stateFilter && stateFilter !== "All State") {
       stateMatch = update.state === stateFilter;
     }
+    if (areaFilter && areaFilter !== "All Area") {
+      areaMatch = update.area_name === areaFilter;
+    }
 
-    return districtMatch && stateMatch;
+    return districtMatch && stateMatch && areaMatch;
   });
 
   const districtOptions = [
@@ -200,7 +226,37 @@ export default function ViewAllRoads() {
                 <TableCell align="center">Road type</TableCell>
                 <TableCell align="center">Material type</TableCell>
                 <TableCell align="center">Road category</TableCell>
-                <TableCell align="center">Area name</TableCell>
+
+                <TableCell
+                  style={{ paddingRight: "0px", paddingLeft: "0px" }}
+                  align="center"
+                >
+                  Area
+                  <IconButton
+                    size="small"
+                    onClick={(e) => setAreaAnchorEl(e.currentTarget)}
+                  >
+                    <ArrowDropDownIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={areaAnchorEl}
+                    open={Boolean(areaAnchorEl)}
+                    onClose={() => setAreaAnchorEl(null)}
+                  >
+                    {areaOptions.map((option) => (
+                      <MenuItem
+                        key={option.value}
+                        onClick={() => {
+                          setAreaFilter(option.value);
+                          setAreaAnchorEl(null);
+                        }}
+                      >
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </TableCell>
+
                 <TableCell
                   style={{ paddingRight: "0px", paddingLeft: "0px" }}
                   align="center"
