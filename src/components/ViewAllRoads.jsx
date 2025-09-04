@@ -32,6 +32,8 @@ export default function ViewAllRoads() {
   const [areaAnchorEl, setAreaAnchorEl] = useState(null);
   const [roadCategoryFilter, setRoadCategoryFilter] = useState("");
   const [roadCategoryAnchorEl, setRoadCategoryAnchorEl] = useState(null);
+  const [materialTypeFilter, setMaterialTypeFilter] = useState("");
+  const [materialTypeAnchorEl, setMaterialTypeAnchorEl] = useState(null);
 
   const roadCategoryOptions = [
     { value: "All Categories", label: "All Categories" },
@@ -46,6 +48,13 @@ export default function ViewAllRoads() {
     ...Array.from(new Set(roads.map((r) => r.area_name))).map((a) => ({
       value: a,
       label: a,
+    })),
+  ];
+  const materialTypeOptions = [
+    { value: "All Materials", label: "All Materials" },
+    ...Array.from(new Set(roads.map((r) => r.material_type))).map((m) => ({
+      value: m,
+      label: m,
     })),
   ];
 
@@ -138,6 +147,7 @@ export default function ViewAllRoads() {
     let stateMatch = true;
     let areaMatch = true;
     let categoryMatch = true;
+    let materialMatch = true;
 
     if (districtFilter && districtFilter !== "All State") {
       districtMatch = update.district === districtFilter;
@@ -154,7 +164,13 @@ export default function ViewAllRoads() {
       categoryMatch = update.road_category === roadCategoryFilter;
     }
 
-    return districtMatch && stateMatch && areaMatch && categoryMatch;
+    if (materialTypeFilter && materialTypeFilter !== "All Materials") {
+      materialMatch = update.material_type === materialTypeFilter;
+    }
+
+    return (
+      districtMatch && stateMatch && areaMatch && categoryMatch && materialMatch
+    );
   });
 
   const districtOptions = [
@@ -227,7 +243,36 @@ export default function ViewAllRoads() {
                 <TableCell align="center">Length (km)</TableCell>
                 <TableCell align="center">Width (m)</TableCell>
                 <TableCell align="center">Road type</TableCell>
-                <TableCell align="center">Material type</TableCell>
+
+                <TableCell
+                  style={{ paddingRight: "0px", paddingLeft: "0px" }}
+                  align="center"
+                >
+                  Material Type
+                  <IconButton
+                    size="small"
+                    onClick={(e) => setMaterialTypeAnchorEl(e.currentTarget)}
+                  >
+                    <ArrowDropDownIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={materialTypeAnchorEl}
+                    open={Boolean(materialTypeAnchorEl)}
+                    onClose={() => setMaterialTypeAnchorEl(null)}
+                  >
+                    {materialTypeOptions.map((option) => (
+                      <MenuItem
+                        key={option.value}
+                        onClick={() => {
+                          setMaterialTypeFilter(option.value);
+                          setMaterialTypeAnchorEl(null);
+                        }}
+                      >
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </TableCell>
 
                 <TableCell
                   style={{ paddingRight: "0px", paddingLeft: "0px" }}
