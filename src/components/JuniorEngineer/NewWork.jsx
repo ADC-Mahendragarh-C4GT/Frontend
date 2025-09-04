@@ -33,6 +33,14 @@ const NewWork = () => {
   const [FinalLatitude, setFinalLatitude] = useState(null);
   const [FinalLongitude, setFinalLongitude] = useState(null);
   const [pdfDescription, setPdfDescription] = useState("");
+  const [wardFilter, setWardFilter] = useState("All");
+
+  const distinctWardNumbers = [...new Set(roads.map((r) => r.ward_number))];
+
+  const filteredRoads = roads.filter((road) => {
+    if (wardFilter === "All") return true;
+    return road.ward_number === wardFilter;
+  });
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -273,6 +281,21 @@ const NewWork = () => {
             }}
           >
             <select
+              name="ward_number"
+              value={wardFilter}
+              onChange={(e) => setWardFilter(e.target.value)}
+              style={styles.select}
+            >
+              <option value="All">All Wards</option>
+              {distinctWardNumbers.map((ward, idx) => (
+                <option key={idx} value={ward}>
+                  Ward {ward}
+                </option>
+              ))}
+            </select>
+
+            {/* ✅ Road Dropdown filtered by ward */}
+            <select
               name="road"
               value={formData.road}
               onChange={handleChange}
@@ -282,7 +305,7 @@ const NewWork = () => {
               <option value="" disabled>
                 Select Road
               </option>
-              {roads?.map((road) => (
+              {filteredRoads.map((road) => (
                 <option key={road.id} value={road.id}>
                   {road.unique_code} - {road.road_name}
                 </option>
