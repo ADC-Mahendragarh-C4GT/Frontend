@@ -34,6 +34,16 @@ export default function ViewAllRoads() {
   const [roadCategoryAnchorEl, setRoadCategoryAnchorEl] = useState(null);
   const [materialTypeFilter, setMaterialTypeFilter] = useState("");
   const [materialTypeAnchorEl, setMaterialTypeAnchorEl] = useState(null);
+  const [roadTypeFilter, setRoadTypeFilter] = useState("");
+  const [roadTypeAnchorEl, setRoadTypeAnchorEl] = useState(null);
+
+  const roadTypeOptions = [
+    { value: "All Road Types", label: "All Road Types" },
+    ...Array.from(new Set(roads.map((r) => r.road_type))).map((t) => ({
+      value: t,
+      label: t,
+    })),
+  ];
 
   const roadCategoryOptions = [
     { value: "All Categories", label: "All Categories" },
@@ -148,6 +158,7 @@ export default function ViewAllRoads() {
     let areaMatch = true;
     let categoryMatch = true;
     let materialMatch = true;
+    let roadTypeMatch = true;
 
     if (districtFilter && districtFilter !== "All State") {
       districtMatch = update.district === districtFilter;
@@ -168,8 +179,17 @@ export default function ViewAllRoads() {
       materialMatch = update.material_type === materialTypeFilter;
     }
 
+    if (roadTypeFilter && roadTypeFilter !== "All Road Types") {
+      roadTypeMatch = update.road_type === roadTypeFilter;
+    }
+
     return (
-      districtMatch && stateMatch && areaMatch && categoryMatch && materialMatch
+      districtMatch &&
+      stateMatch &&
+      areaMatch &&
+      categoryMatch &&
+      materialMatch &&
+      roadTypeMatch
     );
   });
 
@@ -242,7 +262,36 @@ export default function ViewAllRoads() {
                 <TableCell align="center">Location</TableCell>
                 <TableCell align="center">Length (km)</TableCell>
                 <TableCell align="center">Width (m)</TableCell>
-                <TableCell align="center">Road type</TableCell>
+
+                <TableCell
+                  style={{ paddingRight: "0px", paddingLeft: "0px" }}
+                  align="center"
+                >
+                  Road Type
+                  <IconButton
+                    size="small"
+                    onClick={(e) => setRoadTypeAnchorEl(e.currentTarget)}
+                  >
+                    <ArrowDropDownIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={roadTypeAnchorEl}
+                    open={Boolean(roadTypeAnchorEl)}
+                    onClose={() => setRoadTypeAnchorEl(null)}
+                  >
+                    {roadTypeOptions.map((option) => (
+                      <MenuItem
+                        key={option.value}
+                        onClick={() => {
+                          setRoadTypeFilter(option.value);
+                          setRoadTypeAnchorEl(null);
+                        }}
+                      >
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </TableCell>
 
                 <TableCell
                   style={{ paddingRight: "0px", paddingLeft: "0px" }}
