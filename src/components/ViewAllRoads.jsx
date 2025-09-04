@@ -31,16 +31,15 @@ export default function ViewAllRoads() {
   const [areaFilter, setAreaFilter] = useState("");
   const [areaAnchorEl, setAreaAnchorEl] = useState(null);
   const [roadCategoryFilter, setRoadCategoryFilter] = useState("");
-const [roadCategoryAnchorEl, setRoadCategoryAnchorEl] = useState(null);
+  const [roadCategoryAnchorEl, setRoadCategoryAnchorEl] = useState(null);
 
-
-const roadCategoryOptions = [
-  { value: "All Categories", label: "All Categories" },
-  ...Array.from(new Set(roads.map((r) => r.road_category))).map((c) => ({
-    value: c,
-    label: c,
-  })),
-];
+  const roadCategoryOptions = [
+    { value: "All Categories", label: "All Categories" },
+    ...Array.from(new Set(roads.map((r) => r.road_category))).map((c) => ({
+      value: c,
+      label: c,
+    })),
+  ];
 
   const areaOptions = [
     { value: "All Area", label: "All Area" },
@@ -137,8 +136,8 @@ const roadCategoryOptions = [
   const filteredFinalUpdates = filteredUpdates.filter((update) => {
     let districtMatch = true;
     let stateMatch = true;
-     let areaMatch = true;
-     
+    let areaMatch = true;
+    let categoryMatch = true;
 
     if (districtFilter && districtFilter !== "All State") {
       districtMatch = update.district === districtFilter;
@@ -151,7 +150,11 @@ const roadCategoryOptions = [
       areaMatch = update.area_name === areaFilter;
     }
 
-    return districtMatch && stateMatch && areaMatch;
+    if (roadCategoryFilter && roadCategoryFilter !== "All Categories") {
+      categoryMatch = update.road_category === roadCategoryFilter;
+    }
+
+    return districtMatch && stateMatch && areaMatch && categoryMatch;
   });
 
   const districtOptions = [
@@ -225,7 +228,36 @@ const roadCategoryOptions = [
                 <TableCell align="center">Width (m)</TableCell>
                 <TableCell align="center">Road type</TableCell>
                 <TableCell align="center">Material type</TableCell>
-                <TableCell align="center">Road category</TableCell>
+
+                <TableCell
+                  style={{ paddingRight: "0px", paddingLeft: "0px" }}
+                  align="center"
+                >
+                  Road Category
+                  <IconButton
+                    size="small"
+                    onClick={(e) => setRoadCategoryAnchorEl(e.currentTarget)}
+                  >
+                    <ArrowDropDownIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={roadCategoryAnchorEl}
+                    open={Boolean(roadCategoryAnchorEl)}
+                    onClose={() => setRoadCategoryAnchorEl(null)}
+                  >
+                    {roadCategoryOptions.map((option) => (
+                      <MenuItem
+                        key={option.value}
+                        onClick={() => {
+                          setRoadCategoryFilter(option.value);
+                          setRoadCategoryAnchorEl(null);
+                        }}
+                      >
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </TableCell>
 
                 <TableCell
                   style={{ paddingRight: "0px", paddingLeft: "0px" }}
