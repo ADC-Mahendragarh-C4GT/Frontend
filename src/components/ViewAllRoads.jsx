@@ -14,6 +14,8 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 export default function ViewAllRoads() {
   const [roads, setRoads] = useState([]);
@@ -47,11 +49,11 @@ export default function ViewAllRoads() {
 
   const lengthOptions = [
     { value: "All", label: "All" },
-    { value: "0-100", label: "0 - 100 km" },
-    { value: "100-500", label: "100 - 500 km" },
-    { value: "500-1000", label: "500 - 1000 km" },
-    { value: "1000-5000", label: "1000 - 5000 km" },
-    { value: "5000+", label: "Greater than 5000 km" },
+    { value: "0-100", label: "0 - 100 m" },
+    { value: "100-500", label: "100 - 500 m" },
+    { value: "500-1000", label: "500 - 1000 m" },
+    { value: "1000-5000", label: "1000 - 5000 m" },
+    { value: "5000+", label: "Greater than 5000 m" },
   ];
 
   const widthOptions = [
@@ -312,6 +314,44 @@ export default function ViewAllRoads() {
     setAnchorEl(null);
   };
 
+  const handleDownload = () => {
+    if (!filteredFinalUpdates || filteredFinalUpdates.length === 0) {
+      alert("No road data available to download");
+      return;
+    }
+
+    // Prepare data for Excel
+    const data = filteredFinalUpdates.map((road, idx) => ({
+      "S. No.": idx + 1,
+      "Road Number": road.unique_code,
+      "Road Name": road.road_name,
+      "Ward Number": road.ward_number,
+      Location: road.location,
+      "Length (m)": road.length_km,
+      "Width (m)": road.width_m,
+      "Road Type": road.road_type,
+      "Material Type": road.material_type,
+      "Road Category": road.road_category,
+      Area: road.area_name,
+      District: road.district,
+      State: road.state,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Road Data");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const dataBlob = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+
+    saveAs(dataBlob, "RoadData.xlsx");
+  };
+
   return (
     <div>
       <div style={{ textAlign: "center", margin: "20px 0" }}>
@@ -320,24 +360,51 @@ export default function ViewAllRoads() {
       <div
         style={{
           display: "flex",
-          gap: "1rem",
-          margin: "1rem 0",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "space-between",
+          margin: "1rem 0",
+          width: "100%",
         }}
       >
-        <TextField
-          type="text"
-          placeholder="Search by Road Name or Number"
-          value={roadQuery}
-          style={{
-            borderRadius: "20px",
-            width: "20%",
-            backgroundColor: "#cccc",
-            color: "#000",
-          }}
-          onChange={(e) => setRoadQuery(e.target.value)}
-        />
+        {/* Empty spacer to push search to center */}
+        <div style={{ width: "25%" }}></div>
+
+        {/* Centered Search Input */}
+        <div style={{ flex: "1", display: "flex", justifyContent: "center" }}>
+          <TextField
+            type="text"
+            placeholder="Search by Road Name or Number"
+            value={roadQuery}
+            style={{
+              borderRadius: "20px",
+              width: "60%",
+              backgroundColor: "#cccc",
+              color: "#000",
+            }}
+            onChange={(e) => setRoadQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Rightmost Download Button */}
+        <div
+          style={{ width: "25%", display: "flex", justifyContent: "flex-end" }}
+        >
+          <button
+            onClick={handleDownload}
+            style={{
+              backgroundColor: "green",
+              color: "white",
+              padding: "0.8rem 1.5rem",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              marginRight: "25px",
+            }}
+          >
+            Download Road Data
+          </button>
+        </div>
       </div>
 
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
@@ -413,7 +480,7 @@ export default function ViewAllRoads() {
                   style={{ paddingRight: "0px", paddingLeft: "0px" }}
                   align="center"
                 >
-                  {lengthFilter ? `Length (m): ${lengthFilter}` : "Length (Km)"}
+                  {lengthFilter ? `Length (m): ${lengthFilter}` : "Length (m)"}
                   <IconButton
                     size="small"
                     onClick={(e) => setLengthAnchorEl(e.currentTarget)}
