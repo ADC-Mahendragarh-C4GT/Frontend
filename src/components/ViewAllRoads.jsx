@@ -347,6 +347,14 @@ export default function ViewAllRoads() {
     saveAs(dataBlob, "RoadData.xlsx");
   };
 
+  const paginatedUpdates =
+    rowsPerPage > 0
+      ? filteredFinalUpdates.slice(
+          page * rowsPerPage,
+          page * rowsPerPage + rowsPerPage
+        )
+      : filteredFinalUpdates;
+
   return (
     <div>
       <div style={{ textAlign: "center", margin: "20px 0" }}>
@@ -714,8 +722,8 @@ export default function ViewAllRoads() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredFinalUpdates?.length > 0 ? (
-                filteredFinalUpdates.map((update, index) => (
+              {paginatedUpdates?.length > 0 ? (
+                paginatedUpdates.map((update, index) => (
                   <TableRow
                     hover
                     role="checkbox"
@@ -771,7 +779,7 @@ export default function ViewAllRoads() {
         <TablePagination
           rowsPerPageOptions={[10, 25, 100, { label: "All", value: -1 }]}
           component="div"
-          count={totalCount}
+          count={filteredFinalUpdates.length} 
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
