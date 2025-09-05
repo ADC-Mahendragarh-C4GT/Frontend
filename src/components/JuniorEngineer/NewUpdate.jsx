@@ -21,11 +21,20 @@ export default function NewUpdate() {
   const [loading, setLoading] = useState(false);
   const [pdfDescription, setPdfDescription] = useState("");
 
-
   const navigate = useNavigate();
 
   const [FinalLatitude, setFinalLatitude] = useState(null);
   const [FinalLongitude, setFinalLongitude] = useState(null);
+
+  // filters
+  const [wardFilter, setWardFilter] = useState("All");
+  const [materialFilter, setMaterialFilter] = useState("All");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+
+  // distinct values for dropdowns
+  const distinctWardNumbers = [...new Set(roads.map((r) => r.ward_number))];
+  const distinctMaterials = [...new Set(roads.map((r) => r.material_type))];
+  const distinctCategories = [...new Set(roads.map((r) => r.road_category))];
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -82,6 +91,15 @@ export default function NewUpdate() {
     }
   }, [selectedRoad, InfraWorks, roads]);
 
+  // compute filtered roads for dropdown
+  const filteredRoads = roads.filter((road) => {
+    return (
+      (wardFilter === "All" || road.ward_number === wardFilter) &&
+      (materialFilter === "All" || road.material_type === materialFilter) &&
+      (categoryFilter === "All" || road.road_category === categoryFilter)
+    );
+  });
+
   const handleRoadChange = (e) => {
     const roadId = e.target.value;
     setSelectedRoad(roadId);
@@ -94,7 +112,7 @@ export default function NewUpdate() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImageBase64(reader.result); // stores Base64 string
+        setImageBase64(reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -167,17 +185,63 @@ export default function NewUpdate() {
               justifyContent: "center",
             }}
           >
-            {/* Road Dropdown */}
+            {/* Ward filter */}
+            <select
+              name="ward_number"
+              value={wardFilter}
+              onChange={(e) => setWardFilter(e.target.value)}
+              style={styles.select}
+            >
+              <option value="All">All Wards</option>
+              {distinctWardNumbers.map((ward, idx) => (
+                <option key={idx} value={ward}>
+                  Ward {ward}
+                </option>
+              ))}
+            </select>
+
+            {/* Material filter */}
+            <select
+              name="material_type"
+              value={materialFilter}
+              onChange={(e) => setMaterialFilter(e.target.value)}
+              style={styles.select}
+            >
+              <option value="All">All Materials</option>
+              {distinctMaterials.map((mat, idx) => (
+                <option key={idx} value={mat}>
+                  {mat} Material
+                </option>
+              ))}
+            </select>
+
+            {/* Road category filter */}
+            <select
+              name="road_category"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              style={styles.select}
+            >
+              <option value="All">All Categories of Roads</option>
+              {distinctCategories.map((cat, idx) => (
+                <option key={idx} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+
+            {/* Single merged road dropdown */}
             <select
               name="road"
               value={selectedRoad}
               onChange={handleRoadChange}
               style={styles.select}
+              required
             >
               <option value="" disabled>
                 Select Road
               </option>
-              {roads.map((road) => (
+              {filteredRoads.map((road) => (
                 <option key={road.id} value={road.id}>
                   {road.unique_code} - {road.road_name}
                 </option>
@@ -274,6 +338,7 @@ export default function NewUpdate() {
               required
             />
           </div>
+
           {/* PDF Upload */}
           <div
             style={{

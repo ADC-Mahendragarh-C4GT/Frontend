@@ -35,20 +35,22 @@ const NewWork = () => {
   const [pdfDescription, setPdfDescription] = useState("");
   const [wardFilter, setWardFilter] = useState("All");
 
-
   const [materialFilter, setMaterialFilter] = useState("All");
+  const [categoryFilter, setCategoryFilter] = useState("All");
 
   const distinctWardNumbers = [...new Set(roads.map((r) => r.ward_number))];
   const distinctMaterials = [...new Set(roads.map((r) => r.material_type))];
+  const distinctCategories = [...new Set(roads.map((r) => r.road_category))];
 
   const filteredRoads = roads.filter((road) => {
     const wardMatch = wardFilter === "All" || road.ward_number === wardFilter;
     const materialMatch =
       materialFilter === "All" || road.material_type === materialFilter;
+    const categoryMatch =
+      categoryFilter === "All" || road.road_category === categoryFilter;
 
-    return wardMatch && materialMatch;
+    return wardMatch && materialMatch && categoryMatch;
   });
-
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -312,6 +314,20 @@ const NewWork = () => {
               {distinctMaterials.map((mat, idx) => (
                 <option key={idx} value={mat}>
                   {mat} Material
+                </option>
+              ))}
+            </select>
+
+            <select
+              name="road_category"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              style={styles.select}
+            >
+              <option value="All">All Categories of Roads</option>
+              {distinctCategories.map((cat, idx) => (
+                <option key={idx} value={cat}>
+                  {cat}
                 </option>
               ))}
             </select>

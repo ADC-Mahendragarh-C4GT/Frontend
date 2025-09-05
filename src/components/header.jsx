@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 export default function Header() {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 500);
 
   useEffect(() => {
     const handleResize = () => {
@@ -58,7 +58,7 @@ export default function Header() {
             marginBottom: "0",
           }}
         >
-          {isMobile ? "MC Rohtak" : "Municipal Corporation Rohtak"}
+          {isMobile ? "" : "Municipal Corporation Rohtak"}
         </h1>
       </div>
       <img
