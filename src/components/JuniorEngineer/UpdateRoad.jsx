@@ -1,39 +1,88 @@
 import React, { useEffect, useState } from "react";
-import { getRoads, updateRoad,getLoginUser, deleteRoad } from "../../api/api"; // make sure updateRoad is implemented in your api
+import { getRoads, updateRoad, getLoginUser, deleteRoad } from "../../api/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 
 export default function UpdateRoad() {
   const [roads, setRoads] = useState([]);
+  const [filteredRoads, setFilteredRoads] = useState([]);
   const [selectedRoadId, setSelectedRoadId] = useState("");
   const [formData, setFormData] = useState({});
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Filters
+  const [wardNumberFilter, setWardNumberFilter] = useState("");
+  const [materialTypeFilter, setMaterialTypeFilter] = useState("");
+  const [roadCategoryFilter, setRoadCategoryFilter] = useState("");
+
   const location = useLocation();
   const passedId = location.state?.id || "";
-
   const navigate = useNavigate();
 
   useEffect(() => {
-  const fetchRoads = async () => {
-    try {
-      const res = await getRoads();
-      setRoads(res);
+    const fetchRoads = async () => {
+      try {
+        const res = await getRoads();
+        setRoads(res);
+        setFilteredRoads(res); // default all roads
 
-      if (passedId) {
-        const road = res.find((r) => String(r.id) === String(passedId));
-        if (road) {
-          setSelectedRoadId(passedId);
-          setFormData({ ...road });
+        if (passedId) {
+          const road = res.find((r) => String(r.id) === String(passedId));
+          if (road) {
+            setSelectedRoadId(passedId);
+            setFormData({ ...road });
+          }
         }
+      } catch (err) {
+        console.error("Failed to fetch roads", err);
       }
-    } catch (err) {
-      console.error("Failed to fetch roads", err);
-    }
-  };
+    };
 
-  fetchRoads();
-}, []);
+    fetchRoads();
+  }, []);
+
+  const distinctWardNumbers = Array.from(
+    new Set(roads.map((r) => r.ward_number).filter(Boolean))
+  ).sort((a, b) => a - b);
+
+  const distinctMaterialTypes = Array.from(
+    new Set(roads.map((r) => r.material_type).filter(Boolean))
+  ).sort();
+
+  const distinctRoadCategories = Array.from(
+    new Set(roads.map((r) => r.road_category).filter(Boolean))
+  ).sort();
+
+  // Filtering logic
+  useEffect(() => {
+    let filtered = roads;
+
+    if (wardNumberFilter && wardNumberFilter !== "All") {
+      filtered = filtered.filter(
+        (r) => String(r.ward_number) === String(wardNumberFilter)
+      );
+    }
+
+    if (materialTypeFilter && materialTypeFilter !== "All") {
+      filtered = filtered.filter(
+        (r) =>
+          r.material_type &&
+          r.material_type.toLowerCase() === materialTypeFilter.toLowerCase()
+      );
+    }
+
+    if (roadCategoryFilter && roadCategoryFilter !== "All") {
+      filtered = filtered.filter(
+        (r) =>
+          r.road_category &&
+          r.road_category.toLowerCase() === roadCategoryFilter.toLowerCase()
+      );
+    }
+
+    setFilteredRoads(filtered);
+  }, [wardNumberFilter, materialTypeFilter, roadCategoryFilter, roads]);
+
   const handleSelectRoad = (e) => {
     const roadId = e.target.value;
     setSelectedRoadId(roadId);
@@ -57,15 +106,13 @@ export default function UpdateRoad() {
 
     try {
       const loginUserId = localStorage.getItem("id");
-      
-            const loginUser = await getLoginUser(loginUserId);
-            console.log("---------loginUser------", loginUser);
-      
-            const payload = {
-              ...formData,
-              login_user: loginUser,
-              id:selectedRoadId,
-            };
+      const loginUser = await getLoginUser(loginUserId);
+
+      const payload = {
+        ...formData,
+        login_user: loginUser,
+        id: selectedRoadId,
+      };
 
       const res = await updateRoad(selectedRoadId, payload);
       setMessage(`${res.data.road_name} updated successfully!`);
@@ -79,160 +126,152 @@ export default function UpdateRoad() {
   };
 
   const handleDelete = async (id) => {
-      const road = roads.find((r) => r.id === Number(id));
-  
-      const confirmDelete = window.confirm(
-        `Are you sure you want to delete the road ?\n\nThis action cannot be undone!`
-      );
-  
-      if (!confirmDelete) {
-        return;
-      }
-  
-      setLoading(true);
-  
-      try {
-        const loginUserId = localStorage.getItem("id");
-  
-        const loginUser = await getLoginUser(loginUserId);
-        console.log("---------loginUser------", loginUser);
-  
-        const payload = {
-          login_user: loginUser,
-          id: id,
-        };
-  
-        await deleteRoad(id, payload);
-        setRoads((prevRoads) => prevRoads.filter((r) => r.id !== id));
-        setTimeout(() => navigate("/home/"), 1000);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-  
+    const road = roads.find((r) => r.id === Number(id));
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the road?\n\nThis action cannot be undone!`
+    );
+
+    if (!confirmDelete) return;
+
+    setLoading(true);
+
+    try {
+      const loginUserId = localStorage.getItem("id");
+      const loginUser = await getLoginUser(loginUserId);
+
+      const payload = {
+        login_user: loginUser,
+        id: id,
+      };
+
+      await deleteRoad(id, payload);
+      setRoads((prevRoads) => prevRoads.filter((r) => r.id !== id));
+      setTimeout(() => navigate("/home/"), 1000);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <div
-          style={{
-            position: "relative",
-            textAlign: "center",
-            marginBottom: "1.5rem",
-          }}
-        >
-          <h2
-            style={{
-              margin: 0,
-              color: "#333",
-            }}
-          >
-            Update Road Details
-          </h2>
+        <h2 style={styles.heading}>Update Road Details</h2>
 
-          {selectedRoadId && (
-            <button
-              style={{
-                position: "absolute",
-                right: 0,
-                top: "50%",
-                transform: "translateY(-50%)",
-                backgroundColor: "red",
-                color: "white",
-                border: "none",
-                padding: "0.5rem 1rem",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
-              onClick={() => handleDelete(selectedRoadId)}
-            >
-              Delete
-            </button>
-          )}
+        {/* Filtering inputs */}
+        <div style={{ display: "flex", gap: "10px", margin: "20px" }}>
+          <select
+            name="ward_number"
+            value={wardNumberFilter}
+            onChange={(e) => setWardNumberFilter(e.target.value)}
+            style={styles.select}
+          >
+            <option value="All">All Wards (Optional)</option>
+            {distinctWardNumbers.map((ward, idx) => (
+              <option key={idx} value={ward}>
+                Ward {ward}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={materialTypeFilter}
+            onChange={(e) => setMaterialTypeFilter(e.target.value)}
+            style={styles.select}
+          >
+            <option value="All">All Material Types (Optional)</option>
+            {distinctMaterialTypes.map((mat, idx) => (
+              <option key={idx} value={mat}>
+                {mat}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={roadCategoryFilter}
+            onChange={(e) => setRoadCategoryFilter(e.target.value)}
+            style={styles.select}
+          >
+            <option value="All">All Road Categories (Optional)</option>
+            {distinctRoadCategories.map((cat, idx) => (
+              <option key={idx} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "10px",
-              justifyContent: "center",
-            }}
+          <select
+            required
+            name="road"
+            value={selectedRoadId}
+            onChange={handleSelectRoad}
+            style={{ ...styles.select, marginBottom: "20px", width: "100%" }}
           >
-            <select
-              required
-              name="road"
-              value={selectedRoadId}
-              onChange={handleSelectRoad}
-              style={styles.select}
-            >
-              <option value="" disabled>
-                Select Road
+            <option value="" disabled>
+              Select Road
+            </option>
+            {filteredRoads.map((road) => (
+              <option key={road.id} value={road.id}>
+                {road.unique_code} - {road.road_name}
               </option>
-              {roads.map((road) => (
-                <option key={road.id} value={road.id}>
-                  {road.unique_code} - {road.road_name}
-                </option>
-              ))}
-            </select>
+            ))}
+          </select>
 
-            {selectedRoadId &&
-              Object.keys(formData).map((key) => {
-                if (key === "id" || key === "unique_code") {
-                  return null; // unique_code is fixed & id hidden
-                }
+          {/* Form fields */}
+          {selectedRoadId &&
+            Object.keys(formData).map((key) => {
+              if (key === "id" || key === "unique_code") return null;
 
-                if (
-                  key === "road_type" ||
-                  key === "material_type" ||
-                  key === "road_category"
-                ) {
-                  let options = [];
+              if (
+                key === "road_type" ||
+                key === "material_type" ||
+                key === "road_category"
+              ) {
+                let options = [];
 
-                  if (key === "road_type") options = ["IV", "VI", "Others"];
-                  if (key === "material_type")
-                    options = ["CC", "IPB", "Bitumin", "Other"];
-                  if (key === "road_category")
-                    options = ["Road", "ColonyStreet"];
-
-                  return (
-                    <select
-                      required
-                      key={key}
-                      name={key}
-                      value={formData[key] || ""}
-                      onChange={handleChange}
-                      style={{...styles.select}}
-                    >
-                      <option value="" disabled>
-                        {key.replace("_", " ").toUpperCase()}
-                      </option>
-                      {options.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
-                  );
-                }
+                if (key === "road_type") options = ["IV", "VI", "Others"];
+                if (key === "material_type")
+                  options = ["CC", "IPB", "Bitumin", "Other"];
+                if (key === "road_category") options = ["Road", "ColonyStreet"];
 
                 return (
-                  <TextField
+                  <select
+                    required
                     key={key}
-                    type="text"
                     name={key}
-                    label={key.replace("_", " ").toUpperCase()}
-                    placeholder={key.replace("_", " ").toUpperCase()}
                     value={formData[key] || ""}
                     onChange={handleChange}
-                    style={styles.input}
-                  />
+                    style={styles.select}
+                  >
+                    <option value="" disabled>
+                      {key.replace("_", " ").toUpperCase()}
+                    </option>
+                    {options.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
                 );
-              })}
-          </div>
+              }
+
+              return (
+                <TextField
+                  key={key}
+                  type="text"
+                  name={key}
+                  label={key.replace("_", " ").toUpperCase()}
+                  placeholder={key.replace("_", " ").toUpperCase()}
+                  value={formData[key] || ""}
+                  onChange={handleChange}
+                  style={styles.input}
+                />
+              );
+            })}
 
           <br />
           <div style={{ display: "flex", justifyContent: "center" }}>

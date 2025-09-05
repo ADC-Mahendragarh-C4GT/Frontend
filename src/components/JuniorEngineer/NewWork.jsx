@@ -296,7 +296,7 @@ const NewWork = () => {
               onChange={(e) => setWardFilter(e.target.value)}
               style={styles.select}
             >
-              <option value="All">All Wards</option>
+              <option value="All">All Wards (Optional)</option>
               {distinctWardNumbers.map((ward, idx) => (
                 <option key={idx} value={ward}>
                   Ward {ward}
@@ -310,7 +310,7 @@ const NewWork = () => {
               onChange={(e) => setMaterialFilter(e.target.value)}
               style={styles.select}
             >
-              <option value="All">All Materials</option>
+              <option value="All">All Materials (Optional)</option>
               {distinctMaterials.map((mat, idx) => (
                 <option key={idx} value={mat}>
                   {mat} Material
@@ -324,7 +324,7 @@ const NewWork = () => {
               onChange={(e) => setCategoryFilter(e.target.value)}
               style={styles.select}
             >
-              <option value="All">All Categories of Roads</option>
+              <option value="All">All Categories of Roads (Optional)</option>
               {distinctCategories.map((cat, idx) => (
                 <option key={idx} value={cat}>
                   {cat}

@@ -646,7 +646,9 @@ export default function ViewAllRoads() {
                 {userType === "JE" && (
                   <TableCell align="center">Update Details</TableCell>
                 )}
-                <TableCell align="center">Delete</TableCell>
+                {userType === "JE" && (
+                  <TableCell align="center">Delete</TableCell>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
