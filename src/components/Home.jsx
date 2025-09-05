@@ -143,10 +143,10 @@ export default function Home() {
 
   const loadUpdates = async (pageNumber = 1, pageSize = 10) => {
     const finalSize = pageSize === -1 ? totalCount || 100000 : pageSize;
-    
+
     try {
       const response = await getUpdates(pageNumber, finalSize);
-      
+
       const roadObj = await getAllRoads();
 
       const contractorResponse = await getContractors();
@@ -170,7 +170,7 @@ export default function Home() {
         if (a.status !== "Pending" && b.status === "Pending") return 1;
         return 0;
       });
-      
+
       setUpdates(sortedData);
       setTotalCount(response.data.length);
     } catch (error) {
@@ -179,7 +179,6 @@ export default function Home() {
   };
 
   useEffect(() => {
-    
     loadUpdates(page + 1, rowsPerPage);
   }, [page, rowsPerPage]);
 
@@ -228,7 +227,7 @@ export default function Home() {
 
   const handleRowClick = (work) => {
     localStorage.setItem("currentWork", JSON.stringify(work)); // fallback
-    
+
     navigate(`/road/${work.road.unique_code}`, { state: { work } });
   };
 
@@ -341,6 +340,15 @@ export default function Home() {
 
     return true;
   });
+
+  const paginatedUpdates =
+    rowsPerPage > 0
+      ? finalFilteredUpdates.slice(
+          page * rowsPerPage,
+          page * rowsPerPage + rowsPerPage
+        )
+      : finalFilteredUpdates;
+
 
   return (
     <>
@@ -671,12 +679,11 @@ export default function Home() {
                   </Menu>
                 </TableCell>
               </TableRow>
-              
             </TableHead>
-            
+
             <TableBody>
-              {finalFilteredUpdates?.length > 0 ? (
-                finalFilteredUpdates.map((update, index) => (
+              {paginatedUpdates?.length > 0 ? (
+                paginatedUpdates.map((update, index) => (
                   <TableRow
                     hover
                     role="checkbox"
@@ -721,38 +728,34 @@ export default function Home() {
         <TablePagination
           rowsPerPageOptions={[10, 25, 100, { label: "All", value: -1 }]}
           component="div"
-          count={totalCount}
+          count={finalFilteredUpdates.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
-      <Dialog
-                  open={yearDialogOpen}
-                  onClose={() => setYearDialogOpen(false)}
-                >
-                  <DialogTitle>Select Year</DialogTitle>
-                  <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <DatePicker
-                      views={["year"]}
-                      value={selectedYear}
-                      onChange={(newValue) => {
-                        setSelectedYear(newValue);
-                        setStartDateFilter("Select a specific year");
-                        setYearDialogOpen(false);
-                      }}
-                      slotProps={{
-                        textField: { variant: "outlined", fullWidth: true },
-                      }}
-                    />
-                  </LocalizationProvider>
-                </Dialog>
+      <Dialog open={yearDialogOpen} onClose={() => setYearDialogOpen(false)}>
+        <DialogTitle>Select Year</DialogTitle>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <DatePicker
+            views={["year"]}
+            value={selectedYear}
+            onChange={(newValue) => {
+              setSelectedYear(newValue);
+              setStartDateFilter("Select a specific year");
+              setYearDialogOpen(false);
+            }}
+            slotProps={{
+              textField: { variant: "outlined", fullWidth: true },
+            }}
+          />
+        </LocalizationProvider>
+      </Dialog>
 
-                {finalFilteredUpdates.map((u) => (
-                  <div key={u.id}>{u.name}</div>
-                ))}
-
+      {finalFilteredUpdates.map((u) => (
+        <div key={u.id}>{u.name}</div>
+      ))}
     </>
   );
 }
