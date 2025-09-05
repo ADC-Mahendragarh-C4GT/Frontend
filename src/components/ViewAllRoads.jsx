@@ -65,12 +65,14 @@ export default function ViewAllRoads() {
   ];
 
   const wardOptions = [
-    { value: "All Wards", label: "All Wards" },
-    ...Array.from(new Set(roads.map((r) => r.ward_number))).map((w) => ({
+  { value: "All Wards", label: "All Wards" },
+  ...Array.from(new Set(roads.map((r) => r.ward_number)))
+    .sort((a, b) => a - b) 
+    .map((w) => ({
       value: w,
       label: w,
     })),
-  ];
+];
 
   const locationOptions = [
     { value: "All Locations", label: "All Locations" },
@@ -81,12 +83,15 @@ export default function ViewAllRoads() {
   ];
 
   const roadTypeOptions = [
-    { value: "All Road Types", label: "All Road Types" },
-    ...Array.from(new Set(roads.map((r) => r.road_type))).map((t) => ({
+  { value: "All Road Types", label: "All Road Types" },
+  ...Array.from(new Set(roads.map((r) => r.road_type)))
+    .sort((a, b) => a.length - b.length || a.localeCompare(b))
+    .map((t) => ({
       value: t,
       label: t,
     })),
-  ];
+];
+
 
   const roadCategoryOptions = [
     { value: "All Categories", label: "All Categories" },

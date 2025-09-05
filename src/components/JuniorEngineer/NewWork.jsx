@@ -123,7 +123,6 @@ const NewWork = () => {
       contractor: selectedContractor,
       latitude: FinalLatitude,
       longitude: FinalLongitude,
-      pdfDescription: pdfDescription,
     };
 
     try {
@@ -173,6 +172,11 @@ const NewWork = () => {
   const handlePdfChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    if (file.type !== "application/pdf") {
+    alert("Please upload only PDF files.");
+    return;
+  }
 
     const reader = new FileReader();
     reader.onloadend = () => {
