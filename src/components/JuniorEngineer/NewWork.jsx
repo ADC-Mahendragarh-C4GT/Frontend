@@ -35,12 +35,20 @@ const NewWork = () => {
   const [pdfDescription, setPdfDescription] = useState("");
   const [wardFilter, setWardFilter] = useState("All");
 
+
+  const [materialFilter, setMaterialFilter] = useState("All");
+
   const distinctWardNumbers = [...new Set(roads.map((r) => r.ward_number))];
+  const distinctMaterials = [...new Set(roads.map((r) => r.material_type))];
 
   const filteredRoads = roads.filter((road) => {
-    if (wardFilter === "All") return true;
-    return road.ward_number === wardFilter;
+    const wardMatch = wardFilter === "All" || road.ward_number === wardFilter;
+    const materialMatch =
+      materialFilter === "All" || road.material_type === materialFilter;
+
+    return wardMatch && materialMatch;
   });
+
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -294,7 +302,20 @@ const NewWork = () => {
               ))}
             </select>
 
-            {/* ✅ Road Dropdown filtered by ward */}
+            <select
+              name="material_type"
+              value={materialFilter}
+              onChange={(e) => setMaterialFilter(e.target.value)}
+              style={styles.select}
+            >
+              <option value="All">All Materials</option>
+              {distinctMaterials.map((mat, idx) => (
+                <option key={idx} value={mat}>
+                  {mat} Material
+                </option>
+              ))}
+            </select>
+
             <select
               name="road"
               value={formData.road}
