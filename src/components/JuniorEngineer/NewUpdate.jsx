@@ -150,8 +150,6 @@ export default function NewUpdate() {
         pdfDescription: pdfDescription,
       };
 
-      console.log("Payload: ", payload);
-
       await createUpdate(payload);
 
       setMessage("Update created successfully!");

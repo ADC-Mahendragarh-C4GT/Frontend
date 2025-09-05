@@ -126,7 +126,6 @@ export default function ViewAllRoads() {
   const navigate = useNavigate();
 
   const userType = localStorage.getItem("user_type");
-  console.log("userTpye --------------", userType);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -138,7 +137,6 @@ export default function ViewAllRoads() {
   };
 
   const handleEdit = (id) => {
-    console.log("Edit road with ID:", id);
     navigate("/UpdateRoad", { state: { id } });
   };
 
@@ -159,7 +157,6 @@ export default function ViewAllRoads() {
       const loginUserId = localStorage.getItem("id");
 
       const loginUser = await getLoginUser(loginUserId);
-      console.log("---------loginUser------", loginUser);
 
       const payload = {
         login_user: loginUser,
@@ -179,9 +176,7 @@ export default function ViewAllRoads() {
     const fetchRoads = async () => {
       try {
         const response = await getRoads();
-        console.log("------- Roads Fetched -------", response);
         setRoads(response);
-        console.log("First road :------------------", response[0]);
       } catch (err) {
         setError("Failed to fetch roads");
       } finally {

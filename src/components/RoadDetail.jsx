@@ -43,12 +43,9 @@ export default function RoadDetail() {
     defect_liability_period,
   } = work;
 
-  console.log("work details:", work);
-
   const AllUpdates = async (id) => {
     try {
       const response = await getUpdatesByWork(id);
-      console.log("Updates for work:", response.data);
       setAllUpdates(response.data);
     } catch (error) {
       console.error("Error fetching updates:", error);
@@ -58,7 +55,6 @@ export default function RoadDetail() {
   const AllComments = async (id) => {
     try {
       const response = await getCommentsByWork(id);
-      console.log("Comments for work:", response.data);
       setAllComments(response.data);
     } catch (error) {
       console.error("Error fetching comments:", error);
@@ -76,7 +72,6 @@ export default function RoadDetail() {
       AllComments(work.id);
     }
   }, [work]);
-  console.log("allUpdates:", allUpdates);
   const progressPercent = allUpdates[0]?.progress_percent ?? 0;
 
   let bgColor = "#f8e5b0";
@@ -104,7 +99,6 @@ export default function RoadDetail() {
       const loginUserId = localStorage.getItem("id");
 
       const loginUser = await getLoginUser(loginUserId);
-      console.log("---------loginUser------", loginUser);
       setCurrentUser(loginUser);
 
       const payload = {
@@ -117,7 +111,6 @@ export default function RoadDetail() {
 
       await addComment(payload);
 
-      console.log("Comment added");
       setCommentText("");
 
       // Refresh comments
@@ -145,13 +138,11 @@ export default function RoadDetail() {
     const loginUserId = localStorage.getItem("id");
 
     const loginUser = await getLoginUser(loginUserId);
-    console.log("---------loginUser------", loginUser);
     setCurrentUser(loginUser);
 
     // Call delete API
     await deleteComment(commentId, { login_user: loginUser });
 
-    console.log("Comment deleted");
 
     // Refresh comments after delete
     AllComments(work.id);
@@ -174,7 +165,6 @@ useEffect(() => {
   const fetchAllUsers = async () => {
     try {
       const response = await getUsers();
-      console.log("All users:", response.data);
       setAllUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);

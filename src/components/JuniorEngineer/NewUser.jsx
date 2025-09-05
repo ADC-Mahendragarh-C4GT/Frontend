@@ -46,7 +46,6 @@ export default function NewUser() {
       const loginUserId = localStorage.getItem("id");
 
       const loginUser = await getLoginUser(loginUserId);
-      console.log("---------loginUser------", loginUser);
 
       const payload = {
         ...formData,

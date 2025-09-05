@@ -33,7 +33,6 @@ export default function UpdateUser() {
       try {
         const res = await fetchUserType();
         setUserTypes(res.data);
-        console.log("----------User Types--------", res.data);
       } catch (err) {
         console.error("Failed to fetch user types", err);
       }
@@ -72,7 +71,6 @@ export default function UpdateUser() {
       const loginUserId = localStorage.getItem("id");
 
       const loginUser = await getLoginUser(loginUserId);
-      console.log("---------loginUser------", loginUser);
 
       const payload = {
         ...formData,
@@ -114,7 +112,6 @@ export default function UpdateUser() {
       const loginUserId = localStorage.getItem("id");
 
       const loginUser = await getLoginUser(loginUserId);
-      console.log("---------loginUser------", loginUser);
 
       const payload = {
         login_user: loginUser,

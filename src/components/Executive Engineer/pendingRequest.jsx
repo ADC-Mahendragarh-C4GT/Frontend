@@ -53,31 +53,6 @@ export default function PendingRequest() {
     fetchData();
   }, []);
 
-  // useEffect(() => {
-  //   console.log("Fetching other department requests...");
-  //   getOtherRequests()
-  //     .then((res) => {
-  //       console.log("Fetched requests:", res);
-
-  //       const sorted = [...res].sort((a, b) => {
-  //         // Step 1: Pending first
-  //         if (a.status === "Pending" && b.status !== "Pending") return -1;
-  //         if (a.status !== "Pending" && b.status === "Pending") return 1;
-
-  //         // Step 2: Newest submitted_at first
-  //         const dateA = new Date(a.submitted_at);
-  //         const dateB = new Date(b.submitted_at);
-
-  //         return dateB - dateA; // newest first
-  //       });
-
-  //       setOtherRequests(sorted);
-  //     })
-  //     .catch((err) => {
-  //       console.error("Failed to fetch requests", err);
-  //     });
-  // }, []);
-
   const handleActionChange = (id, value) => {
     setSelectedActions((prev) => ({ ...prev, [id]: value }));
   };
@@ -98,11 +73,9 @@ export default function PendingRequest() {
     const loginUserId = localStorage.getItem("id");
     
     const login_user = await getLoginUser(loginUserId);
-    console.log("---------loginUser------", login_user);
 
     updateRequestStatus(id, { status, response_by, response_date, login_user })
       .then(() => {
-        console.log("-------Status-----------------", status);
         fetchData(); // refresh both tables from backend
       })
       .catch((err) => {
@@ -110,7 +83,6 @@ export default function PendingRequest() {
       });
   };
 
-  console.log("-----------", otherRequests);
 
   return (
     <>

@@ -24,10 +24,6 @@ const NewRoad = () => {
       return;
     }
 
-    console.log(
-      `[${new Date().toLocaleTimeString()}] Uploading file: ${file.name}`
-    );
-
     try {
       const loginUserId = localStorage.getItem("id");
 
@@ -38,11 +34,6 @@ const NewRoad = () => {
       setMessage2("");
 
       const response = await uploadExcel(file, payload);
-
-      console.log(
-        `[${new Date().toLocaleTimeString()}] Upload successful:`,
-        response.data
-      );
 
       setMessage2(` ${response.data.message}`);
       setTimeout(() => navigate("/home/"), 1000);

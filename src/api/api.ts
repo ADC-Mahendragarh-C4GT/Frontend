@@ -175,7 +175,6 @@ export const login = (email: string, password: string, userType: string) => {
 };
 
 export const register = (data: RegisterData) => {
-  console.log("--------data--------", data);
   return api.post<{ message: string }>("/accounts/register/", data, {
     requiresAuth: true,
   });
@@ -189,7 +188,6 @@ export const getProfile = () => {
   const res = api.get<Profile>("/accounts/profile/", {
     requiresAuth: true,
   });
-  console.log("-----res--------", res);
   return res;
 };
 
@@ -197,12 +195,10 @@ export const getUsers = () => {
   const res = api.get("/accounts/Users/", {
     requiresAuth: true,
   });
-  console.log("-----res--------", res);
   return res;
 };
 export const getRoads = async () => {
   const response = await api.get("/api/roads/");
-  console.log("-------response--------", response.data);
   response.data = response.data.filter((road: { isActive: boolean }) => road.isActive);
   response.data = Array.isArray(response.data)
     ? response.data.sort((a, b) => (a.road_name || '').localeCompare(b.road_name || ''))
@@ -211,7 +207,6 @@ export const getRoads = async () => {
 };
 export const getAllRoads = async () => {
   const response = await api.get("/api/roads/");
-  console.log("-------response--------", response.data);
   return response.data;
 };
 export const getContractors = () =>
@@ -238,7 +233,6 @@ export const getUpdates = (page: number = 1, pageSize: number = 10) => {
     },
     requiresAuth: true,
   });
-  console.log("-------res--------", res);
   return res;
 };
 
@@ -246,7 +240,6 @@ export const getUpdatesByWork = (workId: number) => {
   const response = api.get(`/api/infra-works/${workId}/updates/`, {
     requiresAuth: true,
   });
-  console.log("Fetching updates for work ID:", workId, response);
   return response;
 };
 
@@ -312,7 +305,6 @@ export const getOtherRequests = async () => {
   const pending = response.data.filter(
     (req: { status: string }) => req.status != "Pending"
   );
-  console.log("Pending -------------", pending);
   return pending;
 };
 
@@ -334,8 +326,6 @@ export const uploadExcel = (file: File, data: Partial<User>) => {
     }
   });
 
-  console.log("--------------formdata----------", formData);
-  console.log("--------------data----------", data);
 
   return api.post("/upload-csv/", formData, {
     headers: {
@@ -362,7 +352,6 @@ export const createUpdate = async (payload: any) => {
 };
 
 export const updateUser = (id: number, data: Partial<User>) => {
-  console.log("--------data--------", data);
   return api.patch(`/accounts/updateUser/${id}/`, data);
 };
 
@@ -403,7 +392,6 @@ export const getLoginUser = async (id: number) => {
 };
 
 export const deleteUser = (id: number, data: Partial<User>) => {
-  console.log("data---------------------", data);
   return api.delete(`/accounts/deleteUser/${id}/`, {
     data,
     requiresAuth: true,
@@ -432,6 +420,5 @@ export const fetchAuditReport = async (startDate : string, endDate: string) => {
     requiresAuth: true,
   });
 
-  console.log("object----------------------------------------------------------------", response.data)
   return response.data;
 };

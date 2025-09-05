@@ -77,8 +77,6 @@ const NewWork = () => {
           (contractor) => contractor.isActive
         );
 
-        console.log("-----------contracoter----------", contractorRes);
-        console.log("-----------roadRes----------", roadRes);
         setRoads(roadRes);
         setContractors(contractorRes);
       } catch (err) {
@@ -157,7 +155,6 @@ const NewWork = () => {
       const loginUserId = localStorage.getItem("id");
 
       const loginUser = await getLoginUser(loginUserId);
-      console.log("---------loginUser------", loginUser);
 
       const pay = {
         ...payload,

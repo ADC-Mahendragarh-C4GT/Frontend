@@ -62,7 +62,6 @@ export default function UpdateContractor() {
       const loginUserId = localStorage.getItem("id");
 
       const loginUser = await getLoginUser(loginUserId);
-      console.log("---------loginUser------", loginUser);
 
       const payload = {
         ...formData,
@@ -96,7 +95,6 @@ export default function UpdateContractor() {
           const loginUserId = localStorage.getItem("id");
     
           const loginUser = await getLoginUser(loginUserId);
-          console.log("---------loginUser------", loginUser);
     
           const payload = {
             login_user: loginUser,

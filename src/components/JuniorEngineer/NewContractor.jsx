@@ -31,7 +31,6 @@ export default function NewContractor() {
       const loginUserId = localStorage.getItem("id");
 
       const loginUser = await getLoginUser(loginUserId);
-      console.log("---------loginUser------", loginUser);
 
       const payload = {
         ...formData,

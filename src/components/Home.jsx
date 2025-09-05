@@ -115,14 +115,11 @@ export default function Home() {
 
   useEffect(() => {
     if (userType === "XEN") {
-      console.log("Fetching pending requests count for XEN...");
       getPendingRequests()
         .then((data) => {
-          console.log("Fetched requests:", data);
           const pendingCount = data.filter(
             (req) => req.status === "Pending"
           ).length;
-          console.log("Pending requests count:", pendingCount);
           setPendingCount(pendingCount);
         })
         .catch((err) => {
@@ -146,23 +143,14 @@ export default function Home() {
 
   const loadUpdates = async (pageNumber = 1, pageSize = 10) => {
     const finalSize = pageSize === -1 ? totalCount || 100000 : pageSize;
-    console.log(
-      `[${new Date().toLocaleTimeString()}] Fetching page=${pageNumber}, pageSize=${finalSize}`
-    );
-
+    
     try {
       const response = await getUpdates(pageNumber, finalSize);
-      console.log(
-        `[${new Date().toLocaleTimeString()}] Updates fetched:`,
-        response.data
-      );
-
+      
       const roadObj = await getAllRoads();
-      console.log("Roads fetched:", roadObj);
 
       const contractorResponse = await getContractors();
       const contractorObj = contractorResponse.data;
-      console.log("Contractors fetched:", contractorObj);
 
       const enrichedData = response.data.map((update) => {
         const roadDetails = roadObj.find((road) => road.id === update.road);
@@ -182,10 +170,7 @@ export default function Home() {
         if (a.status !== "Pending" && b.status === "Pending") return 1;
         return 0;
       });
-      console.log(
-        `[${new Date().toLocaleTimeString()}] Updates sorted by status:`,
-        sortedData
-      );
+      
       setUpdates(sortedData);
       setTotalCount(response.data.length);
     } catch (error) {
@@ -194,9 +179,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    console.log(
-      `useEffect triggered → page=${page + 1}, rowsPerPage=${rowsPerPage}`
-    );
+    
     loadUpdates(page + 1, rowsPerPage);
   }, [page, rowsPerPage]);
 
@@ -236,20 +219,16 @@ export default function Home() {
       !contractorQ || contractorName.includes(contractorQ);
 
     const matchesWork = !workQ || work.includes(workQ);
-    console.log(`Filtering by work: ${workQ}, Matches: ${matchesWork}`);
 
     return matchesRoad && matchesContractor && matchesWork;
   });
 
   const navigate = useNavigate();
   const timestamp = new Date().toLocaleString();
-  console.log(`Clicked at ${timestamp}`);
 
   const handleRowClick = (work) => {
     localStorage.setItem("currentWork", JSON.stringify(work)); // fallback
-    console.log(
-      `[${timestamp}] Row clicked → road=${work.road.unique_code}, contractor=${work.contractor.contractor_name}`
-    );
+    
     navigate(`/road/${work.road.unique_code}`, { state: { work } });
   };
 
