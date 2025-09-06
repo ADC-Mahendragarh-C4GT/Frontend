@@ -170,7 +170,7 @@ const Login = () => {
             </div>
 
             <div style={{ textAlign: "right", marginBottom: 10 }}>
-              <small>Forgot Password?</small>
+              <a href="/ForgetPassword"><small>Forgot Password?</small></a>
             </div>
 
             <button

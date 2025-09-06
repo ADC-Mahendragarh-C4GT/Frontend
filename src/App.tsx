@@ -14,6 +14,8 @@ import UpdateRoad from './components/JuniorEngineer/UpdateRoad';
 import UpdateUser from './components/JuniorEngineer/UpdateUser';
 import UpdateContractor from './components/JuniorEngineer/UpdateContractor';
 import ViewAllRoads from './components/ViewAllRoads';
+import ResetPassword from './components/ResetPassword';
+import ForgetPassword from './components/ForgetPassword';
 import axios from 'axios';
 
 const token = localStorage.getItem("access_token");
@@ -40,6 +42,8 @@ function App() {
         <Route path="/UpdateUser" element={<UpdateUser/>} />
         <Route path="/UpdateContractor" element={<UpdateContractor/>} />
         <Route path="/view-all-roads" element={<ViewAllRoads/>} />
+        <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
+        <Route path = "/ForgetPassword" element = {<ForgetPassword/>}/>
       </Routes>
     </Router>
   );

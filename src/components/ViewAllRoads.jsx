@@ -782,7 +782,7 @@ export default function ViewAllRoads() {
         </TableContainer>
 
         <TablePagination
-          rowsPerPageOptions={[10, 25, 100, { label: "All", value: -1 }]}
+          rowsPerPageOptions={[10, 25, 100, 500]}
           component="div"
           count={filteredFinalUpdates.length} 
           rowsPerPage={rowsPerPage}

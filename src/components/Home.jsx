@@ -726,7 +726,7 @@ export default function Home() {
         </TableContainer>
 
         <TablePagination
-          rowsPerPageOptions={[10, 25, 100, { label: "All", value: -1 }]}
+          rowsPerPageOptions={[10, 25, 100]}
           component="div"
           count={finalFilteredUpdates.length}
           rowsPerPage={rowsPerPage}
