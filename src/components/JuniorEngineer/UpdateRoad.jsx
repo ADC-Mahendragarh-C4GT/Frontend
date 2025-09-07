@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { getRoads, updateRoad, getLoginUser, deleteRoad } from "../../api/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import TextField from "@mui/material/TextField";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 
 export default function UpdateRoad() {
   const [roads, setRoads] = useState([]);
@@ -10,6 +12,7 @@ export default function UpdateRoad() {
   const [formData, setFormData] = useState({});
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
 
   // Filters
   const [wardNumberFilter, setWardNumberFilter] = useState("");
@@ -36,6 +39,8 @@ export default function UpdateRoad() {
         }
       } catch (err) {
         console.error("Failed to fetch roads", err);
+      } finally {
+        setPageLoading(false);
       }
     };
 
@@ -102,6 +107,7 @@ export default function UpdateRoad() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setPageLoading(true);
     setMessage("");
 
     try {
@@ -121,6 +127,7 @@ export default function UpdateRoad() {
       setMessage("Failed to update road.");
     } finally {
       setLoading(false);
+      setPageLoading(false);
       setTimeout(() => navigate("/home/"), 1000);
     }
   };
@@ -155,10 +162,64 @@ export default function UpdateRoad() {
     }
   };
 
+  if (pageLoading) {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+      }}
+    >
+      <CircularProgress />
+    </Box>
+  );
+}
+
+
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2 style={styles.heading}>Update Road Details</h2>
+        <div
+          style={{
+            color: "#000",
+            position: "relative",
+            textAlign: "center",
+            marginBottom: "1.5rem",
+          }}
+        >
+          <h2
+            style={{
+              margin: 0,
+              color: "#000",
+            }}
+          >
+            Update Road Details
+          </h2>
+
+          {selectedRoadId && (
+            <button
+              style={{
+                color: "#000",
+                position: "absolute",
+                right: 0,
+                top: "50%",
+                transform: "translateY(-50%)",
+                backgroundColor: "red",
+                color: "white",
+                border: "none",
+                padding: "0.5rem 1rem",
+                borderRadius: "5px",
+                cursor: "pointer",
+              }}
+              onClick={() => handleDelete(selectedRoadId)}
+            >
+              Delete
+            </button>
+          )}
+        </div>
+
 
         {/* Filtering inputs */}
         <div style={{ display: "flex", gap: "10px", margin: "20px" }}>
@@ -209,7 +270,7 @@ export default function UpdateRoad() {
             name="road"
             value={selectedRoadId}
             onChange={handleSelectRoad}
-            style={{ ...styles.select, marginBottom: "20px", width: "100%" }}
+            style={{ ...styles.select, marginBottom: "20px", width: "100%", color: "#000" }}
           >
             <option value="" disabled>
               Select Road
@@ -233,12 +294,14 @@ export default function UpdateRoad() {
               ) {
                 let options = [];
 
-                if (key === "road_type") options = ["IV", "VI", "Others"];
+                if (key === "road_type") options = ["1", "2","3","4","5","6","7","8","9","10", "Others"];
                 if (key === "material_type")
-                  options = ["CC", "IPB", "Bitumin", "Other"];
-                if (key === "road_category") options = ["Road", "ColonyStreet"];
+                  options = ["CC", "KACCHA", "METALIC","Paver Block", "Other"];
+                if (key === "road_category") options = ["City Road", "Major District Road", "National Highway", "State Highway", "Other"];
 
                 return (
+                  <div>
+                  <label style={styles.label} key={key}>{key.replace("_", " ").toUpperCase()}</label>
                   <select
                     required
                     key={key}
@@ -256,6 +319,7 @@ export default function UpdateRoad() {
                       </option>
                     ))}
                   </select>
+                  </div>
                 );
               }
 
@@ -302,6 +366,7 @@ export default function UpdateRoad() {
 
 const styles = {
   container: {
+    color: "#fff",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -309,6 +374,7 @@ const styles = {
     backgroundColor: "#f7f7f7",
   },
   card: {
+    color: "#000",
     backgroundColor: "#fff",
     padding: "2rem",
     borderRadius: "8px",
@@ -318,30 +384,35 @@ const styles = {
   heading: {
     textAlign: "center",
     marginBottom: "1.5rem",
-    color: "#333",
+    color: "#000",
   },
   input: {
-    padding: "0.8rem",
-    borderRadius: "20px",
-    backgroundColor: "#f9f9f9",
+    width: "100%",
+    marginBottom: "1rem",
+    borderRadius: "8px",
+    backgroundColor: "#fff",
+    paddingTop: "10px",
+    paddingBottom: "10px",
+    fontSize: "1rem",
+    boxSizing: "border-box",
     color: "#000",
-    textAlign: "center",
-    flex: "1 1 calc(20% - 10px)",
-    minWidth: "150px",
   },
   select: {
-    color: "#000",
-    padding: "0.8rem",
-    borderRadius: "20px",
+    width: "100%",
+    marginBottom: "1rem",
+    borderRadius: "8px",
+    backgroundColor: "#fff",
     border: "1px solid #ccc",
-    backgroundColor: "#f9f9f9",
-    flex: "1 1 calc(20% - 10px)",
+    padding: "10px 14px",
+    fontSize: "1rem",
+    boxSizing: "border-box",
+    color: "#000",
   },
   button: {
     width: "40%",
-    padding: "0.6rem",
+    padding: "0.8rem",
     border: "none",
-    borderRadius: "20px",
+    borderRadius: "8px",
     backgroundColor: "#4CAF50",
     color: "#fff",
     fontSize: "1rem",
@@ -354,5 +425,14 @@ const styles = {
     marginTop: "1rem",
     textAlign: "center",
     fontWeight: "500",
+        color: "#000",
+
+  },
+  label: {
+    display: "block",
+    marginBottom: "6px",
+    fontWeight: "500",
+    fontSize: "0.9rem",
+    color: "#000",
   },
 };
