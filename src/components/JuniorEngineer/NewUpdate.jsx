@@ -7,7 +7,9 @@ import {
 } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
-import { CircularProgress, Box } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
+
 
 export default function NewUpdate() {
   const [roads, setRoads] = useState([]);
@@ -21,7 +23,7 @@ export default function NewUpdate() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [pdfDescription, setPdfDescription] = useState("");
-  const [Loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -70,6 +72,8 @@ export default function NewUpdate() {
         setFilteredWorks(worksArray);
       } catch (err) {
         console.error("Failed to fetch data", err);
+      } finally {
+        setPageLoading(false);
       }
     };
 
@@ -123,6 +127,7 @@ export default function NewUpdate() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setPageLoading(true);
     setMessage("");
 
     const selectedWorkObj = InfraWorks.find(
@@ -168,10 +173,11 @@ export default function NewUpdate() {
       );
     } finally {
       setLoading(false);
+      setPageLoading(false);
     }
   };
 
-  if (loading) {
+  if (pageLoading) {
       return (
         <Box
           sx={{
