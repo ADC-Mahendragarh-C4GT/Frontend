@@ -422,3 +422,15 @@ export const fetchAuditReport = async (startDate : string, endDate: string) => {
 
   return response.data;
 };
+
+export const ResetPassword = (uid: string | undefined, token: string | undefined, password: string) => {
+  return api.post(`/accounts/reset-password/${uid}/${token}/`, { password }, {
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+export const ForgetPassword = (email: string) => {
+  return api.post("/accounts/request-password-reset/", { email }, {
+    headers: { "Content-Type": "application/json" },
+  });
+}

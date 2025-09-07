@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { login, fetchUserType } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Box from "@mui/material/Box";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -9,9 +10,12 @@ const Login = () => {
   const [userType, setUserType] = useState("");
   const [userTypes, setUserTypes] = useState([]);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
+
+   useEffect(() => {
+    setLoading(true);
     fetchUserType()
       .then((res) => {
         if (!res.data.length) {
@@ -22,11 +26,12 @@ const Login = () => {
       .catch((err) => {
         console.error(err);
         setError("Failed to load user types");
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+     setLoading(true);
     try {
       const response = await login(email, password, userType);
       localStorage.setItem("access_token", response.data.access);
@@ -46,8 +51,26 @@ const Login = () => {
     } catch (err) {
       console.error(err);
       setError("Invalid credentials");
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
 
   return (
     <div
