@@ -7,6 +7,7 @@ import {
 } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
+import { CircularProgress, Box } from "@mui/material";
 
 export default function NewUpdate() {
   const [roads, setRoads] = useState([]);
@@ -20,6 +21,7 @@ export default function NewUpdate() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [pdfDescription, setPdfDescription] = useState("");
+  const [Loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -168,6 +170,22 @@ export default function NewUpdate() {
       setLoading(false);
     }
   };
+
+  if (loading) {
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "100vh",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      );
+    }
+  
 
   return (
     <div style={styles.container}>

@@ -8,6 +8,8 @@ import {
 } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 
 const NewWork = () => {
   const [formData, setFormData] = useState({
@@ -30,9 +32,9 @@ const NewWork = () => {
   const [contractors, setContractors] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [FinalLatitude, setFinalLatitude] = useState(null);
   const [FinalLongitude, setFinalLongitude] = useState(null);
-  const [pdfDescription, setPdfDescription] = useState("");
   const [wardFilter, setWardFilter] = useState("All");
 
   const [materialFilter, setMaterialFilter] = useState("All");
@@ -81,6 +83,8 @@ const NewWork = () => {
         setContractors(contractorRes);
       } catch (err) {
         console.error(err);
+      } finally {
+        setPageLoading(false);
       }
     };
     fetchData();
@@ -174,9 +178,9 @@ const NewWork = () => {
     if (!file) return;
 
     if (file.type !== "application/pdf") {
-    alert("Please upload only PDF files.");
-    return;
-  }
+      alert("Please upload only PDF files.");
+      return;
+    }
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -235,6 +239,21 @@ const NewWork = () => {
     setShowConfirmation(false);
   };
 
+  if (pageLoading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <div style={styles.container}>
       <div style={styles.card}>
@@ -291,6 +310,8 @@ const NewWork = () => {
               justifyContent: "center",
             }}
           >
+
+
             <select
               name="ward_number"
               value={wardFilter}
@@ -298,12 +319,21 @@ const NewWork = () => {
               style={styles.select}
             >
               <option value="All">All Wards (Optional)</option>
-              {distinctWardNumbers.map((ward, idx) => (
-                <option key={idx} value={ward}>
-                  Ward {ward}
+              {pageLoading ? (
+                <option disabled>
+                  <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <CircularProgress size={20} />
+                  </Box>
                 </option>
-              ))}
+              ) : (
+                distinctWardNumbers.map((ward, idx) => (
+                  <option key={idx} value={ward}>
+                    Ward {ward}
+                  </option>
+                ))
+              )}
             </select>
+
 
             <select
               name="material_type"
@@ -312,12 +342,21 @@ const NewWork = () => {
               style={styles.select}
             >
               <option value="All">All Materials (Optional)</option>
-              {distinctMaterials.map((mat, idx) => (
-                <option key={idx} value={mat}>
-                  {mat} Material
+              {pageLoading ? (
+                <option disabled>
+                  <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <CircularProgress size={20} />
+                  </Box>
                 </option>
-              ))}
+              ) : (
+                distinctMaterials.map((mat, idx) => (
+                  <option key={idx} value={mat}>
+                    {mat} Material
+                  </option>
+                ))
+              )}
             </select>
+
 
             <select
               name="road_category"
@@ -326,11 +365,19 @@ const NewWork = () => {
               style={styles.select}
             >
               <option value="All">All Categories of Roads (Optional)</option>
-              {distinctCategories.map((cat, idx) => (
-                <option key={idx} value={cat}>
-                  {cat}
+              {pageLoading ? (
+                <option disabled>
+                  <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <CircularProgress size={20} />
+                  </Box>
                 </option>
-              ))}
+              ) : (
+                distinctCategories.map((cat, idx) => (
+                  <option key={idx} value={cat}>
+                    {cat}
+                  </option>
+                ))
+              )}
             </select>
 
             <select
@@ -343,11 +390,17 @@ const NewWork = () => {
               <option value="" disabled>
                 Select Road
               </option>
-              {filteredRoads.map((road) => (
-                <option key={road.id} value={road.id}>
-                  {road.unique_code} - {road.road_name}
+              {roads.length === 0 ? (
+                <option disabled>
+                  <CircularProgress size={20} />
                 </option>
-              ))}
+              ) : (
+                filteredRoads.map((road) => (
+                  <option key={road.id} value={road.id}>
+                    {road.unique_code} - {road.road_name}
+                  </option>
+                ))
+              )}
             </select>
 
             <TextField
@@ -418,13 +471,21 @@ const NewWork = () => {
               required
             >
               <option value="" disabled>
-                Select Contractor
+                {contractors.length === 0
+                  ? "Loading Contractors..."
+                  : "Select Contractor"}
               </option>
-              {contractors?.map((con) => (
-                <option key={con.id} value={con.id} style={{ color: "#000" }}>
-                  {con.contractor_name} - {con.contact_person}
+              {contractors.length === 0 ? (
+                <option disabled>
+                  <CircularProgress size={20} />
                 </option>
-              ))}
+              ) : (
+                contractors.map((con) => (
+                  <option key={con.id} value={con.id}>
+                    {con.contractor_name} - {con.contact_person}
+                  </option>
+                ))
+              )}
             </select>
 
             <select
@@ -534,7 +595,11 @@ const NewWork = () => {
                 width: "40%",
               }}
             >
-              {loading ? "Submitting..." : "Submit"}
+              {loading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Submit"
+              )}
             </button>
           </div>
         </form>
