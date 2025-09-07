@@ -3,6 +3,7 @@ import { login, fetchUserType } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -10,11 +11,10 @@ const Login = () => {
   const [userType, setUserType] = useState("");
   const [userTypes, setUserTypes] = useState([]);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-
-   useEffect(() => {
+  useEffect(() => {
     setLoading(true);
     fetchUserType()
       .then((res) => {
@@ -31,7 +31,7 @@ const Login = () => {
   }, []);
   const handleSubmit = async (e) => {
     e.preventDefault();
-     setLoading(true);
+    setLoading(true);
     try {
       const response = await login(email, password, userType);
       localStorage.setItem("access_token", response.data.access);
@@ -41,7 +41,9 @@ const Login = () => {
       localStorage.setItem("userLastName", response.data.userLastName);
       localStorage.setItem("id", response.data.id);
       localStorage.setItem("email", response.data.email);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.access}`;
+      axios.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${response.data.access}`;
 
       setError("");
       setTimeout(() => {
@@ -61,6 +63,7 @@ const Login = () => {
       <Box
         sx={{
           display: "flex",
+          color: "#272727",
           justifyContent: "center",
           alignItems: "center",
           height: "100vh",
@@ -70,7 +73,6 @@ const Login = () => {
       </Box>
     );
   }
-
 
   return (
     <div
@@ -134,15 +136,20 @@ const Login = () => {
                 style={{ width: "100%", padding: 10 }}
                 required
               >
-                <option value="" disabled>
-                  ⬇ Select Your Post ⬇
-                </option>
-
-                {userTypes.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
+                {loading ? (
+                  <option value="">⏳ Loading posts...</option>
+                ) : (
+                  <>
+                    <option value="" disabled>
+                      ⬇ Select Your Post ⬇
+                    </option>
+                    {userTypes.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </>
+                )}
               </select>
             </div>
 
@@ -193,7 +200,9 @@ const Login = () => {
             </div>
 
             <div style={{ textAlign: "right", marginBottom: 10 }}>
-              <a href="/ForgetPassword"><small>Forgot Password?</small></a>
+              <a href="/ForgetPassword">
+                <small>Forgot Password?</small>
+              </a>
             </div>
 
             <button
