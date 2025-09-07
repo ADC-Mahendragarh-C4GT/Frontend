@@ -6,6 +6,8 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 
 import Header from "./header";
 import {
@@ -42,6 +44,7 @@ export default function Home() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [workCompletedRange, setWorkCompletedRange] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const userType = localStorage.getItem("user_type");
   const ranges = [
@@ -70,8 +73,10 @@ export default function Home() {
   };
 
   const handleStatusSelect = (option) => {
+    setLoading(true);
     setStatusFilter(option.value);
     setStatusAnchorEl(null);
+    setTimeout(() => setLoading(false), 300);
   };
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -80,8 +85,10 @@ export default function Home() {
   const handleMenuClose = () => setAnchorEl(null);
 
   const handleRangeSelect = (range) => {
+    setLoading(true);
     setWorkCompletedRange(range);
     setAnchorEl(null);
+    setTimeout(() => setLoading(false), 300);
   };
 
   const startDateOptions = [
@@ -105,12 +112,14 @@ export default function Home() {
   };
 
   const handleStartDateSelect = (option) => {
+    setLoading(true);
     if (option.value === "year") {
       setYearDialogOpen(true);
     } else {
       setStartDateFilter(option.label);
     }
     setStartDateAnchorEl(null);
+    setTimeout(() => setLoading(false), 300);
   };
 
   useEffect(() => {
@@ -142,6 +151,7 @@ export default function Home() {
   }, [userType]);
 
   const loadUpdates = async (pageNumber = 1, pageSize = 10) => {
+    setLoading(true);
     const finalSize = pageSize === -1 ? totalCount || 100000 : pageSize;
 
     try {
@@ -175,6 +185,8 @@ export default function Home() {
       setTotalCount(response.data.length);
     } catch (error) {
       console.error("Error fetching updates:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -183,10 +195,12 @@ export default function Home() {
   }, [page, rowsPerPage]);
 
   const handleChangePage = (event, newPage) => {
+    setLoading(true);
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
+    setLoading(true);
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
@@ -348,7 +362,6 @@ export default function Home() {
           page * rowsPerPage + rowsPerPage
         )
       : finalFilteredUpdates;
-
 
   return (
     <>
@@ -603,138 +616,143 @@ export default function Home() {
           onChange={(e) => setContractorQuery(e.target.value)}
         />
       </div>
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", margin: "2rem" }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Paper sx={{ width: "100%", overflow: "hidden" }}>
+          <TableContainer sx={{ maxHeight: 450 }}>
+            <Table aria-label="sticky table">
+              <TableHead>
+                <TableRow style={{ backgroundColor: "#f0f0f0" }}>
+                  <TableCell align="center">S. No.</TableCell>
+                  <TableCell align="center">Road Number</TableCell>
+                  <TableCell align="center">Road Name</TableCell>
+                  <TableCell align="center">Work</TableCell>
+                  <TableCell align="center">Contractor</TableCell>
+                  <TableCell align="center">
+                    {startDateFilter ? startDateFilter : "Start Date"}
+                    <IconButton size="small" onClick={handleStartDateMenuClick}>
+                      <ArrowDropDownIcon />
+                    </IconButton>
+                    <Menu
+                      anchorEl={startDateAnchorEl}
+                      open={Boolean(startDateAnchorEl)}
+                      onClose={handleStartDateMenuClose}
+                    >
+                      {startDateOptions.map((option) => (
+                        <MenuItem
+                          key={option.value}
+                          onClick={() => handleStartDateSelect(option)}
+                        >
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Menu>
+                  </TableCell>
 
-      <Paper sx={{ width: "100%", overflow: "hidden" }}>
-        <TableContainer sx={{ maxHeight: 450 }}>
-          <Table aria-label="sticky table">
-            <TableHead>
-              <TableRow style={{ backgroundColor: "#f0f0f0" }}>
-                <TableCell align="center">S. No.</TableCell>
-                <TableCell align="center">Road Number</TableCell>
-                <TableCell align="center">Road Name</TableCell>
-                <TableCell align="center">Work</TableCell>
-                <TableCell align="center">Contractor</TableCell>
-                <TableCell align="center">
-                  {startDateFilter ? startDateFilter : "Start Date"}
-                  <IconButton size="small" onClick={handleStartDateMenuClick}>
-                    <ArrowDropDownIcon />
-                  </IconButton>
-                  <Menu
-                    anchorEl={startDateAnchorEl}
-                    open={Boolean(startDateAnchorEl)}
-                    onClose={handleStartDateMenuClose}
-                  >
-                    {startDateOptions.map((option) => (
-                      <MenuItem
-                        key={option.value}
-                        onClick={() => handleStartDateSelect(option)}
-                      >
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Menu>
-                </TableCell>
+                  <TableCell align="center">
+                    {statusFilter ? statusFilter : "Status"}
+                    <IconButton size="small" onClick={handleStatusMenuClick}>
+                      <ArrowDropDownIcon />
+                    </IconButton>
+                    <Menu
+                      anchorEl={statusAnchorEl}
+                      open={Boolean(statusAnchorEl)}
+                      onClose={handleStatusMenuClose}
+                    >
+                      {statusOptions.map((option) => (
+                        <MenuItem
+                          key={option.value}
+                          onClick={() => handleStatusSelect(option)}
+                        >
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Menu>
+                  </TableCell>
 
-                <TableCell align="center">
-                  {statusFilter ? statusFilter : "Status"}
-                  <IconButton size="small" onClick={handleStatusMenuClick}>
-                    <ArrowDropDownIcon />
-                  </IconButton>
-                  <Menu
-                    anchorEl={statusAnchorEl}
-                    open={Boolean(statusAnchorEl)}
-                    onClose={handleStatusMenuClose}
-                  >
-                    {statusOptions.map((option) => (
-                      <MenuItem
-                        key={option.value}
-                        onClick={() => handleStatusSelect(option)}
-                      >
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Menu>
-                </TableCell>
-
-                <TableCell align="center">
-                  {workCompletedRange
-                    ? workCompletedRange.label
-                    : "Work Completed (%)"}
-                  <IconButton size="small" onClick={handleMenuClick}>
-                    <ArrowDropDownIcon />
-                  </IconButton>
-                  <Menu
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={handleMenuClose}
-                  >
-                    {ranges.map((range) => (
-                      <MenuItem
-                        key={range.label}
-                        onClick={() => handleRangeSelect(range)}
-                      >
-                        {range.label}
-                      </MenuItem>
-                    ))}
-                  </Menu>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {paginatedUpdates?.length > 0 ? (
-                paginatedUpdates.map((update, index) => (
-                  <TableRow
-                    hover
-                    role="checkbox"
-                    tabIndex={-1}
-                    key={update.id}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleRowClick(update)}
-                  >
-                    <TableCell align="center">
-                      {page * rowsPerPage + index + 1}
-                    </TableCell>
-                    <TableCell align="center">
-                      {update.road?.unique_code}
-                    </TableCell>
-                    <TableCell align="center">
-                      {update.road?.road_name}
-                    </TableCell>
-                    <TableCell align="center">{update.description}</TableCell>
-                    <TableCell align="center">
-                      {update.contractor?.contractor_name}
-                    </TableCell>
-                    <TableCell align="center">{update.start_date}</TableCell>
-                    <TableCell align="center">
-                      {update.completedOrpending}
-                    </TableCell>
-                    <TableCell align="center">
-                      {update.progress_percent}%
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell align="center" colSpan={7}>
-                    No results found.
+                  <TableCell align="center">
+                    {workCompletedRange
+                      ? workCompletedRange.label
+                      : "Work Completed (%)"}
+                    <IconButton size="small" onClick={handleMenuClick}>
+                      <ArrowDropDownIcon />
+                    </IconButton>
+                    <Menu
+                      anchorEl={anchorEl}
+                      open={Boolean(anchorEl)}
+                      onClose={handleMenuClose}
+                    >
+                      {ranges.map((range) => (
+                        <MenuItem
+                          key={range.label}
+                          onClick={() => handleRangeSelect(range)}
+                        >
+                          {range.label}
+                        </MenuItem>
+                      ))}
+                    </Menu>
                   </TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
 
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 100]}
-          component="div"
-          count={finalFilteredUpdates.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
+              <TableBody>
+                {paginatedUpdates?.length > 0 ? (
+                  paginatedUpdates.map((update, index) => (
+                    <TableRow
+                      hover
+                      role="checkbox"
+                      tabIndex={-1}
+                      key={update.id}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleRowClick(update)}
+                    >
+                      <TableCell align="center">
+                        {page * rowsPerPage + index + 1}
+                      </TableCell>
+                      <TableCell align="center">
+                        {update.road?.unique_code}
+                      </TableCell>
+                      <TableCell align="center">
+                        {update.road?.road_name}
+                      </TableCell>
+                      <TableCell align="center">{update.description}</TableCell>
+                      <TableCell align="center">
+                        {update.contractor?.contractor_name}
+                      </TableCell>
+                      <TableCell align="center">{update.start_date}</TableCell>
+                      <TableCell align="center">
+                        {update.completedOrpending}
+                      </TableCell>
+                      <TableCell align="center">
+                        {update.progress_percent}%
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell align="center" colSpan={7}>
+                      No results found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 100]}
+            component="div"
+            count={finalFilteredUpdates.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Paper>
+      )}
       <Dialog open={yearDialogOpen} onClose={() => setYearDialogOpen(false)}>
         <DialogTitle>Select Year</DialogTitle>
         <LocalizationProvider dateAdapter={AdapterDateFns}>

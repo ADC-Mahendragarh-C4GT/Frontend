@@ -204,13 +204,13 @@ const NewRoad = () => {
                   let options = [];
 
                   if (key === "road_type") {
-                    options = ["IV", "VI", "Others"];
+                    options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "others"];
                   }
                   if (key === "material_type") {
-                    options = ["CC", "IPB", "Bitumin", "Other"];
+                    options = ["CC", "KACCHA", "METALIC", "Paver Block", "Other"];
                   }
                   if (key === "road_category") {
-                    options = ["Road", "ColonyStreet"];
+                    options = ["City Road", "Major District Road", "National Highway", "State Highway", "Other"];
                   }
 
                   return (
