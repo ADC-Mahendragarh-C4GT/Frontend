@@ -10,6 +10,8 @@ import {
   deleteComment,
 } from "../api/api";
 import { useState, useEffect } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 
 export default function RoadDetail() {
   const navigate = useNavigate();
@@ -21,6 +23,7 @@ export default function RoadDetail() {
   const [showAllUpdates, setShowAllUpdates] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // load from state or fallback to localStorage
   let work = location.state?.work;
@@ -49,6 +52,8 @@ export default function RoadDetail() {
       setAllUpdates(response.data);
     } catch (error) {
       console.error("Error fetching updates:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,6 +63,8 @@ export default function RoadDetail() {
       setAllComments(response.data);
     } catch (error) {
       console.error("Error fetching comments:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -117,41 +124,40 @@ export default function RoadDetail() {
       AllComments(work.id);
     } catch (err) {
       console.error("Failed to add comment:", err);
+    } finally {
+      setLoading(false);
     }
   };
-   
-  
-  
 
   const handleDeleteComment = async (commentId) => {
+    if (!commentId) return;
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete comment ?\n\nThis action cannot be undone!`
+    );
 
-  if (!commentId) return;
-  const confirmDelete = window.confirm(
-          `Are you sure you want to delete comment ?\n\nThis action cannot be undone!`
-        );
-    
-        if (!confirmDelete) {
-          return;
-        }
+    if (!confirmDelete) {
+      return;
+    }
 
-  try {
-    const loginUserId = localStorage.getItem("id");
+    try {
+      const loginUserId = localStorage.getItem("id");
 
-    const loginUser = await getLoginUser(loginUserId);
-    setCurrentUser(loginUser);
+      const loginUser = await getLoginUser(loginUserId);
+      setCurrentUser(loginUser);
 
-    // Call delete API
-    await deleteComment(commentId, { login_user: loginUser });
+      // Call delete API
+      await deleteComment(commentId, { login_user: loginUser });
 
+      // Refresh comments after delete
+      AllComments(work.id);
+    } catch (err) {
+      console.error("Failed to delete comment:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Refresh comments after delete
-    AllComments(work.id);
-  } catch (err) {
-    console.error("Failed to delete comment:", err);
-  }
-};
-
-useEffect(() => {
+  useEffect(() => {
     const loginUserId = localStorage.getItem("id");
     if (loginUserId) {
       getLoginUser(loginUserId).then(setCurrentUser);
@@ -168,8 +174,26 @@ useEffect(() => {
       setAllUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          bgcolor: "rgba(255,255,255,0.7)",
+        }}
+      >
+        <CircularProgress size={60} />
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -476,7 +500,7 @@ useEffect(() => {
                                 {comment.comment_date ?? "N/A"}
                               </td>
                               <td style={tdStyle}>
-                                {commenter?.id === currentUser?.id &&  (
+                                {commenter?.id === currentUser?.id && (
                                   <span
                                     style={{
                                       cursor: "pointer",
