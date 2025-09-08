@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { submitOtherDepartmentRequest, getRoads } from "../api/api";
+import { Box, CircularProgress } from "@mui/material";
 
 export default function OtherDepartmentForm() {
   const [roads, setRoads] = useState([]);
@@ -12,6 +13,10 @@ export default function OtherDepartmentForm() {
   const [contactInfo, setContactInfo] = useState("");
   const [error, setError] = useState("");
   const [pdfDescription, setPdfDescription] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [filteringLoader, setFilteringLoader] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  
 
   // Filters
   const [wardNumberFilter, setWardNumberFilter] = useState("All");
@@ -30,6 +35,8 @@ export default function OtherDepartmentForm() {
       } catch (err) {
         console.error("Failed to fetch roads:", err);
         setError("Failed to fetch roads");
+      } finally {
+        setLoading(false);
       }
     };
     fetchRoads();
@@ -50,6 +57,7 @@ export default function OtherDepartmentForm() {
 
   // Filtering logic
   useEffect(() => {
+    setFilteringLoader(true);
     let filtered = roads;
 
     if (wardNumberFilter && wardNumberFilter !== "All") {
@@ -75,10 +83,12 @@ export default function OtherDepartmentForm() {
     }
 
     setFilteredRoads(filtered);
+    setTimeout(() => setFilteringLoader(false), 300);
   }, [wardNumberFilter, materialTypeFilter, roadCategoryFilter, roads]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
 
     try {
       const road = roads?.find((r) => r?.unique_code === uniqueCode);
@@ -103,8 +113,20 @@ export default function OtherDepartmentForm() {
     } catch (err) {
       console.error("Failed to submit request:", err);
       setError("Failed to submit request");
+    } finally {
+      setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <Box
+        sx={{ display: "flex", justifyContent: "center", marginTop: "2rem" }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <div style={styles.container}>
@@ -175,11 +197,17 @@ export default function OtherDepartmentForm() {
           style={styles.input}
         >
           <option value="">Select Road</option>
-          {filteredRoads.map((road) => (
-            <option key={road.id} value={road.unique_code}>
-              {road.unique_code} - {road.name || road.road_name}
-            </option>
-          ))}
+          {filteringLoader ? (
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <CircularProgress size={20} />
+            </Box>
+          ) : (
+            filteredRoads.map((road) => (
+              <option key={road.id} value={road.unique_code}>
+                {road.unique_code} - {road.name || road.road_name}
+              </option>
+            ))
+          )}
         </select>
 
         {/* Requested By */}
@@ -235,9 +263,14 @@ export default function OtherDepartmentForm() {
         />
 
         {/* Submit */}
-        <button type="submit" style={styles.button}>
-          Submit Request
+        <button type="submit" style={styles.button} disabled={submitting}>
+          {submitting ? (
+            <CircularProgress size={20} sx={{ color: "white" }} />
+          ) : (
+            "Submit Request"
+          )}
         </button>
+
         {error && <p style={styles.error}>{error}</p>}
       </form>
     </div>
@@ -262,7 +295,7 @@ const styles = {
   form: {
     display: "flex",
     flexDirection: "column",
-        color: "#000",
+    color: "#000",
 
     gap: "1rem",
   },
@@ -273,7 +306,7 @@ const styles = {
   },
   input: {
     padding: "0.8rem",
-        color: "#000",
+    color: "#000",
 
     borderRadius: "8px",
     border: "1px solid #ccc",
@@ -287,8 +320,7 @@ const styles = {
     backgroundColor: "#f9f9f9",
     minHeight: "100px",
     fontSize: "1rem",
-        color: "#000",
-
+    color: "#000",
   },
   fileInput: {
     padding: "0.6rem",
