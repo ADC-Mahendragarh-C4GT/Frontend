@@ -16,6 +16,8 @@ import IconButton from "@mui/material/IconButton";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 
 export default function ViewAllRoads() {
   const [roads, setRoads] = useState([]);
@@ -65,14 +67,14 @@ export default function ViewAllRoads() {
   ];
 
   const wardOptions = [
-  { value: "All Wards", label: "All Wards" },
-  ...Array.from(new Set(roads.map((r) => r.ward_number)))
-    .sort((a, b) => a - b) 
-    .map((w) => ({
-      value: w,
-      label: w,
-    })),
-];
+    { value: "All Wards", label: "All Wards" },
+    ...Array.from(new Set(roads.map((r) => r.ward_number)))
+      .sort((a, b) => a - b)
+      .map((w) => ({
+        value: w,
+        label: w,
+      })),
+  ];
 
   const locationOptions = [
     { value: "All Locations", label: "All Locations" },
@@ -83,15 +85,14 @@ export default function ViewAllRoads() {
   ];
 
   const roadTypeOptions = [
-  { value: "All Road Types", label: "All Road Types" },
-  ...Array.from(new Set(roads.map((r) => r.road_type)))
-    .sort((a, b) => a.length - b.length || a.localeCompare(b))
-    .map((t) => ({
-      value: t,
-      label: t,
-    })),
-];
-
+    { value: "All Road Types", label: "All Road Types" },
+    ...Array.from(new Set(roads.map((r) => r.road_type)))
+      .sort((a, b) => a.length - b.length || a.localeCompare(b))
+      .map((t) => ({
+        value: t,
+        label: t,
+      })),
+  ];
 
   const roadCategoryOptions = [
     { value: "All Categories", label: "All Categories" },
@@ -181,7 +182,7 @@ export default function ViewAllRoads() {
     const fetchRoads = async () => {
       try {
         const response = await getRoads();
-        setRoads(response);
+        setRoads(response || []);
       } catch (err) {
         setError("Failed to fetch roads");
       } finally {
@@ -192,8 +193,22 @@ export default function ViewAllRoads() {
     fetchRoads();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          bgcolor: "rgba(255,255,255,0.7)",
+        }}
+      >
+        <CircularProgress size={60} />
+      </Box>
+    );
+  }
 
   const filteredFinalUpdates = filteredUpdates.filter((update) => {
     let districtMatch = true;
@@ -315,6 +330,7 @@ export default function ViewAllRoads() {
   };
 
   const handleDownload = () => {
+    setLoading(true);
     if (!filteredFinalUpdates || filteredFinalUpdates.length === 0) {
       alert("No road data available to download");
       return;
@@ -350,6 +366,7 @@ export default function ViewAllRoads() {
     });
 
     saveAs(dataBlob, "RoadData.xlsx");
+    setLoading(false);
   };
 
   const paginatedUpdates =
@@ -410,7 +427,8 @@ export default function ViewAllRoads() {
               marginRight: "25px",
             }}
           >
-            Download Road Data
+            {loading ? "Preparing..." : "Download Road Data"}
+            
           </button>
         </div>
       </div>
@@ -784,7 +802,7 @@ export default function ViewAllRoads() {
         <TablePagination
           rowsPerPageOptions={[10, 25, 100, 500]}
           component="div"
-          count={filteredFinalUpdates.length} 
+          count={filteredFinalUpdates.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
