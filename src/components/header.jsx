@@ -269,15 +269,15 @@ export default function Header() {
                     </>
                   )}
                   {user === "XEN" && (
-                    <MenuItem onClick={() => handleNavigate("/profile")}>
+                    <MenuItem onClick={() => handleNavigate("/pendingRequests")}>
                       <PersonIcon />
-                      Profile
+                      Pending Request of Other Departments
                     </MenuItem>
                   )}
                   {user === "CMC" && (
-                    <MenuItem onClick={() => handleNavigate("/profile")}>
+                    <MenuItem onClick={() => handleNavigate("/home")}>
                       <PersonIcon />
-                      Profile
+                      Download Reports for Audit
                     </MenuItem>
                   )}
                 </StyledMenu>

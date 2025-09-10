@@ -11,7 +11,6 @@ import Box from "@mui/material/Box";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-
 import Header from "./header";
 import {
   getUpdates,
@@ -47,6 +46,7 @@ export default function Home() {
   const [endDate, setEndDate] = useState("");
   const [workCompletedRange, setWorkCompletedRange] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingReport, setLoadingReport] = useState(false);
 
   const userType = localStorage.getItem("user_type");
   const ranges = [
@@ -280,7 +280,11 @@ export default function Home() {
   };
 
   const handleAudit = async (startDate, endDate) => {
+    if (!startDate || !endDate) {
+      return;
+    }
     try {
+      setLoadingReport(true);
       const response = await fetchAuditReport(startDate, endDate);
       const logs = response.data;
 
@@ -314,6 +318,8 @@ export default function Home() {
       XLSX.writeFile(workbook, "audit_report.xlsx");
     } catch (error) {
       console.error("Error fetching audit report:", error);
+    } finally {
+      setLoadingReport(false);
     }
   };
 
@@ -365,11 +371,10 @@ export default function Home() {
         )
       : finalFilteredUpdates;
 
-      
   return (
     <>
       <Header />
-      
+
       {userType === "CMC" && (
         <div
           style={{
@@ -395,11 +400,11 @@ export default function Home() {
             }}
           >
             <ReactDatePicker
+              required
               selected={startDate}
               onChange={(date) => setStartDate(date)}
               placeholderText="Select Start Date"
               className="custom-date-picker"
-              required
             />
 
             <ReactDatePicker
@@ -412,6 +417,7 @@ export default function Home() {
 
             <button
               onClick={() => handleAudit(startDate, endDate)}
+              disabled={loadingReport || !startDate || !endDate}
               style={{
                 padding: "0.8rem 1.5rem",
                 borderRadius: "8px",
@@ -422,7 +428,11 @@ export default function Home() {
                 fontWeight: "600",
               }}
             >
-              Generate Report
+              {loadingReport ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Generate Report"
+              )}
             </button>
           </div>
         </div>
