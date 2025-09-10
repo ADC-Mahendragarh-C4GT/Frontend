@@ -369,66 +369,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <div
-        style={{
-          margin: "1rem auto",
-          paddingLeft: "0.5rem",
-          maxWidth: "1500px",
-          background: "#f9f9f9",
-          borderRadius: "8px",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "10px",
-            justifyContent: "center",
-          }}
-        >
-          <button
-            style={{
-              padding: "0.3rem 0.5rem",
-              borderRadius: "20px",
-              backgroundColor: "#4CAF50",
-              color: "white",
-              border: "none",
-              cursor: "pointer",
-              minWidth: "140px",
-              flex: "1 1 150px",
-              fontSize: "0.9rem",
-              transition: "background 0.3s",
-            }}
-            onClick={() => navigate("/view-all-roads")}
-            onMouseOver={(e) => (e.target.style.backgroundColor = "#45a049")}
-            onMouseOut={(e) => (e.target.style.backgroundColor = "#4CAF50")}
-          >
-            View All Roads
-          </button>
-
-          <button
-            style={{
-              padding: "0.3rem 0.5rem",
-              borderRadius: "20px",
-              backgroundColor: "#f44336",
-              color: "white",
-              border: "none",
-              cursor: "pointer",
-              minWidth: "140px",
-              flex: "1 1 150px",
-              fontSize: "0.9rem",
-              transition: "background 0.3s",
-            }}
-            onClick={handleLogout}
-            onMouseOver={(e) => (e.target.style.backgroundColor = "#d32f2f")}
-            onMouseOut={(e) => (e.target.style.backgroundColor = "#f44336")}
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-
+      
       {userType === "CMC" && (
         <div
           style={{
