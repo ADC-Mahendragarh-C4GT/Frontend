@@ -9,8 +9,12 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
 import EditIcon from "@mui/icons-material/Edit";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import ArchiveIcon from "@mui/icons-material/Archive";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
+import AddRoadIcon from "@mui/icons-material/FileCopy";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -66,8 +70,32 @@ export default function Header() {
   const user = localStorage.getItem("user_type");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1000);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [roadAnchorEl, setRoadAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const [roadOpen, setRoadOpen] = useState(false);
+  const [showRoadOptions, setShowRoadOptions] = useState(false);
+  const [showInfraWorkOptions, setShowInfraWorkOptions] = useState(false);
+
+  const toggleRoadOptions = () => {
+    setShowRoadOptions((prev) => !prev);
+  };
+  const toggleInfraWorkOptions = () => {
+    setShowInfraWorkOptions((prev) => !prev);
+  };
+
+  const toggleRoadMenu = () => {
+    setRoadOpen((prev) => !prev);
+  };
+
   const navigate = useNavigate();
+
+  const handleRoadClick = (event) => {
+    setRoadAnchorEl(event.currentTarget);
+  };
+
+  const handleRoadClose = () => {
+    setRoadAnchorEl(null);
+  };
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -177,131 +205,148 @@ export default function Header() {
         <div style={{ position: "relative" }}>hi</div>
       ) : (
         <nav style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <>
-            <button
-              onClick={() => navigate("/home")}
-              style={{
-                backgroundColor: "transparent",
-                border: "none",
-                fontSize: "14px",
-                color: "#333",
-                cursor: "pointer",
-              }}
-            >
-              HOME
-            </button>
-            <button
-              onClick={() => navigate("/view-all-roads")}
-              style={{
-                backgroundColor: "transparent",
-                border: "none",
-                fontSize: "14px",
-                color: "#333",
-                cursor: "pointer",
-                fontFamily: "system-ui, Avenir, Helvetica, Arial, sans-serif",
-              }}
-            >
-              ALL ROADS
-            </button>
+          <button
+            onClick={() => navigate("/home")}
+            style={{
+              backgroundColor: "transparent",
+              border: "none",
+              fontSize: "14px",
+              color: "#333",
+              cursor: "pointer",
+            }}
+          >
+            HOME
+          </button>
+          <button
+            onClick={() => navigate("/view-all-roads")}
+            style={{
+              backgroundColor: "transparent",
+              border: "none",
+              fontSize: "14px",
+              color: "#333",
+              cursor: "pointer",
+              fontFamily: "system-ui, Avenir, Helvetica, Arial, sans-serif",
+            }}
+          >
+            ALL ROADS
+          </button>
 
-            {(user === "JE" || user === "XEN" || user === "CMC") && (
-              <>
-                <Button
-                  id="demo-customized-button"
-                  aria-controls={open ? "demo-customized-menu" : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? "true" : undefined}
-                  variant="contained"
-                  color="primary"
-                  disableElevation
-                  onClick={handleClick}
-                  endIcon={<KeyboardArrowDownIcon />}
-                  sx={{
-                    backgroundColor: "transparent",
-                    border: "none",
-                    fontSize: "14px",
-                    color: "#333",
-                    cursor: "pointer",
-                    fontFamily:
-                      "system-ui, Avenir, Helvetica, Arial, sans-serif",
-                  }}
-                >
-                  ACTIONS
-                </Button>
+          {(user === "JE" || user === "XEN" || user === "CMC") && (
+            <>
+              <Button
+                id="demo-customized-button"
+                aria-controls={open ? "demo-customized-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? "true" : undefined}
+                variant="contained"
+                color="primary"
+                disableElevation
+                onClick={handleClick}
+                endIcon={<KeyboardArrowDownIcon />}
+                sx={{
+                  backgroundColor: "transparent",
+                  border: "none",
+                  fontSize: "14px",
+                  color: "#333",
+                  cursor: "pointer",
+                  fontFamily: "system-ui, Avenir, Helvetica, Arial, sans-serif",
+                }}
+              >
+                ACTIONS
+              </Button>
 
-                <StyledMenu
-                  id="demo-customized-menu"
-                  MenuListProps={{
-                    "aria-labelledby": "demo-customized-button",
-                  }}
-                  anchorEl={anchorEl}
-                  open={open}
-                  onClose={handleClose}
-                >
-                  {user === "JE" && (
-                    <>
-                      <MenuItem onClick={() => handleNavigate("/profile")}>
-                        <PersonIcon />
-                        Profile
-                      </MenuItem>
-
-                      <MenuItem onClick={() => handleNavigate("/settings")}>
-                        <SettingsIcon />
-                        Settings
-                      </MenuItem>
-                      <Divider sx={{ my: 1 }} />
-                      <MenuItem onClick={() => handleNavigate("/edit")}>
-                        <EditIcon />
-                        Edit
-                      </MenuItem>
-                      <MenuItem onClick={() => handleNavigate("/duplicate")}>
-                        <FileCopyIcon />
-                        Duplicate
-                      </MenuItem>
-                      <MenuItem onClick={() => handleNavigate("/archive")}>
-                        <ArchiveIcon />
-                        Archive
-                      </MenuItem>
-                      <MenuItem onClick={() => handleNavigate("/more")}>
-                        <MoreHorizIcon />
-                        More
-                      </MenuItem>
-                    </>
-                  )}
-                  {user === "XEN" && (
-                    <MenuItem onClick={() => handleNavigate("/pendingRequests")}>
-                      <PersonIcon />
-                      Pending Request of Other Departments
+              <StyledMenu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                {user === "JE" && (
+                  <>
+                    <MenuItem onClick={toggleRoadOptions}>
+                      <AddRoadIcon fontSize="small" />
+                      Roads
+                      {showRoadOptions ? (
+                        <KeyboardArrowDownIcon sx={{ marginLeft: "auto" }} />
+                      ) : (
+                        <KeyboardArrowRightIcon sx={{ marginLeft: "auto" }} />
+                      )}
                     </MenuItem>
-                  )}
-                  {user === "CMC" && (
-                    <MenuItem onClick={() => handleNavigate("/home")}>
-                      <PersonIcon />
-                      Download Reports for Audit
-                    </MenuItem>
-                  )}
-                </StyledMenu>
-              </>
-            )}
 
-            <button
-              onClick={handleLogout}
-              onMouseOver={(e) => (e.target.style.backgroundColor = "#d32f2f")}
-              onMouseOut={(e) => (e.target.style.backgroundColor = "#f44336")}
-              style={{
-                fontFamily: "Inter, sans-serif",
-                backgroundColor: "red",
-                border: "none",
-                borderRadius: "6px",
-                padding: "8px 16px",
-                color: "#fff",
-                fontWeight: "500",
-                cursor: "pointer",
-              }}
-            >
-              Logout
-            </button>
-          </>
+                    {showRoadOptions && (
+                      <>
+                        <MenuItem onClick={() => handleNavigate("/NewRoad")}>
+                          ➕ Create Road
+                        </MenuItem>
+                        <MenuItem onClick={() => handleNavigate("/UpdateRoad")}>
+                          📝 Update Road
+                        </MenuItem>
+                        <Divider sx={{ borderColor: "#444" }} /> {/* Darker divider */}
+                      </>
+                    )}
+
+                    <MenuItem onClick={toggleInfraWorkOptions}>
+                      <GroupWorkIcon fontSize="small" />
+                      Infrastructure Works on Road
+                      {showInfraWorkOptions ? (
+                        <KeyboardArrowDownIcon sx={{ marginLeft: "auto" }} />
+                      ) : (
+                        <KeyboardArrowRightIcon sx={{ marginLeft: "auto" }} />
+                      )}
+                    </MenuItem>
+
+                    {showInfraWorkOptions && (
+                      <>
+                        <MenuItem onClick={() => handleNavigate("/NewInfraWork")}>
+                          ➕ Create Work
+                        </MenuItem>
+                        <MenuItem onClick={() => handleNavigate("/UpdateInfraWork")}>
+                          📝 Update Work
+                        </MenuItem>
+                        <Divider />
+                      </>
+                    )}
+                    <MenuItem onClick={() => handleNavigate("/duplicate")}>
+                      <FileCopyIcon /> Duplicate
+                    </MenuItem>
+                    <MenuItem onClick={() => handleNavigate("/archive")}>
+                      <ArchiveIcon /> Archive
+                    </MenuItem>
+                    <MenuItem onClick={() => handleNavigate("/more")}>
+                      <MoreHorizIcon /> More
+                    </MenuItem>
+                  </>
+                )}
+
+                {user === "XEN" && (
+                  <MenuItem onClick={() => handleNavigate("/pendingRequests")}>
+                    <PersonIcon />
+                    Pending Request of Other Departments
+                  </MenuItem>
+                )}
+
+                {user === "CMC" && (
+                  <MenuItem onClick={() => handleNavigate("/home")}>
+                    <PersonIcon />
+                    Download Reports for Audit
+                  </MenuItem>
+                )}
+              </StyledMenu>
+            </>
+          )}
+
+          <button
+            onClick={handleLogout}
+            onMouseOver={(e) => (e.target.style.backgroundColor = "#d32f2f")}
+            onMouseOut={(e) => (e.target.style.backgroundColor = "#f44336")}
+            style={{
+              fontFamily: "Inter, sans-serif",
+              backgroundColor: "red",
+              border: "none",
+              borderRadius: "6px",
+              padding: "8px 16px",
+              color: "#fff",
+              fontWeight: "500",
+              cursor: "pointer",
+            }}
+          >
+            Logout
+          </button>
         </nav>
       )}
     </header>
