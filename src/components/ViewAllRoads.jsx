@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getRoads, deleteRoad, getLoginUser } from "../api/api";
+import SearchIcon from "@mui/icons-material/Search";
+import { InputAdornment, TextField } from "@mui/material";
+import Header from "./header";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -9,7 +12,6 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import { useNavigate } from "react-router-dom";
-import TextField from "@mui/material/TextField";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
@@ -28,7 +30,7 @@ export default function ViewAllRoads() {
   const totalCount = roads.length;
   const [roadQuery, setRoadQuery] = useState("");
   const [districtFilter, setDistrictFilter] = useState("");
-
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1000);
   const [anchorEl, setAnchorEl] = useState(null);
   const [stateFilter, setStateFilter] = useState("");
   const [stateAnchorEl, setStateAnchorEl] = useState(null);
@@ -48,6 +50,17 @@ export default function ViewAllRoads() {
   const [widthAnchorEl, setWidthAnchorEl] = useState(null);
   const [lengthFilter, setLengthFilter] = useState("");
   const [lengthAnchorEl, setLengthAnchorEl] = useState(null);
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1000);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const lengthOptions = [
     { value: "All", label: "All" },
@@ -379,62 +392,117 @@ export default function ViewAllRoads() {
 
   return (
     <div>
-      <div style={{ textAlign: "center", margin: "20px 0" }}>
-        <h1 style={{ color: "#333" }}>All Roads</h1>
+      <Header />
+      <div
+        style={{
+          textAlign: "center",
+          padding: "10px 0",
+          color: "#333",
+        }}
+      >
+        <h1
+          style={{
+            margin: 0,
+            fontSize: "2rem",
+            fontWeight: 700,
+            color: "#333",
+            textTransform: "uppercase",
+            letterSpacing: "1px",
+            position: "relative",
+            display: "inline-block",
+          }}
+        >
+          Work Detail
+        </h1>
       </div>
+
       <div
         style={{
           display: "flex",
+          flexDirection: isMobile ? "column" : "row",
           alignItems: "center",
-          justifyContent: "space-between",
-          margin: "1rem 0",
+          justifyContent: isMobile ? "center" : "space-between",
           width: "100%",
+          gap: isMobile ? "1rem" : "0",
+          borderRadius: 12,
+          backgroundColor: "#fff",
         }}
       >
-        {/* Empty spacer to push search to center */}
-        <div style={{ width: "25%" }}></div>
+        {/* Left Spacer – desktop only */}
+        {!isMobile && <div style={{ width: "20%" }}></div>}
 
-        {/* Centered Search Input */}
-        <div style={{ flex: "1", display: "flex", justifyContent: "center" }}>
+        {/* Search Input */}
+        <div
+          style={{
+            flex: isMobile ? "none" : 1,
+            display: "flex",
+            justifyContent: "center",
+            width: isMobile ? "90%" : "auto",
+          }}
+        >
           <TextField
             type="text"
             placeholder="Search by Road Name or Number"
             value={roadQuery}
-            style={{
-              borderRadius: "20px",
-              width: "60%",
-              backgroundColor: "#cccc",
-              color: "#000",
-            }}
             onChange={(e) => setRoadQuery(e.target.value)}
+            variant="outlined"
+            size={isMobile ? "small" : "medium"}
+            fullWidth={isMobile}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: "#777" }} />
+                </InputAdornment>
+              ),
+              style: {
+                borderRadius: 30,
+                height: isMobile ? 40 : 46,
+                paddingRight: 8,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+              },
+            }}
+            sx={{
+              width: isMobile ? "100%" : "60%",
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": { border: "1px solid #e0e0e0" },
+                "&:hover fieldset": { borderColor: "#aaa" },
+                "&.Mui-focused fieldset": { borderColor: "#1976d2" },
+              },
+            }}
           />
         </div>
 
-        {/* Rightmost Download Button */}
+        {/* Download Button */}
         <div
-          style={{ width: "25%", display: "flex", justifyContent: "flex-end" }}
+          style={{
+            width: isMobile ? "100%" : "20%",
+            display: "flex",
+            justifyContent: isMobile ? "center" : "flex-end",
+            marginRight: isMobile ? "0rem" : "2rem",
+          }}
         >
           <button
             onClick={handleDownload}
             style={{
-              backgroundColor: "green",
+              backgroundColor: "#2e7d32",
               color: "white",
-              padding: "0.8rem 1.5rem",
+              padding: isMobile ? "0.6rem 1rem" : "0.75rem 1.5rem",
               border: "none",
-              borderRadius: "8px",
+              borderRadius: 8,
               cursor: "pointer",
-              fontWeight: "bold",
-              marginRight: "25px",
+              fontWeight: 600,
+              width: isMobile ? "90%" : "auto",
+              minHeight: 40,
+              boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
             }}
           >
             {loading ? "Preparing..." : "Download Road Data"}
-            
           </button>
         </div>
       </div>
 
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
-        <TableContainer sx={{ maxHeight: 450 }}>
+        <TableContainer sx={{ maxHeight: "100%" }}>
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
@@ -651,7 +719,7 @@ export default function ViewAllRoads() {
                     ))}
                   </Menu>
                 </TableCell>
-
+                
                 <TableCell
                   style={{ paddingRight: "0px", paddingLeft: "0px" }}
                   align="center"
