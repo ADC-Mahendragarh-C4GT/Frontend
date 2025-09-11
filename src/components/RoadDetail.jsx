@@ -1,6 +1,13 @@
 import React, { use } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./header";
+import Paper from "@mui/material/Paper";
+import TableContainer from "@mui/material/TableContainer";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import TableBody from "@mui/material/TableBody";
 import {
   getUpdatesByWork,
   getCommentsByWork,
@@ -17,6 +24,8 @@ export default function RoadDetail() {
   const navigate = useNavigate();
   const location = useLocation();
   const [allUpdates, setAllUpdates] = useState([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1000);
+
   const [allUsers, setAllUsers] = useState([]);
   const [allComments, setAllComments] = useState([]);
   const [commentText, setCommentText] = useState("");
@@ -24,6 +33,18 @@ export default function RoadDetail() {
   const [showAllComments, setShowAllComments] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1000);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   // load from state or fallback to localStorage
   let work = location.state?.work;
@@ -198,12 +219,35 @@ export default function RoadDetail() {
   return (
     <>
       <Header />
+      <div
+        style={{
+          textAlign: "center",
+          padding: "10px 0",
+          color: "#333",
+        }}
+      >
+        <h1
+          style={{
+            margin: 0,
+            fontSize: "2rem",
+            fontWeight: 700,
+            color: "#333",
+            textTransform: "uppercase",
+            letterSpacing: "1px",
+            position: "relative",
+            display: "inline-block",
+          }}
+        >
+          Work Detail
+        </h1>
+      </div>
+
       <div style={{ fontFamily: "Arial, sans-serif", color: "#333" }}>
         <div
           style={{
             background: "#fff",
             borderRadius: "10px",
-            padding: "2rem",
+            padding: "0.5rem",
             paddingTop: "0rem",
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
           }}
@@ -214,7 +258,6 @@ export default function RoadDetail() {
               display: "flex",
               justifyContent: "space-between",
               flexWrap: "wrap",
-              marginBottom: "2rem",
               color: "#333",
             }}
           >
@@ -247,7 +290,6 @@ export default function RoadDetail() {
                 <b>Location:</b> {road.location}
               </p>
             </div>
-
             <div style={{ flex: "1", minWidth: "250px" }}>
               <p>
                 <b>Contractor Firm:</b> {contractor?.contractor_name}
@@ -265,7 +307,9 @@ export default function RoadDetail() {
                 <b>Address:</b> {contractor?.address}
               </p>
               <p>
-                <b>Defect Liability Period:</b> {defect_liability_period} months
+                <div style={{display:"flex", flexDirection:"row"}}>
+          <b>Defect Liability Period : </b> <div style={{fontWeight: "bold", fontSize : "1.1rem", marginLeft:"0.5rem"}}> {defect_liability_period} months</div>
+          </div>
               </p>
             </div>
 
@@ -274,7 +318,7 @@ export default function RoadDetail() {
                 <b>Start Date:</b> {start_date}
               </p>
               <p>
-                <b>Complete or Pending:</b> {completedOrpending}
+                <b>Status :</b> {completedOrpending}
               </p>
               <p>
                 <b>Cost:</b> ₹{cost ?? "40,000"}
@@ -299,7 +343,7 @@ export default function RoadDetail() {
               </div>
             </div>
           </div>
-
+          <hr style={{ border: "none", borderTop: "1px solid #000" }} />
           {/* Work Updates Table */}
           <div style={{ marginBottom: "2rem" }}>
             <h3>Update of Work</h3>
@@ -309,7 +353,6 @@ export default function RoadDetail() {
                 style={{
                   ...tableStyle,
                   width: "100%",
-                  borderCollapse: "collapse",
                 }}
               >
                 <thead>
@@ -419,7 +462,7 @@ export default function RoadDetail() {
                 marginBottom: "1rem",
               }}
             >
-              <h3 style={{ margin: 0 }}>Comments</h3>
+              {!isMobile ? <h3 style={{ margin: 0 }}>Comments</h3> : null}
               <input
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
@@ -447,105 +490,119 @@ export default function RoadDetail() {
               </button>
             </div>
 
-            <table style={tableStyle}>
-              <thead>
-                <tr>
-                  <th style={thStyle}>S. No.</th>
-                  <th style={thStyle}>Commentator</th>
-                  <th style={thStyle}>Comment</th>
-                  <th style={thStyle}>Progress Percentage</th>
-                  <th style={thStyle}>Work Update Description</th>
-                  <th style={thStyle}>Date when Commented</th>
-                  <th style={thStyle}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allComments?.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} style={tdStyleCenter}>
-                      No comments available on this road.
-                    </td>
-                  </tr>
-                ) : (
-                  <>
-                    {(showAllComments
-                      ? allComments
-                      : allComments.slice(0, 5)
-                    ).map((comment, index) => {
-                      const update = allUpdates.find(
-                        (u) => u.id === comment.update
-                      );
-                      const commenter = allUsers.find(
-                        (u) => u.id === comment.commenter
-                      );
+            <Paper sx={{ width: "100%", overflow: "hidden", mt: 2 }}>
+              <TableContainer sx={{ maxHeight: "100%" }}>
+                <Table stickyHeader aria-label="comments table">
+                  <TableHead>
+                    <TableRow style={{ backgroundColor: "#f0f0f0" }}>
+                      <TableCell align="center">S. No.</TableCell>
+                      <TableCell align="center">Commentator</TableCell>
+                      <TableCell align="center">Comment</TableCell>
+                      <TableCell align="center">Progress Percentage</TableCell>
+                      <TableCell align="center">
+                        Work Update Description
+                      </TableCell>
+                      <TableCell align="center">Date when Commented</TableCell>
+                      <TableCell align="center">Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
 
-                      return (
-                        <tr key={comment.id}>
-                          <td style={tdStyle}>{index + 1}</td>
+                  <TableBody>
+                    {allComments?.length === 0 ? (
+                      <TableRow>
+                        <TableCell align="center" colSpan={7}>
+                          No comments available on this road.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      <>
+                        {(showAllComments
+                          ? allComments
+                          : allComments.slice(0, 5)
+                        ).map((comment, index) => {
+                          const update = allUpdates.find(
+                            (u) => u.id === comment.update
+                          );
+                          const commenter = allUsers.find(
+                            (u) => u.id === comment.commenter
+                          );
 
-                          {comment.isActive ? (
-                            <>
-                              <td style={tdStyle}>
-                                {commenter?.first_name} {commenter?.last_name} (
-                                {commenter?.user_type})
-                              </td>
-                              <td style={tdStyle}>{comment.comment_text}</td>
-                              <td style={tdStyle}>
-                                {update?.progress_percent ?? "N/A"}%
-                              </td>
-                              <td style={tdStyle}>
-                                {update?.status_note ?? "N/A"}
-                              </td>
-                              <td style={tdStyle}>
-                                {comment.comment_date ?? "N/A"}
-                              </td>
-                              <td style={tdStyle}>
-                                {commenter?.id === currentUser?.id && (
-                                  <span
-                                    style={{
-                                      cursor: "pointer",
-                                      color: "red",
-                                      textDecoration: "underline",
-                                    }}
-                                    onClick={() =>
-                                      handleDeleteComment(comment.id)
-                                    }
-                                  >
-                                    Delete
-                                  </span>
-                                )}
-                              </td>
-                            </>
-                          ) : (
-                            <td colSpan={6} style={tdStyleCenter}>
-                              This comment was deleted by commenter or
-                              administrator.
-                            </td>
-                          )}
-                        </tr>
-                      );
-                    })}
+                          return (
+                            <TableRow
+                              key={comment.id}
+                              hover
+                              style={{ cursor: "pointer" }}
+                            >
+                              <TableCell align="center">{index + 1}</TableCell>
 
-                    {allComments.length > 5 && !showAllComments && (
-                      <tr>
-                        <td colSpan={7} style={tdStyleCenter}>
-                          <span
-                            style={{
-                              cursor: "pointer",
-                              color: "blue",
-                              textDecoration: "underline",
-                            }}
-                            onClick={() => setShowAllComments(true)}
-                          >
-                            See all ⬇
-                          </span>
-                        </td>
-                      </tr>
+                              {comment.isActive ? (
+                                <>
+                                  <TableCell align="center">
+                                    {commenter?.first_name}{" "}
+                                    {commenter?.last_name} (
+                                    {commenter?.user_type})
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    {comment.comment_text}
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    {update?.progress_percent ?? "N/A"}%
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    {update?.status_note ?? "N/A"}
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    {comment.comment_date ?? "N/A"}
+                                  </TableCell>
+                                  <TableCell align="center">
+                                    {commenter?.id === currentUser?.id && (
+                                      <span
+                                        style={{
+                                          cursor: "pointer",
+                                          color: "red",
+                                          textDecoration: "underline",
+                                        }}
+                                        onClick={() =>
+                                          handleDeleteComment(comment.id)
+                                        }
+                                      >
+                                        Delete
+                                      </span>
+                                    )}
+                                  </TableCell>
+                                </>
+                              ) : (
+                                <TableCell align="center" colSpan={6}>
+                                  This comment was deleted by commenter or
+                                  administrator.
+                                </TableCell>
+                              )}
+                            </TableRow>
+                          );
+                        })}
+
+                        {!showAllComments && allComments.length > 5 && (
+                          <TableRow>
+                            <TableCell align="center" colSpan={7}>
+                              <span
+                                style={{
+                                  cursor: "pointer",
+                                  color: "blue",
+                                  textDecoration: "underline",
+                                }}
+                                onClick={() => setShowAllComments(true)}
+                              >
+                                See all ⬇
+                              </span>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </>
                     )}
-                  </>
-                )}
-              </tbody>
-            </table>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
           </div>
         </div>
       </div>
