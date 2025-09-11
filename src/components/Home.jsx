@@ -462,62 +462,7 @@ export default function Home() {
           </p>
         </div>
       )}
-      {userType === "JE" && (
-        <div
-          style={{
-            margin: "1rem auto",
-            paddingleft: "0.5rem",
-            maxWidth: "1500px",
-            background: "#f9f9f9",
-            borderRadius: "8px",
-            textAlign: "center",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "10px",
-              justifyContent: "center",
-            }}
-          >
-            {[
-              "Add New Road",
-              "Add New Work",
-              "Add New Update",
-              "Add New User",
-              "Add New Contractor",
-              "Update Road Details",
-              "Update User Details",
-              "Update Contractor Details",
-            ].map((label) => (
-              <button
-                key={label}
-                style={{
-                  padding: "0.3rem 0.5rem",
-                  borderRadius: "20px",
-                  backgroundColor: "#4CAF50",
-                  color: "white",
-                  border: "none",
-                  cursor: "pointer",
-                  minWidth: "140px",
-                  flex: "1 1 150px",
-                  fontSize: "0.9rem",
-                  transition: "background 0.3s",
-                }}
-                onClick={() => handleClick(label)}
-                onMouseOver={(e) =>
-                  (e.target.style.backgroundColor = "#45a049")
-                }
-                onMouseOut={(e) => (e.target.style.backgroundColor = "#4CAF50")}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
+      
       <div
         style={{
           display: "flex",

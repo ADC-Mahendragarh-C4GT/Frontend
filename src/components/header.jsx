@@ -19,6 +19,8 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
+import InterpreterModeIcon from '@mui/icons-material/InterpreterMode';
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 const StyledMenu = styled((props) => (
@@ -74,14 +76,23 @@ export default function Header() {
   const open = Boolean(anchorEl);
   const [roadOpen, setRoadOpen] = useState(false);
   const [showRoadOptions, setShowRoadOptions] = useState(false);
-  const [showInfraWorkOptions, setShowInfraWorkOptions] = useState(false);
+  const [showContractorOptions, setShowContractorOptions] = useState(false);
+  const [showUserOptions, setShowUserOptions] = useState(false);
+  const [showWorkOptions, setShowWorkOptions] = useState(false);
+  
+  const toggleWorkOptions = () => {
+    setShowWorkOptions((prev) => !prev);
+  };
 
   const toggleRoadOptions = () => {
     setShowRoadOptions((prev) => !prev);
   };
-  const toggleInfraWorkOptions = () => {
-    setShowInfraWorkOptions((prev) => !prev);
+  const toggleContractorOptions = () => {
+    setShowContractorOptions((prev) => !prev);
   };
+  const toggleUserOptions = () => {
+    setShowUserOptions((prev) => !prev);
+  }
 
   const toggleRoadMenu = () => {
     setRoadOpen((prev) => !prev);
@@ -274,42 +285,81 @@ export default function Header() {
                           ➕ Create Road
                         </MenuItem>
                         <MenuItem onClick={() => handleNavigate("/UpdateRoad")}>
-                          📝 Update Road
+                          📝 Update Existing Road Details
                         </MenuItem>
-                        <Divider sx={{ borderColor: "#444" }} /> {/* Darker divider */}
+                        <Divider />
                       </>
                     )}
 
-                    <MenuItem onClick={toggleInfraWorkOptions}>
-                      <GroupWorkIcon fontSize="small" />
-                      Infrastructure Works on Road
-                      {showInfraWorkOptions ? (
+                    <MenuItem onClick={toggleWorkOptions}>
+                      <ArchiveIcon fontSize="small" />
+                      Works
+                      {showWorkOptions ? (
                         <KeyboardArrowDownIcon sx={{ marginLeft: "auto" }} />
                       ) : (
                         <KeyboardArrowRightIcon sx={{ marginLeft: "auto" }} />
                       )}
                     </MenuItem>
 
-                    {showInfraWorkOptions && (
+                    {showWorkOptions && (
                       <>
-                        <MenuItem onClick={() => handleNavigate("/NewInfraWork")}>
-                          ➕ Create Work
+                        <MenuItem onClick={() => handleNavigate("/NewWork")}>
+                          ➕ Create New Work
                         </MenuItem>
-                        <MenuItem onClick={() => handleNavigate("/UpdateInfraWork")}>
-                          📝 Update Work
+                        <MenuItem onClick={() => handleNavigate("/NewUpdate")}>
+                          📝 Add an Update of Existing Work
                         </MenuItem>
                         <Divider />
                       </>
                     )}
-                    <MenuItem onClick={() => handleNavigate("/duplicate")}>
-                      <FileCopyIcon /> Duplicate
+
+                    <MenuItem onClick={toggleUserOptions}>
+                      <PersonIcon fontSize="small" />
+                      Users
+                      {showUserOptions ? (
+                        <KeyboardArrowDownIcon sx={{ marginLeft: "auto" }} />
+                      ) : (
+                        <KeyboardArrowRightIcon sx={{ marginLeft: "auto" }} />
+                      )}
                     </MenuItem>
-                    <MenuItem onClick={() => handleNavigate("/archive")}>
-                      <ArchiveIcon /> Archive
+
+                    {showUserOptions && (
+                      <>
+                        <MenuItem onClick={() => handleNavigate("/NewUser")}>
+                          ➕ Create New User
+                        </MenuItem>
+                        <MenuItem onClick={() => handleNavigate("/UpdateUser")}>
+                          📝 Update Existing User Details
+                        </MenuItem>
+                        <Divider />
+                      </>
+                    )}
+
+                    <MenuItem onClick={toggleContractorOptions}>
+                      <InterpreterModeIcon fontSize="small" />
+                      Contractors
+                      {showContractorOptions ? (
+                        <KeyboardArrowDownIcon sx={{ marginLeft: "auto" }} />
+                      ) : (
+                        <KeyboardArrowRightIcon sx={{ marginLeft: "auto" }} />
+                      )}
                     </MenuItem>
-                    <MenuItem onClick={() => handleNavigate("/more")}>
-                      <MoreHorizIcon /> More
-                    </MenuItem>
+
+                    {showContractorOptions && (
+                      <>
+                        <MenuItem onClick={() => handleNavigate("/NewContractor")}>
+                          ➕ Create New Contractor
+                        </MenuItem>
+                        <MenuItem onClick={() => handleNavigate("/UpdateContractor")}>
+                          📝 Update Existing Contractor Details
+                        </MenuItem>
+                        <Divider />
+                      </>
+                    )}
+                    
+                    
+
+                    
                   </>
                 )}
 
