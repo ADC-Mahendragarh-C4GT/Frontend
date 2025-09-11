@@ -521,7 +521,7 @@ export default function Home() {
         </Box>
       ) : (
         <Paper sx={{ width: "100%", overflow: "hidden" }}>
-          <TableContainer sx={{ maxHeight: 450 }}>
+          <TableContainer sx={{ maxHeight: "100%" }}>
             <Table aria-label="sticky table">
               <TableHead>
                 <TableRow style={{ backgroundColor: "#f0f0f0" }}>

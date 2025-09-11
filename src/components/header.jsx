@@ -11,17 +11,21 @@ import Divider from "@mui/material/Divider";
 import EditIcon from "@mui/icons-material/Edit";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import GroupWorkIcon from '@mui/icons-material/GroupWork';
+import GroupWorkIcon from "@mui/icons-material/GroupWork";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
-import AddRoadIcon from "@mui/icons-material/FileCopy";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PersonIcon from "@mui/icons-material/Person";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
-import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
-import InterpreterModeIcon from '@mui/icons-material/InterpreterMode';
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import InterpreterModeIcon from "@mui/icons-material/InterpreterMode";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close";
+import HomeIcon from '@mui/icons-material/Home';
+import AddRoadIcon from '@mui/icons-material/AddRoad';
+import AlignHorizontalCenterIcon from '@mui/icons-material/AlignHorizontalCenter';
 
 const StyledMenu = styled((props) => (
   <Menu
@@ -79,7 +83,7 @@ export default function Header() {
   const [showContractorOptions, setShowContractorOptions] = useState(false);
   const [showUserOptions, setShowUserOptions] = useState(false);
   const [showWorkOptions, setShowWorkOptions] = useState(false);
-  
+
   const toggleWorkOptions = () => {
     setShowWorkOptions((prev) => !prev);
   };
@@ -92,7 +96,7 @@ export default function Header() {
   };
   const toggleUserOptions = () => {
     setShowUserOptions((prev) => !prev);
-  }
+  };
 
   const toggleRoadMenu = () => {
     setRoadOpen((prev) => !prev);
@@ -213,7 +217,163 @@ export default function Header() {
       </a>
 
       {isMobile ? (
-        <div style={{ position: "relative" }}>hi</div>
+        <>
+          <div>
+            <Button
+              id="mobile-menu-button"
+              aria-controls={open ? "mobile-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? "true" : undefined}
+              onClick={handleClick}
+              sx={{
+                minWidth: "auto",
+                p: 1,
+                color: "#333",
+              }}
+            >
+              {open ? (
+                <CloseIcon fontSize="large" />
+              ) : (
+                <MenuIcon fontSize="large" />
+              )}
+            </Button>
+
+            <StyledMenu
+              id="mobile-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+          
+            >
+              <MenuItem onClick={() => handleNavigate("/home")}>
+                  <HomeIcon />
+                  Home
+                </MenuItem>
+
+              <MenuItem onClick={() => handleNavigate("/view-all-roads")}>
+                  <AlignHorizontalCenterIcon />
+                  View All Roads
+                </MenuItem>
+
+              {user === "JE" && (
+                <>
+                  <div>
+                    <MenuItem onClick={toggleRoadOptions}>
+                      <AddRoadIcon fontSize="small" />
+                      Roads
+                      {showRoadOptions ? (
+                        <KeyboardArrowDownIcon sx={{ marginLeft: "auto" }} />
+                      ) : (
+                        <KeyboardArrowRightIcon sx={{ marginLeft: "auto" }} />
+                      )}
+                    </MenuItem>
+
+                    {showRoadOptions && (
+                      <>
+                        <MenuItem onClick={() => handleNavigate("/NewRoad")}>
+                          ➕ Create Road
+                        </MenuItem>
+                        <MenuItem onClick={() => handleNavigate("/UpdateRoad")}>
+                          📝 Update Existing Road Details
+                        </MenuItem>
+                        <Divider />
+                      </>
+                    )}
+
+                    <MenuItem onClick={toggleWorkOptions}>
+                      <ArchiveIcon fontSize="small" />
+                      Works
+                      {showWorkOptions ? (
+                        <KeyboardArrowDownIcon sx={{ marginLeft: "auto" }} />
+                      ) : (
+                        <KeyboardArrowRightIcon sx={{ marginLeft: "auto" }} />
+                      )}
+                    </MenuItem>
+
+                    {showWorkOptions && (
+                      <>
+                        <MenuItem onClick={() => handleNavigate("/NewWork")}>
+                          ➕ Create New Work
+                        </MenuItem>
+                        <MenuItem onClick={() => handleNavigate("/NewUpdate")}>
+                          📝 Add an Update of Existing Work
+                        </MenuItem>
+                        <Divider />
+                      </>
+                    )}
+
+                    <MenuItem onClick={toggleUserOptions}>
+                      <PersonIcon fontSize="small" />
+                      Users
+                      {showUserOptions ? (
+                        <KeyboardArrowDownIcon sx={{ marginLeft: "auto" }} />
+                      ) : (
+                        <KeyboardArrowRightIcon sx={{ marginLeft: "auto" }} />
+                      )}
+                    </MenuItem>
+
+                    {showUserOptions && (
+                      <>
+                        <MenuItem onClick={() => handleNavigate("/NewUser")}>
+                          ➕ Create New User
+                        </MenuItem>
+                        <MenuItem onClick={() => handleNavigate("/UpdateUser")}>
+                          📝 Update Existing User Details
+                        </MenuItem>
+                        <Divider />
+                      </>
+                    )}
+
+                    <MenuItem onClick={toggleContractorOptions}>
+                      <InterpreterModeIcon fontSize="small" />
+                      Contractors
+                      {showContractorOptions ? (
+                        <KeyboardArrowDownIcon sx={{ marginLeft: "auto" }} />
+                      ) : (
+                        <KeyboardArrowRightIcon sx={{ marginLeft: "auto" }} />
+                      )}
+                    </MenuItem>
+
+                    {showContractorOptions && (
+                      <>
+                        <MenuItem
+                          onClick={() => handleNavigate("/NewContractor")}
+                        >
+                          ➕ Create New Contractor
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => handleNavigate("/UpdateContractor")}
+                        >
+                          📝 Update Existing Contractor Details
+                        </MenuItem>
+                        <Divider />
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {user === "XEN" && (
+                <MenuItem onClick={() => handleNavigate("/pendingRequests")}>
+                  <PersonIcon />
+                  Pending Request of Other Departments
+                </MenuItem>
+              )}
+
+              {user === "CMC" && (
+                <MenuItem onClick={() => handleNavigate("/home")}>
+                  <PersonIcon />
+                  Download Reports for Audit
+                </MenuItem>
+              )}
+
+              <Divider />
+              <MenuItem onClick={handleLogout}>
+                <LogoutIcon fontSize="small" sx={{ mr: 1 }} /> Logout
+              </MenuItem>
+            </StyledMenu>
+          </div>
+        </>
       ) : (
         <nav style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <button
@@ -347,19 +507,19 @@ export default function Header() {
 
                     {showContractorOptions && (
                       <>
-                        <MenuItem onClick={() => handleNavigate("/NewContractor")}>
+                        <MenuItem
+                          onClick={() => handleNavigate("/NewContractor")}
+                        >
                           ➕ Create New Contractor
                         </MenuItem>
-                        <MenuItem onClick={() => handleNavigate("/UpdateContractor")}>
+                        <MenuItem
+                          onClick={() => handleNavigate("/UpdateContractor")}
+                        >
                           📝 Update Existing Contractor Details
                         </MenuItem>
                         <Divider />
                       </>
                     )}
-                    
-                    
-
-                    
                   </>
                 )}
 
