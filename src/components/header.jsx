@@ -251,7 +251,7 @@ export default function Header() {
                 </MenuItem>
 
               <MenuItem onClick={() => handleNavigate("/view-all-roads")}>
-                  <AlignHorizontalCenterIcon />
+                  <AddRoadIcon />
                   View All Roads
                 </MenuItem>
 

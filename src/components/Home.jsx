@@ -47,6 +47,7 @@ export default function Home() {
   const [workCompletedRange, setWorkCompletedRange] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingReport, setLoadingReport] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1000);
 
   const userType = localStorage.getItem("user_type");
   const ranges = [
@@ -56,6 +57,18 @@ export default function Home() {
     { label: "61 - 90%", min: 61, max: 90 },
     { label: "91 - 100%", min: 91, max: 100 },
   ];
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1000);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const [statusAnchorEl, setStatusAnchorEl] = useState(null);
   const [statusFilter, setStatusFilter] = useState("");
@@ -462,10 +475,11 @@ export default function Home() {
           </p>
         </div>
       )}
-      
+
       <div
         style={{
           display: "flex",
+          flexDirection: isMobile ? "column" : "row",
           gap: "1rem",
           margin: "1rem 0",
           alignItems: "center",
@@ -480,7 +494,7 @@ export default function Home() {
             padding: "0.8rem",
             borderRadius: "20px",
             border: "1px solid #ccc",
-            width: "20%",
+            width: isMobile ? "85%" : "20%",
             backgroundColor: "#f9f9f9",
             color: "#000",
           }}
@@ -494,7 +508,7 @@ export default function Home() {
             padding: "0.8rem",
             borderRadius: "20px",
             border: "1px solid #ccc",
-            width: "20%",
+            width: isMobile ? "85%" : "20%",
             backgroundColor: "#f9f9f9",
             color: "#000",
           }}
@@ -508,7 +522,7 @@ export default function Home() {
             padding: "0.8rem",
             borderRadius: "20px",
             border: "1px solid #ccc",
-            width: "20%",
+            width: isMobile ? "85%" : "20%",
             backgroundColor: "#f9f9f9",
             color: "#000",
           }}
