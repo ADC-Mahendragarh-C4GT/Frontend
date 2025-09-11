@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import { Menu, MenuItem, IconButton, Dialog, DialogTitle } from "@mui/material";
+import {
+  Menu,
+  MenuItem,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+} from "@mui/material";
+
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -32,6 +40,7 @@ import TableRow from "@mui/material/TableRow";
 import "react-datepicker/dist/react-datepicker.css";
 import "../auditLog.css";
 import { Refresh } from "@mui/icons-material";
+import Button from "@mui/material/Button";
 
 export default function Home() {
   const [roadQuery, setRoadQuery] = useState("");
@@ -367,6 +376,12 @@ export default function Home() {
         startRange.setFullYear(today.getFullYear() - 1);
         if (updateDate < startRange || updateDate > today) return false;
       } else if (startDateFilter === "Select a specific year" && selectedYear) {
+        const updateDate = new Date(update.start_date);
+        if (updateDate.getFullYear() !== selectedYear.getFullYear()) {
+          return false;
+        }
+      } else if (selectedYear) {
+        const updateDate = new Date(update.start_date);
         if (updateDate.getFullYear() !== selectedYear.getFullYear()) {
           return false;
         }
@@ -668,20 +683,31 @@ export default function Home() {
       )}
       <Dialog open={yearDialogOpen} onClose={() => setYearDialogOpen(false)}>
         <DialogTitle>Select Year</DialogTitle>
+
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <DatePicker
             views={["year"]}
+            openTo="year"
             value={selectedYear}
-            onChange={(newValue) => {
-              setSelectedYear(newValue);
-              setStartDateFilter("Select a specific year");
-              setYearDialogOpen(false);
-            }}
+            onChange={(newValue) => setSelectedYear(newValue)}
             slotProps={{
               textField: { variant: "outlined", fullWidth: true },
             }}
           />
         </LocalizationProvider>
+
+        <DialogActions>
+          <Button
+            onClick={() => {
+              if (selectedYear) {
+                setStartDateFilter("Select a specific year");
+              }
+              setYearDialogOpen(false);
+            }}
+          >
+            OK
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {finalFilteredUpdates.map((u) => (
