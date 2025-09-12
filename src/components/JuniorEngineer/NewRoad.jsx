@@ -1,15 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { uploadExcel, createRoad } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import Header from "../header";
+import Button from "@mui/material/Button";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 const NewRoad = () => {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState("");
   const [message2, setMessage2] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1000);
+  const commonStyle = { m: 1, width: "25ch" };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1000);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const navigate = useNavigate();
 
@@ -144,31 +161,68 @@ const NewRoad = () => {
             </p>
           </div>
           <br />
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={{ width: "100%" }}>
             <div
               style={{
-                width: "100%",
-                display: "",
-                justifyContent: "center",
-                alignContent:"center",
-                alignSelf:"center",
+                maxWidth: "100%",
+                margin: "0 auto",
+                padding: "1.5rem",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                backgroundColor: "#fff",
+                borderRadius: 16,
               }}
             >
               <input
                 type="file"
                 accept=".csv"
                 onChange={handleFileChange}
-                style={styles.fileInput}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  marginBottom: "1.2rem",
+                  cursor: "pointer",
+                  padding: "0.7rem",
+                  borderRadius: 25,
+                  border: "1px solid #ddd",
+                  backgroundColor: "#f5f5f5",
+                  color: "#333",
+                  textAlign: "center",
+                  fontSize: "0.95rem",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseOver={(e) =>
+                  (e.target.style.backgroundColor = "#f0f0f0")
+                }
+                onMouseOut={(e) => (e.target.style.backgroundColor = "#f5f5f5")}
               />
 
               <button
                 type="submit"
                 disabled={loading}
-                style={styles.button}
-                onMouseOver={(e) =>
-                  (e.target.style.backgroundColor = "#45a049")
-                }
-                onMouseOut={(e) => (e.target.style.backgroundColor = "#4CAF50")}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem 1.2rem",
+                  border: "none",
+                  borderRadius: 30,
+                  backgroundColor: loading ? "#9e9e9e" : "#4CAF50",
+                  color: "#fff",
+                  fontSize: "1rem",
+                  fontWeight: 600,
+                  cursor: loading ? "not-allowed" : "pointer",
+                  textAlign: "center",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                  transition: "background 0.3s ease, transform 0.2s ease",
+                }}
+                onMouseOver={(e) => {
+                  if (!loading) e.target.style.backgroundColor = "#45a049";
+                }}
+                onMouseOut={(e) => {
+                  if (!loading) e.target.style.backgroundColor = "#4CAF50";
+                }}
+                onMouseDown={(e) => (e.target.style.transform = "scale(0.97)")}
+                onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
               >
                 {loading ? "Uploading..." : "Upload"}
               </button>
@@ -189,124 +243,238 @@ const NewRoad = () => {
               {message2}
             </p>
           )}
+
           <div
             style={{ justifyContent: "center", display: "flex", width: "100%" }}
           >
             <p style={styles.or}>OR</p>
           </div>
 
-          <div>
+          {/* Manual Road Entry */}
+          <div
+            style={{
+              background: "#fff",
+              padding: "1.5rem",
+              borderRadius: 12,
+              boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+            }}
+          >
             <form onSubmit={handleSubmitManually}>
               <div
                 style={{
                   display: "flex",
                   flexWrap: "wrap",
-                  gap: "10px",
+                  gap: "1rem",
                   justifyContent: "center",
                 }}
               >
-                {Object.keys(formData).map((key) => {
-                  if (key === "unique_code") {
-                    return null;
-                  }
-                  if (
-                    key === "road_type" ||
-                    key === "material_type" ||
-                    key === "road_category"
-                  ) {
-                    let options = [];
+                {/* Road Name */}
+                <TextField
+                  name="road_name"
+                  label="ROAD NAME"
+                  placeholder="ROAD NAME"
+                  value={formData.road_name}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  sx={{
+                    ...inputStyle,
+                    "& .MuiOutlinedInput-root": { borderRadius: 1 },
+                    "& .MuiInputBase-input": { textAlign: "center" },
+                  }}
+                  required
+                />
 
-                    if (key === "road_type") {
-                      options = [
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "5",
-                        "6",
-                        "7",
-                        "8",
-                        "9",
-                        "10",
-                        "others",
-                      ];
-                    }
-                    if (key === "material_type") {
-                      options = [
-                        "CC",
-                        "KACCHA",
-                        "METALIC",
-                        "Paver Block",
-                        "Other",
-                      ];
-                    }
-                    if (key === "road_category") {
-                      options = [
-                        "City Road",
-                        "Major District Road",
-                        "National Highway",
-                        "State Highway",
-                        "Other",
-                      ];
-                    }
+                {/* Ward Number */}
+                <TextField
+                  name="ward_number"
+                  label="WARD NUMBER"
+                  placeholder="WARD NUMBER"
+                  value={formData.ward_number}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  sx={inputStyle}
+                  required
+                />
 
-                    return (
-                      <select
-                        required
-                        key={key}
-                        name={key}
-                        value={formData[key]}
-                        onChange={handleChange}
-                        style={{
-                          padding: "0.8rem",
-                          borderRadius: "20px",
-                          border: "1px solid #ccc",
-                          backgroundColor: "#f9f9f9",
-                          color: "#000",
-                          flex: "1 1 calc(20% - 10px)",
-                          minWidth: "150px",
-                        }}
-                      >
-                        <option value="" disabled>
-                          {key.replace("_", " ").toUpperCase()}
-                        </option>
-                        {options.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                    );
-                  }
+                {/* Location */}
+                <TextField
+                  name="location"
+                  label="LOCATION"
+                  placeholder="LOCATION"
+                  value={formData.location}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  sx={inputStyle}
+                  required
+                />
 
-                  return (
-                    <TextField
-                      required
-                      key={key}
-                      type="text"
-                      name={key}
-                      label={key.replace("_", " ").toUpperCase()}
-                      placeholder={key.replace("_", " ").toUpperCase()}
-                      value={formData[key]}
-                      onChange={handleChange}
-                      style={{
-                        padding: "0.8rem",
-                        borderRadius: "20px",
-                        backgroundColor: "#f9f9f9",
-                        color: "#000",
-                        textAlign: "center",
-                        flex: "1 1 calc(20% - 10px)",
-                        minWidth: "150px",
-                      }}
-                    />
-                  );
-                })}
+                {/* Length (km) – numeric */}
+                <TextField
+                  type="number"
+                  inputProps={{ step: "any", min: "0" }}
+                  name="length_km"
+                  label="Length (m)"
+                  placeholder="Length (m)"
+                  value={formData.length_km}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  sx={inputStyle}
+                  required
+                />
+
+                {/* Width (m) – numeric */}
+                <TextField
+                  type="number"
+                  inputProps={{ step: "any", min: "0" }}
+                  name="width_m"
+                  label="Width (m)"
+                  placeholder="Width (m)"
+                  value={formData.width_m}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  sx={inputStyle}
+                  required
+                />
+
+                {/* Road Type */}
+                <TextField
+                  select
+                  name="road_type"
+                  label="ROAD TYPE"
+                  value={formData.road_type}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  sx={inputStyle}
+                  SelectProps={{ native: true }}
+                  required
+                >
+                  <option value=""></option>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, "others"].map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                  required
+                </TextField>
+
+                {/* Material Type */}
+                <TextField
+                  select
+                  name="material_type"
+                  label="MATERIAL TYPE"
+                  value={formData.material_type}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  sx={inputStyle}
+                  SelectProps={{ native: true }}
+                  required
+                >
+                  <option value=""></option>
+                  {["CC", "KACCHA", "METALIC", "Paver Block", "Other"].map(
+                    (opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    )
+                  )}
+                  required
+                </TextField>
+
+                {/* Road Category */}
+                <TextField
+                  select
+                  name="road_category"
+                  label="ROAD CATEGORY"
+                  value={formData.road_category}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  sx={inputStyle}
+                  SelectProps={{ native: true }}
+                  required
+                >
+                  <option value=""></option>
+                  {[
+                    "City Road",
+                    "Major District Road",
+                    "National Highway",
+                    "State Highway",
+                    "Other",
+                  ].map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                  required
+                </TextField>
+
+                {/* Area Name */}
+                <TextField
+                  name="area_name"
+                  label="AREA NAME"
+                  placeholder="AREA NAME"
+                  value={formData.area_name}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  sx={inputStyle}
+                  required
+                />
+
+                {/* District */}
+                <TextField
+                  name="district"
+                  label="DISTRICT"
+                  placeholder="DISTRICT"
+                  value={formData.district}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  sx={inputStyle}
+                  required
+                />
+
+                {/* State */}
+                <TextField
+                  name="state"
+                  label="STATE"
+                  placeholder="STATE"
+                  value={formData.state}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  sx={inputStyle}
+                  required
+                />
               </div>
 
-              <br />
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <button type="submit" style={styles.button}>
-                  Submit
+              <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    width: "100%",
+                    maxWidth: 300,
+                    padding: "0.75rem 1.5rem",
+                    fontSize: "1rem",
+                    fontWeight: 600,
+                    border: "none",
+                    borderRadius: 30,
+                    color: "#fff",
+                    backgroundColor: loading ? "#9e9e9e" : "#1976d2",
+                    cursor: loading ? "not-allowed" : "pointer",
+                    boxShadow: "0 3px 6px rgba(0,0,0,0.15)",
+                    transition: "background 0.3s ease, transform 0.2s ease",
+                  }}
+                >
+                  {loading ? "Saving..." : "Submit"}
                 </button>
               </div>
             </form>
@@ -314,8 +482,10 @@ const NewRoad = () => {
             {message && (
               <p
                 style={{
-                  ...styles.message,
-                  color: message.startsWith("") ? "green" : "red",
+                  textAlign: "center",
+                  marginTop: "1rem",
+                  color: message.includes("success") ? "green" : "red",
+                  fontWeight: 500,
                 }}
               >
                 {message}
@@ -349,32 +519,6 @@ const styles = {
     marginTop: "0rem",
     color: "#333",
   },
-  fileInput: {
-    display: "block",
-    width: "95%",
-    marginBottom: "1rem",
-    cursor: "pointer",
-    padding: "0.5rem",
-    borderRadius: "20px",
-    border: "1px solid #fff",
-    backgroundColor: "#f9f9c4",
-    color: "#000",
-    textAlign: "center",
-  },
-  button: {
-    
-    width: "40%",
-    padding: "0.6rem",
-    border: "none",
-    borderRadius: "20px",
-    backgroundColor: "#4CAF50",
-    color: "#fff",
-    fontSize: "1rem",
-    cursor: "pointer",
-    display: "flex",
-    justifyContent: "center",
-    transition: "background 0.3s",
-  },
   message: {
     marginTop: "1rem",
     textAlign: "center",
@@ -395,4 +539,11 @@ const styles = {
     fontSize: "large",
     color: "#000",
   },
+};
+const inputStyle = {
+  flex: "1 1 calc(25% - 1rem)",
+  minWidth: 220,
+  backgroundColor: "#fafafa",
+  borderRadius: 8,
+  boxShadow: "inset 0 1px 3px rgba(0,0,0,0.06)",
 };
