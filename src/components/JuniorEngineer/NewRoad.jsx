@@ -3,6 +3,7 @@ import axios from "axios";
 import { uploadExcel, createRoad } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
+import Header from "../header";
 
 const NewRoad = () => {
   const [file, setFile] = useState(null);
@@ -107,186 +108,223 @@ const NewRoad = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.heading}>Upload Excel File</h2>
-        <div style={styles.cautionBox}>
-          <h4 style={{ marginBottom: "0.5rem", color: "#b00020" }}>
-            ⚠️ Caution
-          </h4>
-          <p style={styles.cautionText}>
-            Please ensure that the file you upload strictly follows the{" "}
-            <strong>example .csv file format</strong>.
-            <br />
-            Incorrect column names, spelling mistakes, or mismatched
-            uppercase/lowercase letters will result in{" "}
-            <strong>invalid or misleading road entries</strong> in the system.
-            <br />
-            <strong>Do not modify the column headers</strong> and make sure the
-            data is accurate and complete.
-            <br />
-            <br />{" "}
-            <a
-              href="/example.csv"
-              download
-              style={{
-                color: "#007BFF",
-                textDecoration: "underline",
-                fontWeight: "bold",
-              }}
-            >
-              Click here to see the example .csv file
-            </a>{" "}
-            and verify your file matches exactly before uploading.
-          </p>
-        </div>
-        <br />
-        <form onSubmit={handleSubmit}>
-          <input
-            type="file"
-            accept=".csv"
-            onChange={handleFileChange}
-            style={styles.fileInput}
-          />
-          <div
-            style={{ width: "100%", display: "flex", justifyContent: "center" }}
-          >
-            <button
-              type="submit"
-              disabled={loading}
-              style={styles.button}
-              onMouseOver={(e) => (e.target.style.backgroundColor = "#45a049")}
-              onMouseOut={(e) => (e.target.style.backgroundColor = "#4CAF50")}
-            >
-              {loading ? "Uploading..." : "Upload"}
-            </button>
+    <>
+      <Header />
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <h2 style={styles.heading}>Upload Excel File</h2>
+          <div style={styles.cautionBox}>
+            <h4 style={{ marginBottom: "0.5rem", color: "#b00020" }}>
+              ⚠️ Caution
+            </h4>
+            <p style={styles.cautionText}>
+              Please ensure that the file you upload strictly follows the{" "}
+              <strong>example .csv file format</strong>.
+              <br />
+              Incorrect column names, spelling mistakes, or mismatched
+              uppercase/lowercase letters will result in{" "}
+              <strong>invalid or misleading road entries</strong> in the system.
+              <br />
+              <strong>Do not modify the column headers</strong> and make sure
+              the data is accurate and complete.
+              <br />
+              <br />{" "}
+              <a
+                href="/example.csv"
+                download
+                style={{
+                  color: "#007BFF",
+                  textDecoration: "underline",
+                  fontWeight: "bold",
+                }}
+              >
+                Click here to see the example .csv file
+              </a>{" "}
+              and verify your file matches exactly before uploading.
+            </p>
           </div>
-        </form>
-
-        {message2 && (
-          <p
-            style={{
-              ...styles.message,
-              color:
-                message2.startsWith("Please") || message2.startsWith(" Upload")
-                  ? "red"
-                  : "green",
-            }}
-          >
-            {message2}
-          </p>
-        )}
-        <div
-          style={{ justifyContent: "center", display: "flex", width: "100%" }}
-        >
-          <p style={styles.or}>OR</p>
-        </div>
-
-        <div>
-          <form onSubmit={handleSubmitManually}>
+          <br />
+          <form onSubmit={handleSubmit}>
             <div
               style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "10px",
+                width: "100%",
+                display: "",
                 justifyContent: "center",
+                alignContent:"center",
+                alignSelf:"center",
               }}
             >
-              {Object.keys(formData).map((key) => {
-                if (key === "unique_code") {
-                  return null;
-                }
-                if (
-                  key === "road_type" ||
-                  key === "material_type" ||
-                  key === "road_category"
-                ) {
-                  let options = [];
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleFileChange}
+                style={styles.fileInput}
+              />
 
-                  if (key === "road_type") {
-                    options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "others"];
+              <button
+                type="submit"
+                disabled={loading}
+                style={styles.button}
+                onMouseOver={(e) =>
+                  (e.target.style.backgroundColor = "#45a049")
+                }
+                onMouseOut={(e) => (e.target.style.backgroundColor = "#4CAF50")}
+              >
+                {loading ? "Uploading..." : "Upload"}
+              </button>
+            </div>
+          </form>
+
+          {message2 && (
+            <p
+              style={{
+                ...styles.message,
+                color:
+                  message2.startsWith("Please") ||
+                  message2.startsWith(" Upload")
+                    ? "red"
+                    : "green",
+              }}
+            >
+              {message2}
+            </p>
+          )}
+          <div
+            style={{ justifyContent: "center", display: "flex", width: "100%" }}
+          >
+            <p style={styles.or}>OR</p>
+          </div>
+
+          <div>
+            <form onSubmit={handleSubmitManually}>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "10px",
+                  justifyContent: "center",
+                }}
+              >
+                {Object.keys(formData).map((key) => {
+                  if (key === "unique_code") {
+                    return null;
                   }
-                  if (key === "material_type") {
-                    options = ["CC", "KACCHA", "METALIC", "Paver Block", "Other"];
-                  }
-                  if (key === "road_category") {
-                    options = ["City Road", "Major District Road", "National Highway", "State Highway", "Other"];
+                  if (
+                    key === "road_type" ||
+                    key === "material_type" ||
+                    key === "road_category"
+                  ) {
+                    let options = [];
+
+                    if (key === "road_type") {
+                      options = [
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                        "10",
+                        "others",
+                      ];
+                    }
+                    if (key === "material_type") {
+                      options = [
+                        "CC",
+                        "KACCHA",
+                        "METALIC",
+                        "Paver Block",
+                        "Other",
+                      ];
+                    }
+                    if (key === "road_category") {
+                      options = [
+                        "City Road",
+                        "Major District Road",
+                        "National Highway",
+                        "State Highway",
+                        "Other",
+                      ];
+                    }
+
+                    return (
+                      <select
+                        required
+                        key={key}
+                        name={key}
+                        value={formData[key]}
+                        onChange={handleChange}
+                        style={{
+                          padding: "0.8rem",
+                          borderRadius: "20px",
+                          border: "1px solid #ccc",
+                          backgroundColor: "#f9f9f9",
+                          color: "#000",
+                          flex: "1 1 calc(20% - 10px)",
+                          minWidth: "150px",
+                        }}
+                      >
+                        <option value="" disabled>
+                          {key.replace("_", " ").toUpperCase()}
+                        </option>
+                        {options.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    );
                   }
 
                   return (
-                    <select
+                    <TextField
                       required
                       key={key}
+                      type="text"
                       name={key}
+                      label={key.replace("_", " ").toUpperCase()}
+                      placeholder={key.replace("_", " ").toUpperCase()}
                       value={formData[key]}
                       onChange={handleChange}
                       style={{
                         padding: "0.8rem",
                         borderRadius: "20px",
-                        border: "1px solid #ccc",
                         backgroundColor: "#f9f9f9",
                         color: "#000",
+                        textAlign: "center",
                         flex: "1 1 calc(20% - 10px)",
                         minWidth: "150px",
                       }}
-                    >
-                      <option value="" disabled>
-                        {key.replace("_", " ").toUpperCase()}
-                      </option>
-                      {options.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   );
-                }
+                })}
+              </div>
 
-                return (
-                  <TextField
-                    required
-                    key={key}
-                    type="text"
-                    name={key}
-                    label={key.replace("_", " ").toUpperCase()}
-                    placeholder={key.replace("_", " ").toUpperCase()}
-                    value={formData[key]}
-                    onChange={handleChange}
-                    style={{
-                      padding: "0.8rem",
-                      borderRadius: "20px",
-                      backgroundColor: "#f9f9f9",
-                      color: "#000",
-                      textAlign: "center",
-                      flex: "1 1 calc(20% - 10px)",
-                      minWidth: "150px",
-                    }}
-                  />
-                );
-              })}
-            </div>
+              <br />
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <button type="submit" style={styles.button}>
+                  Submit
+                </button>
+              </div>
+            </form>
 
-            <br />
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <button type="submit" style={styles.button}>
-                Submit
-              </button>
-            </div>
-          </form>
-
-          {message && (
-            <p
-              style={{
-                ...styles.message,
-                color: message.startsWith("") ? "green" : "red",
-              }}
-            >
-              {message}
-            </p>
-          )}
+            {message && (
+              <p
+                style={{
+                  ...styles.message,
+                  color: message.startsWith("") ? "green" : "red",
+                }}
+              >
+                {message}
+              </p>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -297,27 +335,26 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    minHeight: "100vh",
     backgroundColor: "#f7f7f7",
   },
   card: {
     backgroundColor: "#fff",
-    padding: "2rem",
+    padding: "1rem",
     borderRadius: "8px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    width: "90%",
+    width: "100%",
   },
   heading: {
     textAlign: "center",
     marginBottom: "1.5rem",
+    marginTop: "0rem",
     color: "#333",
   },
   fileInput: {
     display: "block",
-    width: "100%",
+    width: "95%",
     marginBottom: "1rem",
     cursor: "pointer",
-    padding: "0.8rem",
+    padding: "0.5rem",
     borderRadius: "20px",
     border: "1px solid #fff",
     backgroundColor: "#f9f9c4",
@@ -325,6 +362,7 @@ const styles = {
     textAlign: "center",
   },
   button: {
+    
     width: "40%",
     padding: "0.6rem",
     border: "none",
@@ -343,10 +381,8 @@ const styles = {
     fontWeight: "500",
   },
   cautionBox: {
-    marginTop: "1rem",
     backgroundColor: "#ffe5e5",
-    width: "99%",
-    padding: "0.8rem",
+    padding: "0.5rem",
     borderRadius: "4px",
     border: "1px solid #ffcccc",
   },

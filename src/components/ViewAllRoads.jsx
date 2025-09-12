@@ -412,7 +412,7 @@ export default function ViewAllRoads() {
             display: "inline-block",
           }}
         >
-          Work Detail
+          All Roads
         </h1>
       </div>
 
@@ -719,7 +719,7 @@ export default function ViewAllRoads() {
                     ))}
                   </Menu>
                 </TableCell>
-                
+
                 <TableCell
                   style={{ paddingRight: "0px", paddingLeft: "0px" }}
                   align="center"
