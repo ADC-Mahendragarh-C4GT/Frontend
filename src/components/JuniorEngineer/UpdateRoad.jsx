@@ -310,86 +310,121 @@ export default function UpdateRoad() {
             </TextField>
 
             <Box
-  sx={{
-    display: "flex",
-    flexDirection: "row", // always row, flexWrap will handle wrapping
-    flexWrap: "wrap",
-    gap: 2,
-    mb: 3,
-  }}
->
-  {selectedRoadId &&
-    Object.keys(formData).map((key) => {
-      if (key === "id" || key === "unique_code" || key === "isActive")
-        return null;
+              sx={{
+                display: "flex",
+                flexDirection: "row", // always row, flexWrap will handle wrapping
+                flexWrap: "wrap",
+                gap: 2,
+                mb: 3,
+              }}
+            >
+              {selectedRoadId &&
+                Object.keys(formData).map((key) => {
+                  if (
+                    key === "id" ||
+                    key === "unique_code" ||
+                    key === "isActive"
+                  )
+                    return null;
 
-      const commonProps = {
-        key,
-        name: key,
-        value: formData[key] || "",
-        onChange: handleChange,
-        size: "small",
-        sx: {
-          width: !isMobile ? "calc(33.33% - 16px)" : "100%", 
-          // desktop: 3 inputs per row (33.33%), mobile: full width
-        },
-      };
+                  const commonProps = {
+                    key,
+                    name: key,
+                    value: formData[key] || "",
+                    onChange: handleChange,
+                    size: "small",
+                    sx: {
+                      width: !isMobile ? "calc(33.33% - 16px)" : "100%",
+                      // desktop: 3 inputs per row (33.33%), mobile: full width
+                    },
+                  };
 
-      // Dropdowns
-      if (key === "road_type") {
-        const options = ["1","2","3","4","5","6","7","8","9","10","Others"];
-        return (
-          <TextField {...commonProps} select label="Road Type">
-            {options.map((o) => (
-              <MenuItem key={o} value={o}>{o}</MenuItem>
-            ))}
-          </TextField>
-        );
-      }
+                  if (key === "ward_number") {
+                    const options = wardOptions;
+                    return (
+                      <TextField {...commonProps} select label="Ward">
+                        {options.map((o) => (
+                          <MenuItem key={o} value={o}>
+                            {o}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    );
+                  }
 
-      if (key === "material_type") {
-        const options = ["CC","KACCHA","METALIC","Paver Block","Other"];
-        return (
-          <TextField {...commonProps} select label="Material Type">
-            {options.map((o) => (
-              <MenuItem key={o} value={o}>{o}</MenuItem>
-            ))}
-          </TextField>
-        );
-      }
+                  // Dropdowns
+                  if (key === "road_type") {
+                    const options = [
+                      "1",
+                      "2",
+                      "3",
+                      "4",
+                      "5",
+                      "6",
+                      "7",
+                      "8",
+                      "9",
+                      "10",
+                      "Others",
+                    ];
+                    return (
+                      <TextField {...commonProps} select label="Road Type">
+                        {options.map((o) => (
+                          <MenuItem key={o} value={o}>
+                            {o}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    );
+                  }
 
-      if (key === "road_category") {
-        const options = [
-          "City Road","Major District Road","National Highway","State Highway","Other"
-        ];
-        return (
-          <TextField {...commonProps} select label="Road Category">
-            {options.map((o) => (
-              <MenuItem key={o} value={o}>{o}</MenuItem>
-            ))}
-          </TextField>
-        );
-      }
+                  if (key === "material_type") {
+                    const options = materialOptions;
+                    return (
+                      <TextField {...commonProps} select label="Material Type">
+                        {options.map((o) => (
+                          <MenuItem key={o} value={o}>
+                            {o}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    );
+                  }
 
-      // Numbers
-      if (key === "length_km" || key === "width_m") {
-        return (
-          <TextField
-            {...commonProps}
-            type="number"
-            label={key.replace("_", " ").toUpperCase()}
-            inputProps={{ step: "any", min: 0 }}
-          />
-        );
-      }
+                  if (key === "road_category") {
+                    const options = categoryOptions;
+                    return (
+                      <TextField {...commonProps} select label="Road Category">
+                        {options.map((o) => (
+                          <MenuItem key={o} value={o}>
+                            {o}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    );
+                  }
 
-      // Text fields
-      return (
-        <TextField {...commonProps} label={key.replace("_", " ").toUpperCase()} />
-      );
-    })}
-</Box>
+                  // Numbers
+                  if (key === "length_km" || key === "width_m") {
+                    return (
+                      <TextField
+                        {...commonProps}
+                        type="number"
+                        label={key.replace("_", " ").toUpperCase()}
+                        inputProps={{ step: "any", min: 0 }}
+                      />
+                    );
+                  }
 
+                  // Text fields
+                  return (
+                    <TextField
+                      {...commonProps}
+                      label={key.replace("_", " ").toUpperCase()}
+                    />
+                  );
+                })}
+            </Box>
 
             <Box textAlign="center" mt={3}>
               <Button
