@@ -410,7 +410,7 @@ export default function UpdateRoad() {
                       <TextField
                         {...commonProps}
                         type="number"
-                        label={key.replace("_", " ").toUpperCase()}
+                        label= {key==="length_km" ? "Length (m)" : "Width (m)"}
                         inputProps={{ step: "any", min: 0 }}
                       />
                     );

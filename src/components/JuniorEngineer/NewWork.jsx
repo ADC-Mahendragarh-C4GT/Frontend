@@ -7,9 +7,15 @@ import {
   getLoginUser,
 } from "../../api/api";
 import { useNavigate } from "react-router-dom";
-import TextField from "@mui/material/TextField";
-import CircularProgress from "@mui/material/CircularProgress";
-import Box from "@mui/material/Box";
+import {
+  TextField,
+  MenuItem,
+  CircularProgress,
+  Box,
+  Typography,
+  Button,
+} from "@mui/material";
+import Header from "../header";
 
 const NewWork = () => {
   const [formData, setFormData] = useState({
@@ -24,21 +30,66 @@ const NewWork = () => {
     completedOrpending: "Pending",
     defect_liability_period: "",
     image: "",
+    pdfDescription: "",
   });
-
-  const navigate = useNavigate();
 
   const [roads, setRoads] = useState([]);
   const [contractors, setContractors] = useState([]);
+  const [wardFilter, setWardFilter] = useState("All");
+  const [materialFilter, setMaterialFilter] = useState("All");
+  const [categoryFilter, setCategoryFilter] = useState("All");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
-  const [FinalLatitude, setFinalLatitude] = useState(null);
-  const [FinalLongitude, setFinalLongitude] = useState(null);
-  const [wardFilter, setWardFilter] = useState("All");
+  const [finalLatitude, setFinalLatitude] = useState(null);
+  const [finalLongitude, setFinalLongitude] = useState(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [savedPayload, setSavedPayload] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1000);
 
-  const [materialFilter, setMaterialFilter] = useState("All");
-  const [categoryFilter, setCategoryFilter] = useState("All");
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1000);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setFinalLatitude(position.coords.latitude);
+          setFinalLongitude(position.coords.longitude);
+        },
+        (error) => console.error("Error fetching location:", error)
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const roadRes = await getRoads();
+        const contractorsRes = await getContractors();
+        const activeContractors = contractorsRes.data.filter((c) => c.isActive);
+
+        setRoads(roadRes);
+        setContractors(activeContractors);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setPageLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const distinctWardNumbers = [...new Set(roads.map((r) => r.ward_number))];
   const distinctMaterials = [...new Set(roads.map((r) => r.material_type))];
@@ -50,157 +101,40 @@ const NewWork = () => {
       materialFilter === "All" || road.material_type === materialFilter;
     const categoryMatch =
       categoryFilter === "All" || road.road_category === categoryFilter;
-
     return wardMatch && materialMatch && categoryMatch;
   });
 
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setFinalLatitude(position.coords.latitude);
-          setFinalLongitude(position.coords.longitude);
-        },
-        (error) => {
-          console.error("Error fetching location:", error);
-        }
-      );
-    } else {
-      console.log("Geolocation not supported by this browser.");
-    }
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const roadRes = await getRoads();
-        const contractors = await getContractors();
-        const contractorRes = contractors.data.filter(
-          (contractor) => contractor.isActive
-        );
-
-        setRoads(roadRes);
-        setContractors(contractorRes);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setPageLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     if (name === "progress_percent") {
       const num = Number(value);
-
       if (isNaN(num) || num < 0 || num > 100) {
         alert("Progress percent must be between 0 and 100.");
         return;
       }
     }
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [savedPayload, setSavedPayload] = useState(null);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
-
-    const selectedRoad = roads.find((r) => r.id === Number(formData.road));
-    const selectedContractor = contractors.find(
-      (c) => c.id === Number(formData.contractor)
-    );
-
-    const payload = {
-      ...formData,
-      road: selectedRoad,
-      contractor: selectedContractor,
-      latitude: FinalLatitude,
-      longitude: FinalLongitude,
-    };
-
-    try {
-      const existingWorks = await getWorksonRoad(selectedRoad.id);
-      const currentTime = new Date();
-
-      for (const work of existingWorks.data) {
-        const isPending = work.completedOrpending === "Pending";
-
-        const workEndDate = new Date(work.end_date);
-        const liabilityMonths = Number(work.defect_liability_period) || 0;
-
-        const defectLiabilityEndDate = new Date(workEndDate);
-        defectLiabilityEndDate.setMonth(
-          defectLiabilityEndDate.getMonth() + liabilityMonths
-        );
-
-        const isCompletedButInDefectPeriod =
-          work.progress_percent === 100 && currentTime < defectLiabilityEndDate;
-
-        if (isPending || isCompletedButInDefectPeriod) {
-          setSavedPayload(payload);
-          setShowConfirmation(true);
-          setLoading(false);
-          return;
-        }
-      }
-
-      const loginUserId = localStorage.getItem("id");
-
-      const loginUser = await getLoginUser(loginUserId);
-
-      const pay = {
-        ...payload,
-        login_user: loginUser,
-      };
-
-      await submitInfraWork(pay);
-    } catch (err) {
-      console.error(err);
-      setMessage("Failed to add InfraWork.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePdfChange = (e) => {
+  const handleFileChange = (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.type !== "application/pdf") {
+    if (type === "image" && !file.type.startsWith("image/")) {
+      alert("Please upload only image files.");
+      return;
+    }
+    if (type === "pdf" && file.type !== "application/pdf") {
       alert("Please upload only PDF files.");
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setFormData((prev) => ({ ...prev, pdfDescription: reader.result }));
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload only image files (jpg, png, jpeg, etc.).");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData((prev) => ({ ...prev, image: reader.result }));
+      setFormData((prev) => ({
+        ...prev,
+        [type === "image" ? "image" : "pdfDescription"]: reader.result,
+      }));
     };
     reader.readAsDataURL(file);
   };
@@ -218,13 +152,68 @@ const NewWork = () => {
         progress_percent: "",
         cost: "",
         contractor: "",
-        completedOrpending: "",
+        completedOrpending: "Pending",
         defect_liability_period: "",
+        image: "",
+        pdfDescription: "",
       });
       navigate("/home/");
     } catch (err) {
       console.error(err);
       setMessage("Failed to add InfraWork.");
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
+
+    const selectedRoad = roads.find((r) => r.id === Number(formData.road));
+    const selectedContractor = contractors.find(
+      (c) => c.id === Number(formData.contractor)
+    );
+
+    const payload = {
+      ...formData,
+      road: selectedRoad,
+      contractor: selectedContractor,
+      latitude: finalLatitude,
+      longitude: finalLongitude,
+    };
+
+    try {
+      const existingWorks = await getWorksonRoad(selectedRoad.id);
+      const currentTime = new Date();
+
+      for (const work of existingWorks.data) {
+        const isPending = work.completedOrpending === "Pending";
+        const workEndDate = new Date(work.end_date);
+        const liabilityMonths = Number(work.defect_liability_period) || 0;
+        const defectLiabilityEndDate = new Date(workEndDate);
+        defectLiabilityEndDate.setMonth(
+          defectLiabilityEndDate.getMonth() + liabilityMonths
+        );
+
+        const isCompletedButInDefectPeriod =
+          work.progress_percent === 100 && currentTime < defectLiabilityEndDate;
+
+        if (isPending || isCompletedButInDefectPeriod) {
+          setSavedPayload(payload);
+          setShowConfirmation(true);
+          setLoading(false);
+          return;
+        }
+      }
+
+      const loginUserId = localStorage.getItem("id");
+      const loginUser = await getLoginUser(loginUserId);
+      await submitInfraWork({ ...payload, login_user: loginUser });
+    } catch (err) {
+      console.error(err);
+      setMessage("Failed to add InfraWork.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -235,9 +224,7 @@ const NewWork = () => {
     setLoading(false);
   };
 
-  const handleConfirmNo = () => {
-    setShowConfirmation(false);
-  };
+  const handleConfirmNo = () => setShowConfirmation(false);
 
   if (pageLoading) {
     return (
@@ -254,413 +241,283 @@ const NewWork = () => {
     );
   }
 
+  const commonProps = {
+    margin: "normal",
+    size: "small",
+    sx: {
+      flex: { xs: "1 1 100%", md: "1 1 calc(33.33% - 16px)" },
+    },
+  };
+
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
+    <>
+      <Header />
+      <Box sx={{ p: 2, mx: "auto" }}>
         {showConfirmation && (
-          <div
-            style={{
+          <Box
+            sx={{
               position: "fixed",
               top: 0,
               left: 0,
               width: "100%",
               height: "100%",
-              background: "rgba(0, 0, 0, 0.4)",
+              bgcolor: "rgba(0,0,0,0.4)",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               zIndex: 999,
             }}
           >
-            <div
-              style={{
-                backgroundColor: "#fff",
-                padding: "25px 30px",
-                borderRadius: "10px",
-                width: "400px",
+            <Box
+              sx={{
+                bgcolor: "background.paper",
+                p: 3,
+                borderRadius: 2,
+                width: 350,
                 textAlign: "center",
-                boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.25)",
               }}
             >
-              <h2 style={{ color: "#333" }}>Existing Work Alert</h2>
-              <p style={{ color: "#000" }}>
-                There is already a pending work or a recently completed work
-                still under defect liability period. Do you want to proceed with
-                adding a new InfraWork?
-              </p>
-              <button
-                onClick={handleConfirmYes}
-                style={{ marginRight: "10px" }}
-              >
-                Yes, Add New Work
-              </button>
-              <button onClick={handleConfirmNo}>No, Cancel</button>
-            </div>
-          </div>
+              <Typography variant="h6" mb={2}>
+                Existing Work Alert
+              </Typography>
+              <Typography mb={2}>
+                There is already a pending work or recently completed work still
+                under defect liability period. Do you want to proceed?
+              </Typography>
+              <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={handleConfirmYes}
+                >
+                  Yes
+                </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={handleConfirmNo}
+                >
+                  No
+                </Button>
+              </Box>
+            </Box>
+          </Box>
         )}
 
-        <h2 style={styles.heading}>Add New InfraWork</h2>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
+          <Typography variant="h5" fontWeight={600} color="text.primary">
+            Update Road Details
+          </Typography>
+        </div>
 
-        <form onSubmit={handleSubmit}>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "10px",
-              justifyContent: "center",
-            }}
-          >
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <form onSubmit={handleSubmit}>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+              {/* Ward Filter */}
+              <TextField {...commonProps} select label="Ward (Optional)">
+                <MenuItem value="All">All Wards</MenuItem>
+                {distinctWardNumbers.map((w) => (
+                  <MenuItem key={w} value={w}>
+                    Ward {w}
+                  </MenuItem>
+                ))}
+              </TextField>
 
+              {/* Material Filter */}
+              <TextField {...commonProps} select label="Material (Optional)">
+                <MenuItem value="All">All Materials</MenuItem>
+                {distinctMaterials.map((m) => (
+                  <MenuItem key={m} value={m}>
+                    {m} Material
+                  </MenuItem>
+                ))}
+              </TextField>
 
-            <select
-              name="ward_number"
-              value={wardFilter}
-              onChange={(e) => setWardFilter(e.target.value)}
-              style={styles.select}
-            >
-              <option value="All">All Wards (Optional)</option>
-              {pageLoading ? (
-                <option disabled>
-                  <Box sx={{ display: "flex", justifyContent: "center" }}>
-                    <CircularProgress size={20} />
-                  </Box>
-                </option>
-              ) : (
-                distinctWardNumbers.map((ward, idx) => (
-                  <option key={idx} value={ward}>
-                    Ward {ward}
-                  </option>
-                ))
-              )}
-            </select>
+              {/* Category Filter */}
+              <TextField {...commonProps} select label="Category (Optional)">
+                <MenuItem value="All">All Categories</MenuItem>
+                {distinctCategories.map((c) => (
+                  <MenuItem key={c} value={c}>
+                    {c}
+                  </MenuItem>
+                ))}
+              </TextField>
 
-
-            <select
-              name="material_type"
-              value={materialFilter}
-              onChange={(e) => setMaterialFilter(e.target.value)}
-              style={styles.select}
-            >
-              <option value="All">All Materials (Optional)</option>
-              {pageLoading ? (
-                <option disabled>
-                  <Box sx={{ display: "flex", justifyContent: "center" }}>
-                    <CircularProgress size={20} />
-                  </Box>
-                </option>
-              ) : (
-                distinctMaterials.map((mat, idx) => (
-                  <option key={idx} value={mat}>
-                    {mat} Material
-                  </option>
-                ))
-              )}
-            </select>
-
-
-            <select
-              name="road_category"
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              style={styles.select}
-            >
-              <option value="All">All Categories of Roads (Optional)</option>
-              {pageLoading ? (
-                <option disabled>
-                  <Box sx={{ display: "flex", justifyContent: "center" }}>
-                    <CircularProgress size={20} />
-                  </Box>
-                </option>
-              ) : (
-                distinctCategories.map((cat, idx) => (
-                  <option key={idx} value={cat}>
-                    {cat}
-                  </option>
-                ))
-              )}
-            </select>
-
-            <select
-              name="road"
-              value={formData.road}
-              onChange={handleChange}
-              style={styles.select}
-              required
-            >
-              <option value="" disabled>
-                Select Road
-              </option>
-              {roads.length === 0 ? (
-                <option disabled>
-                  <CircularProgress size={20} />
-                </option>
-              ) : (
-                filteredRoads.map((road) => (
-                  <option key={road.id} value={road.id}>
-                    {road.unique_code} - {road.road_name}
-                  </option>
-                ))
-              )}
-            </select>
-
-            <TextField
-              name="phase"
-              placeholder="PHASE"
-              label="Phase"
-              value={formData.phase}
-              onChange={handleChange}
-              style={styles.input}
-              required
-            />
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                flex: "1 1 calc(20% - 10px)",
-                minWidth: "150px",
-              }}
-            >
-              <label
-                style={{
-                  marginBottom: "4px",
-                  fontWeight: "500",
-                  color: "#333",
-                }}
-              >
-                Start Date
-              </label>
-              <input
-                type="date"
-                name="start_date"
-                value={formData.start_date}
+              {/* Road */}
+              <TextField
+                {...commonProps}
+                select
+                label="Select Road"
+                name="road"
+                value={formData.road}
                 onChange={handleChange}
-                style={styles.input}
+                required
+              >
+                {filteredRoads.map((r) => (
+                  <MenuItem key={r.id} value={r.id}>
+                    {r.unique_code} - {r.road_name}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              <TextField
+                {...commonProps}
+                name="phase"
+                label="Phase"
+                value={formData.phase}
+                onChange={handleChange}
                 required
               />
-            </div>
 
-            <TextField
-              name="progress_percent"
-              placeholder="PROGRESS %"
-              type="number"
-              value={formData.progress_percent}
-              label="Progress Percent"
-              onChange={handleChange}
-              style={styles.input}
-              inputProps={{ min: 0, max: 100 }}
-              required
-            />
+              <TextField
+                {...commonProps}
+                type="date"
+                name="start_date"
+                label="Start Date"
+                InputLabelProps={{ shrink: true }}
+                value={formData.start_date}
+                onChange={handleChange}
+                required
+              />
 
-            <TextField
-              name="cost"
-              placeholder="COST"
-              label="Cost"
-              type="Number"
-              value={formData.cost}
-              onChange={handleChange}
-              style={styles.input}
-              required
-            />
+              <TextField
+                {...commonProps}
+                type="number"
+                name="progress_percent"
+                label="Progress %"
+                value={formData.progress_percent}
+                onChange={handleChange}
+                inputProps={{ min: 0, max: 100 }}
+                required
+              />
 
-            <select
-              name="contractor"
-              value={formData.contractor}
-              onChange={handleChange}
-              style={styles.select}
-              required
-            >
-              <option value="" disabled>
-                {contractors.length === 0
-                  ? "Loading Contractors..."
-                  : "Select Contractor"}
-              </option>
-              {contractors.length === 0 ? (
-                <option disabled>
-                  <CircularProgress size={20} />
-                </option>
-              ) : (
-                contractors.map((con) => (
-                  <option key={con.id} value={con.id}>
-                    {con.contractor_name} - {con.contact_person}
-                  </option>
-                ))
-              )}
-            </select>
+              <TextField
+                {...commonProps}
+                type="number"
+                name="cost"
+                label="Cost"
+                value={formData.cost}
+                onChange={handleChange}
+                required
+              />
 
-            <select
-              name="completedOrpending"
-              value={formData.completedOrpending}
-              onChange={handleChange}
-              style={styles.select}
-              required
-            >
-              <option value="" disabled>
-                COMPLETED / PENDING
-              </option>
-              <option value="Completed">Completed</option>
-              <option value="Pending">Pending</option>
-            </select>
+              <TextField
+                {...commonProps}
+                select
+                label="Contractor"
+                name="contractor"
+                value={formData.contractor}
+                onChange={handleChange}
+                required
+              >
+                {contractors.map((c) => (
+                  <MenuItem key={c.id} value={c.id}>
+                    {c.contractor_name} - {c.contact_person}
+                  </MenuItem>
+                ))}
+              </TextField>
 
-            <TextField
-              name="defect_liability_period"
-              placeholder="DEFECT LIABILITY PERIOD (months)"
-              label="Defect Liability Period (months)"
-              value={formData.defect_liability_period}
-              onChange={handleChange}
-              style={styles.input}
-              type="Number"
-              required
-            />
-            <TextField
-              name="description"
-              placeholder="DESCRIPTION"
-              label="Short description in 1 or 2 line"
-              multiline
-              value={formData.description}
-              onChange={handleChange}
-              style={{
-                ...styles.input,
-                minHeight: "60px",
-                flex: "1 1 90%",
-                textAlign: "start",
-              }}
-              required
-            />
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                flex: "1 1 calc(20% - 10px)",
-                minWidth: "150px",
-              }}
-            >
-              <label
-                style={{
-                  marginBottom: "4px",
-                  fontWeight: "500",
-                  color: "#333",
-                }}
+              <TextField
+                {...commonProps}
+                select
+                label="Status"
+                name="completedOrpending"
+                value={formData.completedOrpending}
+                onChange={handleChange}
+                required
+              >
+                <MenuItem value="Completed">Completed</MenuItem>
+                <MenuItem value="Pending">Pending</MenuItem>
+              </TextField>
+
+              <TextField
+                {...commonProps}
+                type="number"
+                name="defect_liability_period"
+                label="Defect Liability Period (months)"
+                value={formData.defect_liability_period}
+                onChange={handleChange}
+                required
+              />
+
+              <TextField
+                {...commonProps}
+                label="Description"
+                name="description"
+                multiline
+                minRows={2}
+                value={formData.description}
+                onChange={handleChange}
+                required
+              />
+
+              <Button
+                variant="contained"
+                component="label"
+                fullWidth
+                sx={{ mt: 1 }}
               >
                 Upload Image (Optional)
-              </label>
-              <input
-                type="file"
-                name="image"
-                accept="image/*,application/pdf"
-                onChange={handleImageChange}
-                style={styles.input}
-              />
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                flex: "1 1 calc(20% - 10px)",
-                minWidth: "150px",
-                marginTop: "1rem",
-              }}
-            >
-              <label
-                style={{
-                  marginBottom: "4px",
-                  fontWeight: "500",
-                  color: "#333",
-                }}
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, "image")}
+                />
+              </Button>
+
+              <Button
+                variant="contained"
+                component="label"
+                fullWidth
+                sx={{ mt: 1 }}
               >
-                Upload Detailed Update/Description (Optional)
-              </label>
-              <input
-                type="file"
-                accept="application/pdf"
-                onChange={handlePdfChange}
-                placeholder="Please upload PDF only"
-                style={styles.input}
-              />
-            </div>
-          </div>
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                marginTop: "1rem",
-                padding: "0.8rem 2rem",
-                borderRadius: "20px",
-                border: "none",
-                backgroundColor: "#4CAF50",
-                color: "#fff",
-                fontSize: "1rem",
-                cursor: "pointer",
-                width: "40%",
-              }}
-            >
-              {loading ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                "Submit"
-              )}
-            </button>
-          </div>
-        </form>
+                Upload PDF (Optional)
+                <input
+                  type="file"
+                  hidden
+                  accept="application/pdf"
+                  onChange={(e) => handleFileChange(e, "pdf")}
+                />
+              </Button>
+
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                sx={{ mt: 2 }}
+                disabled={loading}
+              >
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Submit"
+                )}
+              </Button>
+            </Box>
+          </form>
+        </div>
 
         {message && (
-          <p
-            style={{
-              ...styles.message,
-              color: message.startsWith("✅") ? "green" : "red",
-            }}
+          <Typography
+            align="center"
+            color={message.includes("successfully") ? "green" : "red"}
+            sx={{ mt: 1 }}
           >
             {message}
-          </p>
+          </Typography>
         )}
-      </div>
-    </div>
+      </Box>
+    </>
   );
 };
 
 export default NewWork;
-
-const styles = {
-  container: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: "100vh",
-    backgroundColor: "#f7f7f7",
-  },
-  card: {
-    backgroundColor: "#fff",
-    padding: "2rem",
-    borderRadius: "8px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    width: "90%",
-  },
-  heading: {
-    textAlign: "center",
-    marginBottom: "1.5rem",
-    color: "#333",
-  },
-  input: {
-    padding: "0.8rem",
-    borderRadius: "20px",
-    backgroundColor: "#e0e0e0",
-    color: "#000",
-    textAlign: "center",
-    flex: "1 1 calc(20% - 10px)",
-  },
-  select: {
-    color: "#000",
-    padding: "0.8rem",
-    borderRadius: "20px",
-    border: "1px solid #ccc",
-    backgroundColor: "#f9f9f9",
-    flex: "1 1 calc(20% - 10px)",
-    minWidth: "150px",
-  },
-  message: {
-    marginTop: "1rem",
-    textAlign: "center",
-    fontWeight: "500",
-  },
-};
