@@ -307,9 +307,19 @@ export default function RoadDetail() {
                 <b>Address:</b> {contractor?.address}
               </p>
               <p>
-                <div style={{display:"flex", flexDirection:"row"}}>
-          <b>Defect Liability Period : </b> <div style={{fontWeight: "bold", fontSize : "1.1rem", marginLeft:"0.5rem"}}> {defect_liability_period} months</div>
-          </div>
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <b>Defect Liability Period : </b>{" "}
+                  <div
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "1.1rem",
+                      marginLeft: "0.5rem",
+                    }}
+                  >
+                    {" "}
+                    {defect_liability_period} months
+                  </div>
+                </div>
               </p>
             </div>
 
@@ -346,7 +356,36 @@ export default function RoadDetail() {
           <hr style={{ border: "none", borderTop: "1px solid #000" }} />
           {/* Work Updates Table */}
           <div style={{ marginBottom: "2rem" }}>
-            <h3>Update of Work</h3>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginTop: "1rem",
+                gap: "1rem",
+                marginBottom: "1rem",
+              }}
+            >
+              <h3 style={{ margin: 0 }}>All Updates :-</h3>
+              <button
+                onClick={() =>
+                  navigate("/NewUpdate", {
+                    state: { roadId: road.id, workId: work.id },
+                  })
+                }
+                style={{
+                  padding: "0.5rem 1rem",
+                  borderRadius: "6px",
+                  backgroundColor: "#4CAF50",
+                  color: "white",
+                  border: "none",
+                  cursor: "pointer",
+                  minWidth: "120px",
+                }}
+              >
+                Add New Update
+              </button>
+            </div>
 
             <div style={{ overflowX: "auto" }}>
               <table

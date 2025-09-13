@@ -839,7 +839,7 @@ export default function ViewAllRoads() {
                     <TableCell align="center">{update.state}</TableCell>
                     {userType === "JE" && (
                       <TableCell align="center">
-                        <button onClick={() => handleEdit(update.id)}>
+                        <button style={{color:"#fff"}} onClick={() => handleEdit(update.id)}>
                           Edit
                         </button>
                       </TableCell>

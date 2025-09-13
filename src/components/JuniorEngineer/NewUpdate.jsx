@@ -5,15 +5,22 @@ import {
   createUpdate,
   getLoginUser,
 } from "../../api/api";
-import { useNavigate } from "react-router-dom";
-import TextField from "@mui/material/TextField";
-import CircularProgress from "@mui/material/CircularProgress";
-import Box from "@mui/material/Box";
-
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  TextField,
+} from "@mui/material";
+import Header from "../header";
 
 export default function NewUpdate() {
   const [roads, setRoads] = useState([]);
-  const [InfraWorks, setInfraWorks] = useState([]);
+  const [infraWorks, setInfraWorks] = useState([]);
   const [filteredWorks, setFilteredWorks] = useState([]);
   const [selectedRoad, setSelectedRoad] = useState("");
   const [selectedWork, setSelectedWork] = useState("");
@@ -24,102 +31,90 @@ export default function NewUpdate() {
   const [loading, setLoading] = useState(false);
   const [pdfDescription, setPdfDescription] = useState("");
   const [pageLoading, setPageLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1000);
 
+  const location = useLocation();
+  const { roadId, workId } = location.state || {};
   const navigate = useNavigate();
-
-  const [FinalLatitude, setFinalLatitude] = useState(null);
-  const [FinalLongitude, setFinalLongitude] = useState(null);
 
   // filters
   const [wardFilter, setWardFilter] = useState("All");
   const [materialFilter, setMaterialFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
 
-  // distinct values for dropdowns
-  const distinctWardNumbers = [...new Set(roads.map((r) => r.ward_number))];
-  const distinctMaterials = [...new Set(roads.map((r) => r.material_type))];
-  const distinctCategories = [...new Set(roads.map((r) => r.road_category))];
-
+  // responsive
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setFinalLatitude(position.coords.latitude);
-          setFinalLongitude(position.coords.longitude);
-        },
-        (error) => {
-          console.error("Error fetching location:", error);
-        }
-      );
-    } else {
-      console.log("Geolocation not supported by this browser.");
-    }
+    const handleResize = () => setIsMobile(window.innerWidth < 1000);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // fetch data
   useEffect(() => {
     const fetchData = async () => {
       try {
         const roadsRes = await getRoads();
-        const works = await getInfraWorks();
-        const worksRes = works.data.filter((work) => work.isActive);
-
-        const worksArray = Array.isArray(worksRes)
-          ? worksRes
-          : worksRes.data ?? [];
-
+        const worksRes = (await getInfraWorks()).data.filter((w) => w.isActive);
         setRoads(roadsRes);
-        setInfraWorks(worksArray);
-        setFilteredWorks(worksArray);
-      } catch (err) {
-        console.error("Failed to fetch data", err);
+        setInfraWorks(worksRes);
+        setFilteredWorks(worksRes);
+      } catch (e) {
+        console.error(e);
       } finally {
         setPageLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
+  // preselect road/work after data arrives
+  useEffect(() => {
+    if (!pageLoading && roadId) {
+      setSelectedRoad(String(roadId));
+    }
+  }, [pageLoading, roadId]);
+
+  useEffect(() => {
+    if (!pageLoading && workId) {
+      setSelectedWork(String(workId));
+    }
+  }, [pageLoading, workId]);
+
+  // filter works when road changes
   useEffect(() => {
     if (!selectedRoad) {
-      setFilteredWorks(InfraWorks);
-      return;
-    }
-
-    const selectedRoadObj = roads.find(
-      (road) => road.id === Number(selectedRoad)
-    );
-    if (selectedRoadObj) {
-      const filtered = InfraWorks.filter(
-        (InfraWork) => String(InfraWork.road) === String(selectedRoadObj.id)
+      setFilteredWorks(infraWorks);
+    } else {
+      const filtered = infraWorks.filter(
+        (w) => String(w.road) === String(selectedRoad)
       );
       setFilteredWorks(filtered);
     }
-  }, [selectedRoad, InfraWorks, roads]);
+  }, [selectedRoad, infraWorks]);
 
-  // compute filtered roads for dropdown
+  const distinctWardNumbers = [...new Set(roads.map((r) => r.ward_number))];
+  const distinctMaterials = [...new Set(roads.map((r) => r.material_type))];
+  const distinctCategories = [...new Set(roads.map((r) => r.road_category))];
+
   const filteredRoads = roads.filter((road) => {
-    return (
-      (wardFilter === "All" || road.ward_number === wardFilter) &&
-      (materialFilter === "All" || road.material_type === materialFilter) &&
-      (categoryFilter === "All" || road.road_category === categoryFilter)
-    );
+    const wardMatch = wardFilter === "All" || road.ward_number === wardFilter;
+    const materialMatch =
+      materialFilter === "All" || road.material_type === materialFilter;
+    const categoryMatch =
+      categoryFilter === "All" || road.road_category === categoryFilter;
+    return wardMatch && materialMatch && categoryMatch;
   });
 
   const handleRoadChange = (e) => {
-    const roadId = e.target.value;
-    setSelectedRoad(roadId);
+    setSelectedRoad(e.target.value);
     setSelectedWork("");
   };
 
-  // Convert uploaded image to Base64
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImageBase64(reader.result);
-      };
+      reader.onloadend = () => setImageBase64(reader.result);
       reader.readAsDataURL(file);
     }
   };
@@ -127,10 +122,8 @@ export default function NewUpdate() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setPageLoading(true);
-    setMessage("");
 
-    const selectedWorkObj = InfraWorks.find(
+    const selectedWorkObj = infraWorks.find(
       (work) => String(work.id) === String(selectedWork)
     );
 
@@ -140,304 +133,196 @@ export default function NewUpdate() {
       navigate("/home/");
       return;
     }
-
     try {
       const loginUserId = localStorage.getItem("id");
       const loginUser = await getLoginUser(loginUserId);
-
-      const payload = {
+      await createUpdate({
         login_user: loginUser,
         road: selectedRoad,
         work: selectedWork,
         progress_percent: progressPercent,
         status_note: statusNote,
         image: imageBase64,
-        latitude: FinalLatitude,
-        longitude: FinalLongitude,
-        pdfDescription: pdfDescription,
-      };
-
-      await createUpdate(payload);
-
+        pdfDescription,
+      });
       setMessage("Update created successfully!");
-      setSelectedRoad("");
-      setSelectedWork("");
-      setProgressPercent("");
-      setStatusNote("");
-      setImageBase64("");
       navigate("/home/");
     } catch (err) {
       console.error(err);
-      setMessage(
-        err.response?.data?.progress_percent?.[0] || "Failed to create update."
-      );
+      setMessage("Failed to create update.");
     } finally {
       setLoading(false);
-      setPageLoading(false);
     }
   };
 
   if (pageLoading) {
-      return (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "100vh",
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      );
-    }
-  
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.heading}>Add New Update</h2>
+    <>
+      <Header />
+      <Box sx={styles.container}>
+        <Box sx={styles.card}>
+          <h2 style={styles.heading}>Add New Update</h2>
+          <form onSubmit={handleSubmit}>
+            <Box sx={styles.formBox}>
+              <FormControl sx={styles.field}>
+                <InputLabel>Ward (Optional)</InputLabel>
+                <Select
+                  value={wardFilter}
+                  onChange={(e) => setWardFilter(e.target.value)}
+                >
+                  <MenuItem value="All">All Wards</MenuItem>
+                  {distinctWardNumbers.map((w) => (
+                    <MenuItem key={w} value={w}>{`Ward ${w}`}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-        <form onSubmit={handleSubmit}>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "10px",
-              justifyContent: "center",
-            }}
-          >
-            {/* Ward filter */}
-            <select
-              name="ward_number"
-              value={wardFilter}
-              onChange={(e) => setWardFilter(e.target.value)}
-              style={styles.select}
-            >
-              <option value="All">All Wards (Optional)</option>
-              {distinctWardNumbers.map((ward, idx) => (
-                <option key={idx} value={ward}>
-                  Ward {ward}
-                </option>
-              ))}
-            </select>
+              <FormControl sx={styles.field}>
+                <InputLabel>Material (Optional)</InputLabel>
+                <Select
+                  value={materialFilter}
+                  onChange={(e) => setMaterialFilter(e.target.value)}
+                >
+                  <MenuItem value="All">All Material Types</MenuItem>
+                  {distinctMaterials.map((m) => (
+                    <MenuItem key={m} value={m}>
+                      {m}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-            {/* Material filter */}
-            <select
-              name="material_type"
-              value={materialFilter}
-              onChange={(e) => setMaterialFilter(e.target.value)}
-              style={styles.select}
-            >
-              <option value="All">All Materials (Optional)</option>
-              {distinctMaterials.map((mat, idx) => (
-                <option key={idx} value={mat}>
-                  {mat} Material
-                </option>
-              ))}
-            </select>
 
-            {/* Road category filter */}
-            <select
-              name="road_category"
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              style={styles.select}
-            >
-              <option value="All">All Categories of Roads (Optional)</option>
-              {distinctCategories.map((cat, idx) => (
-                <option key={idx} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+              <FormControl sx={styles.field}>
+                <InputLabel>Category (Optional)</InputLabel>
+                <Select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                >
+                  <MenuItem value="All">All Categories</MenuItem>
+                  {distinctCategories.map((c) => (
+                    <MenuItem key={c} value={c}>
+                      {c}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-            {/* Single merged road dropdown */}
-            <select
-              name="road"
-              value={selectedRoad}
-              onChange={handleRoadChange}
-              style={styles.select}
-              required
-            >
-              <option value="" disabled>
-                Select Road
-              </option>
-              {filteredRoads.map((road) => (
-                <option key={road.id} value={road.id}>
-                  {road.unique_code} - {road.road_name}
-                </option>
-              ))}
-            </select>
 
-            {/* Work Dropdown */}
-            <select
-              name="InfraWork"
-              value={selectedWork}
-              onChange={(e) => setSelectedWork(e.target.value)}
-              style={styles.select}
-              required
-            >
-              <option value="" disabled>
-                Select Work
-              </option>
-              {filteredWorks.length === 0 ? (
-                <option value="" disabled>
-                  No past works available for this road
-                </option>
-              ) : (
-                filteredWorks.map((work) => (
-                  <option key={work.id} value={work.id}>
-                    {work.description} - {work.phase} - {work.start_date} -{" "}
-                    {work.end_date} - {work.progress_percent}%
-                  </option>
-                ))
-              )}
-            </select>
+              <FormControl sx={styles.field} required>
+                <InputLabel>Road</InputLabel>
+                <Select value={selectedRoad} onChange={handleRoadChange}>
+                  {filteredRoads.length === 0 ? (
+                    <MenuItem value="">No Roads Found</MenuItem>
+                  ) : (
+                    filteredRoads.map((r) => (
+                      <MenuItem key={r.id} value={r.id}>
+                        {r.unique_code} - {r.road_name}
+                      </MenuItem>
+                    ))
+                  )}
+                </Select>
+              </FormControl>
 
-            {/* Progress % */}
-            <TextField
-              type="number"
-              name="progressPercent"
-              label="Progress %"
-              placeholder="Progress %"
-              value={progressPercent}
-              onChange={(e) => setProgressPercent(e.target.value)}
-              style={styles.input}
-              required
-            />
-          </div>
 
-          {/* Image Upload */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              flex: "1 1 calc(20% - 10px)",
-              minWidth: "150px",
-            }}
-          >
-            <label
-              style={{
-                marginBottom: "4px",
-                fontWeight: "500",
-                color: "#333",
-              }}
-            >
-              Upload Image
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              style={{
-                padding: "0.8rem",
-                borderRadius: "20px",
-                backgroundColor: "#e0e0e0",
-                color: "#000",
-                textAlign: "center",
-                flex: "1 1 calc(20% - 10px)",
-              }}
-            />
-          </div>
+              <FormControl sx={styles.field} required>
+                <InputLabel>Work</InputLabel>
+                <Select
+                  value={selectedWork}
+                  onChange={(e) => setSelectedWork(e.target.value)}
+                >
+                  {filteredWorks.length === 0 ? (
+                    <MenuItem value="">No Work Found</MenuItem>
+                  ) : (
+                    filteredWorks.map((w) => (
+                      <MenuItem key={w.id} value={w.id}>
+                        {w.description} – {w.phase}
+                      </MenuItem>
+                    ))
+                  )}
+                </Select>
+              </FormControl>
 
-          {/* Short Description */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              margin: "1rem 0",
-              minHeight: "100px",
-            }}
-          >
-            <textarea
-              type="text"
-              name="statusNote"
-              placeholder="Short description (1–2 lines)"
-              value={statusNote}
-              onChange={(e) => setStatusNote(e.target.value)}
-              style={{ ...styles.input, textAlign: "start" }}
-              required
-            />
-          </div>
 
-          {/* PDF Upload */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              flex: "1 1 calc(20% - 10px)",
-              minWidth: "150px",
-              marginTop: "1rem",
-            }}
-          >
-            <label
-              style={{
-                marginBottom: "4px",
-                fontWeight: "500",
-                color: "#333",
-              }}
-            >
-              Upload Detailed Update/Description (Optional)
-            </label>
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    setPdfDescription(reader.result);
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
-              placeholder="Please upload PDF only"
-              style={{
-                padding: "0.8rem",
-                borderRadius: "20px",
-                backgroundColor: "#e0e0e0",
-                color: "#000",
-                textAlign: "center",
-                flex: "1 1 calc(20% - 10px)",
-              }}
-            />
-          </div>
+              <TextField
+                label="Progress %"
+                type="number"
+                value={progressPercent}
+                onChange={(e) => setProgressPercent(e.target.value)}
+                sx={styles.field}
+                required
+              />
 
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                marginTop: "1rem",
-                padding: "0.8rem 2rem",
-                borderRadius: "20px",
-                border: "none",
-                backgroundColor: "#4CAF50",
-                color: "#fff",
-                fontSize: "1rem",
-                cursor: "pointer",
-                width: "40%",
-              }}
-            >
-              {loading ? "Submitting..." : "Submit"}
-            </button>
-          </div>
 
-          {message && (
-            <p
-              style={{
-                ...styles.message,
-                color: message.startsWith("Failed") ? "red" : "green",
-              }}
-            >
-              {message}
-            </p>
-          )}
-        </form>
-      </div>
-    </div>
+              <TextField
+                label="Short Description"
+                value={statusNote}
+                onChange={(e) => setStatusNote(e.target.value)}
+                multiline
+                minRows={2}
+                fullWidth
+                sx={{ mt: 2 }}
+              />
+
+
+              <Button variant="contained" component="label" fullWidth sx={{ mt: 2 }}>
+                Upload Image
+                <input type="file" hidden accept="image/*" onChange={handleImageChange} />
+              </Button>
+
+              <Button variant="contained" component="label" fullWidth sx={{ mt: 2 }}>
+                Upload PDF (Optional)
+                <input
+                  type="file"
+                  hidden
+                  accept="application/pdf"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => setPdfDescription(reader.result);
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </Button>
+
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                sx={{ mt: 3 }}
+                disabled={loading}
+              >
+                {loading ? <CircularProgress size={24} color="inherit" /> : "Submit"}
+              </Button>
+            </Box>
+
+            {message && (
+              <Box
+                mt={2}
+                textAlign="center"
+                color={message.startsWith("Failed") ? "red" : "green"}
+              >
+                {message}
+              </Box>
+            )}
+          </form>
+        </Box>
+      </Box>
+    </>
   );
 }
 
@@ -445,43 +330,21 @@ const styles = {
   container: {
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
-    minHeight: "100vh",
-    backgroundColor: "#f7f7f7",
   },
   card: {
-    backgroundColor: "#fff",
-    padding: "2rem",
+    background: "#fff",
+    p: 2,
     borderRadius: "8px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    width: "90%",
   },
-  heading: {
-    textAlign: "center",
-    marginBottom: "1.5rem",
-    color: "#333",
+  heading: { textAlign: "center", color: "#333" },
+  formBox: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 2,
+    justifyContent: "center",
   },
-  input: {
-    padding: "0.8rem",
-    borderRadius: "20px",
-    backgroundColor: "#e0e0e0",
-    color: "#000",
-    textAlign: "center",
-    flex: "1 1 calc(20% - 10px)",
-    minWidth: "150px",
-  },
-  select: {
-    color: "#000",
-    padding: "0.8rem",
-    borderRadius: "20px",
-    border: "1px solid #ccc",
-    backgroundColor: "#f9f9f9",
-    flex: "1 1 calc(20% - 10px)",
-    minWidth: "150px",
-  },
-  message: {
-    marginTop: "1rem",
-    textAlign: "center",
-    fontWeight: "500",
+  field: {
+    flex: { xs: "1 1 100%", md: "1 1 calc(33.33% - 16px)" },
+    minWidth: 150,
   },
 };

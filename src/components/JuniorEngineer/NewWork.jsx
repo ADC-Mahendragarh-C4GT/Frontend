@@ -188,15 +188,17 @@ const NewWork = () => {
 
       for (const work of existingWorks.data) {
         const isPending = work.completedOrpending === "Pending";
-        const workEndDate = new Date(work.end_date);
-        const liabilityMonths = Number(work.defect_liability_period) || 0;
-        const defectLiabilityEndDate = new Date(workEndDate);
-        defectLiabilityEndDate.setMonth(
-          defectLiabilityEndDate.getMonth() + liabilityMonths
-        );
 
-        const isCompletedButInDefectPeriod =
-          work.progress_percent === 100 && currentTime < defectLiabilityEndDate;
+        let isCompletedButInDefectPeriod = false;
+        if (work.progress_percent === 100 && work.end_date) {
+          const workEndDate = new Date(work.end_date);
+          const liabilityMonths = Number(work.defect_liability_period) || 0;
+          const defectLiabilityEndDate = new Date(workEndDate);
+          defectLiabilityEndDate.setMonth(
+            defectLiabilityEndDate.getMonth() + liabilityMonths
+          );
+          isCompletedButInDefectPeriod = currentTime < defectLiabilityEndDate;
+        }
 
         if (isPending || isCompletedButInDefectPeriod) {
           setSavedPayload(payload);
@@ -266,6 +268,7 @@ const NewWork = () => {
               justifyContent: "center",
               alignItems: "center",
               zIndex: 999,
+              color : "#000",
             }}
           >
             <Box
@@ -313,7 +316,7 @@ const NewWork = () => {
           }}
         >
           <Typography variant="h5" fontWeight={600} color="text.primary">
-            Update Road Details
+            Add New Work on Road
           </Typography>
         </div>
 
@@ -321,8 +324,15 @@ const NewWork = () => {
           <form onSubmit={handleSubmit}>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
               {/* Ward Filter */}
-              <TextField {...commonProps} select label="Ward (Optional)">
+              <TextField
+                {...commonProps}
+                value={wardFilter}
+                onChange={(e) => setWardFilter(e.target.value)}
+                select
+                label="Ward (Optional)"
+              >
                 <MenuItem value="All">All Wards</MenuItem>
+
                 {distinctWardNumbers.map((w) => (
                   <MenuItem key={w} value={w}>
                     Ward {w}
@@ -331,8 +341,15 @@ const NewWork = () => {
               </TextField>
 
               {/* Material Filter */}
-              <TextField {...commonProps} select label="Material (Optional)">
-                <MenuItem value="All">All Materials</MenuItem>
+              <TextField
+                {...commonProps}
+                value={materialFilter}
+                onChange={(e) => setMaterialFilter(e.target.value)}
+                select
+                label="Material (Optional)"
+              >
+                <MenuItem value="All">All Categories</MenuItem>
+
                 {distinctMaterials.map((m) => (
                   <MenuItem key={m} value={m}>
                     {m} Material
@@ -341,10 +358,17 @@ const NewWork = () => {
               </TextField>
 
               {/* Category Filter */}
-              <TextField {...commonProps} select label="Category (Optional)">
+              <TextField
+                {...commonProps}
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                select
+                label="Category (Optional)"
+              >
                 <MenuItem value="All">All Categories</MenuItem>
+
                 {distinctCategories.map((c) => (
-                  <MenuItem key={c} value={c}>
+                  <MenuItem key={c} value={c} style={{ color: "#000" }}>
                     {c}
                   </MenuItem>
                 ))}
@@ -360,11 +384,17 @@ const NewWork = () => {
                 onChange={handleChange}
                 required
               >
-                {filteredRoads.map((r) => (
-                  <MenuItem key={r.id} value={r.id}>
-                    {r.unique_code} - {r.road_name}
+                {filteredRoads.length == 0 ? (
+                  <MenuItem key="" value="">
+                    No Road Found
                   </MenuItem>
-                ))}
+                ) : (
+                  filteredRoads.map((r) => (
+                    <MenuItem key={r.id} value={r.id}>
+                      {r.unique_code} - {r.road_name}
+                    </MenuItem>
+                  ))
+                )}
               </TextField>
 
               <TextField
