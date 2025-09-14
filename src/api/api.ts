@@ -434,3 +434,16 @@ export const ForgetPassword = (email: string) => {
     headers: { "Content-Type": "application/json" },
   });
 }
+
+export const welcomeEmail = (email: string, token: string) => {
+  return api.post(
+    "accounts/send-welcome-email/",
+    { email },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};

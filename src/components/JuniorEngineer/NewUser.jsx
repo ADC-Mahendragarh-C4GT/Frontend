@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { register, fetchUserType, getLoginUser } from "../../api/api";
+import { register, fetchUserType, getLoginUser, welcomeEmail } from "../../api/api";
 import {
   Box,
   Button,
@@ -62,6 +62,9 @@ export default function NewUser() {
         login_user: loginUser,
       };
       const res = await register(payload);
+      const token = localStorage.getItem("access_token");
+      welcomeEmail(formData.email, token);
+
       setMessage("User registered successfully!");
       setFormData({
         username: "",
