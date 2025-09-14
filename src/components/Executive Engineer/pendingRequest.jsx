@@ -7,6 +7,21 @@ import {
   getLoginUser,
 } from "../../api/api";
 import Header from "../header";
+import {
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  Button,
+  Select,
+  MenuItem,
+  useMediaQuery,
+} from "@mui/material";
 
 export default function PendingRequest() {
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -14,277 +29,280 @@ export default function PendingRequest() {
   const [road, setRoad] = useState([]);
   const [otherRoad, setOtherRoad] = useState([]);
   const [selectedActions, setSelectedActions] = useState({});
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1000);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1000);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const fetchData = () => {
     Promise.all([getPendingRequests(), getOtherRequests(), getRoads()])
       .then(([pending, other, roads]) => {
-        const pendingWithRoads = pending
-          .map((req) => {
-            const roadObj = roads.find((r) => r.id === req.road);
-            return { ...req, road: roadObj || req.road };
-          })
-          .sort((a, b) => {
-            if (a.status === "Pending" && b.status !== "Pending") return -1;
-            if (a.status !== "Pending" && b.status === "Pending") return 1;
-            return new Date(b.submitted_at) - new Date(a.submitted_at);
-          });
+        const mapRequests = (data) =>
+          data
+            .map((req) => {
+              const roadObj = roads.find((r) => r.id === req.road);
+              return { ...req, road: roadObj || req.road };
+            })
+            .sort((a, b) => {
+              if (a.status === "Pending" && b.status !== "Pending") return -1;
+              if (a.status !== "Pending" && b.status === "Pending") return 1;
+              return new Date(b.submitted_at) - new Date(a.submitted_at);
+            });
 
-        const otherWithRoads = other
-          .map((req) => {
-            const roadObj = roads.find((r) => r.id === req.road);
-            return { ...req, road: roadObj || req.road };
-          })
-          .sort((a, b) => {
-            if (a.status === "Pending" && b.status !== "Pending") return -1;
-            if (a.status !== "Pending" && b.status === "Pending") return 1;
-            return new Date(b.submitted_at) - new Date(a.submitted_at);
-          });
-
-        setPendingRequests(pendingWithRoads);
-        setOtherRequests(otherWithRoads);
+        setPendingRequests(mapRequests(pending));
+        setOtherRequests(mapRequests(other));
         setRoad(roads);
         setOtherRoad(roads);
       })
-      .catch((err) => {
-        console.error("Failed to fetch data", err);
-      });
+      .catch((err) => console.error("Failed to fetch data", err));
   };
+
   useEffect(() => {
     fetchData();
   }, []);
 
-  const handleActionChange = (id, value) => {
+  const handleActionChange = (id, value) =>
     setSelectedActions((prev) => ({ ...prev, [id]: value }));
-  };
 
   const handleUpdateStatus = async (id) => {
     const status = selectedActions[id];
+    if (!status) return alert("Please select a status first.");
+
     const userFirstName = localStorage.getItem("userFirstName");
     const userLastName = localStorage.getItem("userLastName");
     const user_type = localStorage.getItem("user_type");
-    const response_by =
-      userFirstName + " " + userLastName + " " + "(" + user_type + ")";
+    const response_by = `${userFirstName} ${userLastName} (${user_type})`;
     const response_date = new Date().toISOString().split("T")[0];
-    if (!status) {
-      alert("Please select a status first.");
-      return;
-    }
-
     const loginUserId = localStorage.getItem("id");
-    
     const login_user = await getLoginUser(loginUserId);
 
     updateRequestStatus(id, { status, response_by, response_date, login_user })
-      .then(() => {
-        fetchData(); // refresh both tables from backend
-      })
-      .catch((err) => {
-        console.error("Failed to update status", err);
-      });
+      .then(() => fetchData())
+      .catch((err) => console.error("Failed to update status", err));
   };
 
+  const renderPdfButton = (url) =>
+    url ? (
+      <Button
+        variant="contained"
+        size="small"
+        sx={{ textTransform: "none" }}
+        onClick={() => window.open(url, "_blank")}
+      >
+        View PDF
+      </Button>
+    ) : (
+      "No Description"
+    );
 
   return (
     <>
       <Header />
-      <div
-        style={{
-          padding: "1rem",
-          fontFamily: "Arial, sans-serif",
-          color: "#333",
-        }}
-      >
-        <h2>Other Department Work Requests(Pending) :-</h2>
-        <table style={tableStyle}>
-          <thead>
-            <tr>
-              <th style={thStyle}>S. No.</th>
-              <th style={thStyle}>Date</th>
-              <th style={thStyle}>Department Name</th>
-              <th style={thStyle}>Road </th>
-              <th style={thStyle}>Work Description</th>
-              <th style={thStyle}>Requested By</th>
-              <th style={thStyle}>Contact Info</th>
-              <th style={thStyle}>Detail Description (PDF)</th>
-              <th style={thStyle}>Action</th>
-              <th style={thStyle}>Update</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pendingRequests.length === 0 ? (
-              <tr>
-                <td colSpan={10} style={tdStyleCenter}>
-                  No requests found.
-                </td>
-              </tr>
-            ) : (
-              pendingRequests.map((req, index) => (
-                <tr key={req.id}>
-                  <td style={tdStyle}>{index + 1}</td>
-                  <td style={tdStyle}>{req.submitted_at.split("T")[0]}</td>
-                  <td style={tdStyle}>{req.department_name}</td>
-                  <td style={tdStyle}>
-                    {(() => {
-                      const matchedRoad = road.find(
-                        (r) => r.id === req.road.id
-                      );
-                      return matchedRoad
-                        ? `${matchedRoad.unique_code} - ${matchedRoad.road_name}`
-                        : "No details found";
-                    })()}
-                  </td>
-                  <td style={tdStyle}>{req.work_description}</td>
-                  <td style={tdStyle}>{req.requested_by}</td>
-                  <td style={tdStyle}>{req.contact_info}</td>
-                  <td style={tdStyle}>
-                    {req.pdfDescription ? (
-                      <button
-                        style={{
-                          backgroundColor: "#007bff",
-                          color: "white",
-                          border: "none",
-                          padding: "5px 10px",
-                          borderRadius: "5px",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => window.open(req.pdfDescription, "_blank")}
-                      >
-                        View PDF
-                      </button>
-                    ) : (
-                      "No Description available"
-                    )}
-                  </td>
-                  <td style={tdStyle}>
-                    <select
-                      value={selectedActions[req.id] || ""}
-                      onChange={(e) =>
-                        handleActionChange(req.id, e.target.value)
-                      }
+      <Box sx={{ p: 1, fontFamily: "Arial, sans-serif" }}>
+        <Typography
+          variant={isMobile ? "h6" : "h5"}
+          fontWeight={600}
+          mb={2}
+          color="#000"
+        >
+          Other Department Work Requests (Pending) :-
+        </Typography>
+
+        <Paper sx={{ width: "100%", overflow: "hidden", mb: 4 }}>
+          <TableContainer>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  {[
+                    "S.No",
+                    "Date",
+                    "Department Name",
+                    "Road",
+                    "Work Description",
+                    "Requested By",
+                    "Contact Info",
+                    "Detail Description (PDF)",
+                    "Action",
+                    "Update",
+                  ].map((head) => (
+                    <TableCell
+                      key={head}
+                      align="center"
+                      
+                      sx={{ fontWeight: 600 }}
                     >
-                      <option value="">Select</option>
-                      <option value="Approved">Approve</option>
-                      <option value="Rejected">Reject</option>
-                    </select>
-                  </td>
-                  <td style={tdStyle}>
-                    <button onClick={() => handleUpdateStatus(req.id)}>
-                      Update
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-        <br />
-        <h2>Past Requests :-</h2>
-        <table style={tableStyle}>
-          <thead>
-            <tr>
-              <th style={thStyle}>S. No.</th>
-              <th style={thStyle}>Date</th>
-              <th style={thStyle}>Department Name</th>
-              <th style={thStyle}>Road Unique Code</th>
-              <th style={thStyle}>Work Description</th>
-              <th style={thStyle}>Requested By</th>
-              <th style={thStyle}>Contact Info</th>
-              <th style={thStyle}>Status</th>
-              <th style={thStyle}>Response by</th>
-              <th style={thStyle}>Response Date</th>
-              <th style={thStyle}>PDF Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {otherRequests.length === 0 ? (
-              <tr>
-                <td colSpan={11} style={tdStyleCenter}>
-                  No requests found.
-                </td>
-              </tr>
-            ) : (
-              otherRequests.map((req, index) => (
-                <tr key={req.id}>
-                  <td style={tdStyle}>{index + 1}</td>
-                  <td style={tdStyle}>{req.submitted_at.split("T")[0]}</td>
-                  <td style={tdStyle}>{req.department_name}</td>
-                  <td style={tdStyle}>
-                    {(() => {
-                      const matchedRoad = otherRoad.find(
-                        (r) => r.id === req.road.id
-                      );
-                      return matchedRoad
-                        ? `${matchedRoad.unique_code} - ${matchedRoad.road_name}`
-                        : "No details found";
-                    })()}
-                  </td>
-                  <td style={tdStyle}>{req.work_description}</td>
-                  <td style={tdStyle}>{req.requested_by}</td>
-                  <td style={tdStyle}>{req.contact_info}</td>
-                  <td
-                    style={{
-                      ...tdStyle,
-                      fontWeight: req.status === "Pending" ? "bold" : "normal",
-                    }}
-                  >
-                    {req.status}
-                  </td>
-                  <td style={tdStyle}>{req.response_by}</td>
-                  <td style={tdStyle}>
-                    {req.response_date?.split("T")[0] || ""}
-                  </td>
-                  <td style={tdStyle}>
-                    {req.pdfDescription ? (
-                      <button
-                        style={{
-                          backgroundColor: "#007bff",
-                          color: "white",
-                          border: "none",
-                          padding: "5px 10px",
-                          borderRadius: "5px",
-                          cursor: "pointer",
+                      {head}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {pendingRequests.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={10}
+                      align="center"
+                      sx={{ fontStyle: "italic" }}
+                    >
+                      No requests found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  pendingRequests.map((req, idx) => (
+                    <TableRow key={req.id} hover>
+                      <TableCell align="center">{idx + 1}</TableCell>
+                      <TableCell align="center">
+                        {req.submitted_at.split("T")[0]}
+                      </TableCell>
+                      <TableCell align="center">
+                        {req.department_name}
+                      </TableCell>
+                      <TableCell align="center">
+                        {road.find((r) => r.id === req.road.id)
+                          ? `${req.road.unique_code} - ${req.road.road_name}`
+                          : "No details"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {req.work_description}{" "}
+                      </TableCell>
+                      <TableCell align="center">{req.requested_by}</TableCell>
+                      <TableCell align="center">{req.contact_info}</TableCell>
+                      <TableCell align="center">
+                        {renderPdfButton(req.pdfDescription)}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Select
+                          size="small"
+                          value={selectedActions[req.id] || ""}
+                          onChange={(e) =>
+                            handleActionChange(req.id, e.target.value)
+                          }
+                          displayEmpty
+                          sx={{ minWidth: 120 }}
+                        >
+                          <MenuItem value="">Select</MenuItem>
+                          <MenuItem value="Approved">Approve</MenuItem>
+                          <MenuItem value="Rejected">Reject</MenuItem>
+                        </Select>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant="contained"
+                          size="large"
+                          sx={{
+                            backgroundColor: "#007bff",
+                            color: "#fff",
+                            textTransform: "none",
+                          }}
+                          onClick={() => handleUpdateStatus(req.id)}
+                        >
+                          Update
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+
+        <Typography
+          variant={isMobile ? "h6" : "h5"}
+          fontWeight={600}
+          mb={2}
+          color="#000"
+        >
+          Past Requests :-
+        </Typography>
+
+        <Paper sx={{ width: "100%", overflow: "hidden"}}>
+          <TableContainer>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  {[
+                    "S.No",
+                    "Date",
+                    "Department Name",
+                    "Road Unique Code",
+                    "Work Description",
+                    "Requested By",
+                    "Contact Info",
+                    "Status",
+                    "Response By",
+                    "Response Date",
+                    "PDF Description",
+                  ].map((head) => (
+                    <TableCell
+                      key={head}
+                      align="center"
+                      sx={{ fontWeight: 600 }}
+                    >
+                      {head}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {otherRequests.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={11}
+                      align="center"
+                      sx={{ fontStyle: "italic" }}
+                    >
+                      No requests found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  otherRequests.map((req, idx) => (
+                    <TableRow key={req.id} hover>
+                      <TableCell align="center">{idx + 1}</TableCell>
+                      <TableCell align="center">
+                        {req.submitted_at.split("T")[0]}
+                      </TableCell>
+                      <TableCell align="center">
+                        {req.department_name}
+                      </TableCell>
+                      <TableCell align="center">
+                        {otherRoad.find((r) => r.id === req.road.id)
+                          ? `${req.road.unique_code} - ${req.road.road_name}`
+                          : "No details"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {req.work_description}
+                      </TableCell>
+                      <TableCell align="center">{req.requested_by}</TableCell>
+                      <TableCell align="center">{req.contact_info}</TableCell>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          fontWeight: req.status === "Pending" ? 700 : 400,
                         }}
-                        onClick={() => window.open(req.pdfDescription, "_blank")}
                       >
-                        View PDF
-                      </button>
-                    ) : (
-                      "No Description available"
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                        {req.status}
+                      </TableCell>
+                      <TableCell align="center">{req.response_by}</TableCell>
+                      <TableCell align="center">
+                        {req.response_date?.split("T")[0] || ""}
+                      </TableCell>
+                      <TableCell align="center">
+                        {renderPdfButton(req.pdfDescription)}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      </Box>
     </>
   );
 }
-
-// Styles
-const tableStyle = {
-  width: "100%",
-  borderCollapse: "collapse",
-  marginTop: "1rem",
-  background: "#fefefe",
-};
-
-const thStyle = {
-  border: "1px solid #ccc",
-  padding: "8px",
-  textAlign: "center",
-  background: "#eee",
-};
-
-const tdStyle = {
-  border: "1px solid #ccc",
-  padding: "8px",
-  textAlign: "center",
-};
-
-const tdStyleCenter = {
-  ...tdStyle,
-  fontStyle: "italic",
-  background: "#fafafa",
-};
