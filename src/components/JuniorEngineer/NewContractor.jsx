@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createContractor, getLoginUser } from "../../api/api";
-import TextField from "@mui/material/TextField";
+import { Box, Paper, Typography, TextField, Button, Grid } from "@mui/material";
+import Header from "../header";
 
 export default function NewContractor() {
   const [formData, setFormData] = useState({
@@ -14,12 +15,25 @@ export default function NewContractor() {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1000);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1000);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -29,15 +43,9 @@ export default function NewContractor() {
 
     try {
       const loginUserId = localStorage.getItem("id");
-
       const loginUser = await getLoginUser(loginUserId);
 
-      const payload = {
-        ...formData,
-        login_user: loginUser,
-      };
-
-      await createContractor(payload);
+      await createContractor({ ...formData, login_user: loginUser });
       setMessage("Contractor registered successfully!");
       setFormData({
         contractor_name: "",
@@ -46,6 +54,7 @@ export default function NewContractor() {
         email: "",
         address: "",
       });
+
       setTimeout(() => navigate("/home/"), 1500);
     } catch (err) {
       console.error(err);
@@ -57,133 +66,136 @@ export default function NewContractor() {
     }
   };
 
-  return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.heading}>Register New Contractor</h2>
+  // Common TextField props
+  const commonTextFieldProps = {
+    fullWidth: true,
+    variant: "outlined",
+    size: "large",
+    onChange: handleChange,
+  };
 
-        <form onSubmit={handleSubmit}>
+  return (
+    <>
+      <Header />
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%",
+        }}
+      >
+        <Paper sx={{ p: 2, width: "100%" }}>
           <div
             style={{
               display: "flex",
-              flexWrap: "wrap",
-              gap: "10px",
               justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              marginBottom: "1rem",
+            }}
+          >
+            <Typography variant="h5" fontWeight={600} color="text.primary">
+              Register New Contractor
+            </Typography>
+          </div>
+
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 2,
+              width: "100%",
             }}
           >
             <TextField
+              {...commonTextFieldProps}
               name="contractor_name"
               label="Contractor Name"
-              placeholder="Contractor Name"
               value={formData.contractor_name}
-              onChange={handleChange}
-              style={styles.input}
               required
+              sx={{
+                flex: { xs: "1 1 100%", md: "1 1 calc(33.33% - 16px)" },
+              }}
             />
+
             <TextField
+              {...commonTextFieldProps}
               name="contact_person"
-              placeholder="Contact Person"
               label="Contact Person"
               value={formData.contact_person}
-              onChange={handleChange}
-              style={styles.input}
+              sx={{
+                flex: { xs: "1 1 100%", md: "1 1 calc(33.33% - 16px)" },
+              }}
             />
+
             <TextField
+              {...commonTextFieldProps}
               name="contact_number"
-              placeholder="Contact Number"
               label="Contact Number"
               value={formData.contact_number}
-              onChange={handleChange}
-              style={styles.input}
+              sx={{
+                flex: { xs: "1 1 100%", md: "1 1 calc(33.33% - 16px)" },
+              }}
             />
+
             <TextField
+              {...commonTextFieldProps}
               type="email"
               name="email"
               label="Email"
-              placeholder="Email"
               value={formData.email}
-              onChange={handleChange}
-              style={styles.input}
+              sx={{
+                flex: { xs: "1 1 100%", md: "1 1 calc(33.33% - 16px)" },
+              }}
             />
+
             <TextField
+              {...commonTextFieldProps}
               name="address"
               label="Address"
               multiline
-              placeholder="Address"
+              minRows={1}
               value={formData.address}
-              onChange={handleChange}
-              style={{ ...styles.input, minHeight: "80px", textAlign: "start" }}
+              sx={{
+                flex: { xs: "1 1 100%", md: "1 1 calc(66.66% - 16px)" },
+              }}
             />
-          </div>
 
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                marginTop: "1rem",
-                padding: "0.8rem 2rem",
-                borderRadius: "20px",
-                border: "none",
-                backgroundColor: "#4CAF50",
-                color: "#fff",
-                fontSize: "1rem",
-                cursor: "pointer",
-                width: "40%",
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                mt: 3,
+                width: "100%",
               }}
             >
-              {loading ? "Submitting..." : "Register"}
-            </button>
-          </div>
+              <Button
+                type="submit"
+                variant="contained"
+                color="success"
+                size="large"
+                disabled={loading}
+                sx={{ px: 10, borderRadius: "30px" }}
+              >
+                {loading ? "Submitting..." : "Register"}
+              </Button>
+            </Box>
 
-          {message && (
-            <p
-              style={{
-                ...styles.message,
-                color: message.startsWith("") ? "green" : "red",
-              }}
-            >
-              {message}
-            </p>
-          )}
-        </form>
-      </div>
-    </div>
+            {message && (
+              <Typography
+                sx={{ mt: 2, textAlign: "center" }}
+                color={message.includes("successfully") ? "green" : "error"}
+              >
+                {message}
+              </Typography>
+            )}
+          </Box>
+        </Paper>
+      </Box>
+    </>
   );
 }
-
-const styles = {
-  container: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: "100vh",
-    backgroundColor: "#f7f7f7",
-  },
-  card: {
-    backgroundColor: "#fff",
-    padding: "2rem",
-    borderRadius: "8px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    width: "90%",
-  },
-  heading: {
-    textAlign: "center",
-    marginBottom: "1.5rem",
-    color: "#333",
-  },
-  input: {
-    padding: "0.8rem",
-    borderRadius: "20px",
-    backgroundColor: "#e0e0e0",
-    color: "#000",
-    textAlign: "center",
-    flex: "1 1 calc(20% - 10px)",
-    minWidth: "150px",
-  },
-  message: {
-    marginTop: "1rem",
-    textAlign: "center",
-    fontWeight: "500",
-  },
-};
