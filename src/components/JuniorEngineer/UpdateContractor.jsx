@@ -1,7 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { getContractors, updateContractor, getLoginUser, deleteContractor } from "../../api/api";
+import {
+  getContractors,
+  updateContractor,
+  getLoginUser,
+  deleteContractor,
+} from "../../api/api";
 import { useNavigate } from "react-router-dom";
-import { TextField } from "@mui/material";
+import Header from "../header";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from "@mui/material";
+
 
 export default function UpdateContractor() {
   const [contractors, setContractors] = useState([]);
@@ -16,6 +33,19 @@ export default function UpdateContractor() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1000);
+  
+    useEffect(() => {
+      const handleResize = () => {
+        setIsMobile(window.innerWidth < 1000);
+      };
+  
+      window.addEventListener("resize", handleResize);
+  
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    }, []);
 
   useEffect(() => {
     const fetchContractors = async () => {
@@ -112,142 +142,139 @@ export default function UpdateContractor() {
     
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
+    <>
+    <Header />
+    <Box sx={styles.container}>
+      <Box sx={styles.card}>
+        <Box
+  sx={{
+    mb: 3,
+    display: "flex",
+    flexDirection: "column",
+    position: "relative",
+  }}
+>
+  {/* Title */}
+  <Typography
+    variant="h5"
+    textAlign="center"
+    color="#333"
+    sx={{ mb: isMobile ? 1.5 : 0 }}
+  >
+    Update Contractor Details
+  </Typography>
 
-        <div
-          style={{
-            position: "relative",
-            textAlign: "center",
-            marginBottom: "1.5rem",
-          }}
-        >
-          <h2
-            style={{
-              margin: 0,
-              color: "#333",
-            }}
-          >
-            Update Contractor Details
-          </h2>
+  {/* Delete button */}
+  {selectedContractorId && (
+    <Box
+      sx={{
+        position: isMobile ? "static" : "absolute",
+        right: isMobile ? "0" : "16px",
+        top: isMobile ? "auto" : "50%",
+        transform: isMobile ? "none" : "translateY(-50%)",
+        alignSelf: isMobile ? "flex-end" : "auto",
+        mt: isMobile ? 1 : 0,
+      }}
+    >
+      <Button
+        variant="contained"
+        color="error"
+        size="small"
+        onClick={() => handleDelete(selectedContractorId)}
+      >
+        Delete
+      </Button>
+    </Box>
+  )}
+</Box>
 
-          {selectedContractorId && (
-            <button
-              style={{
-                position: "absolute",
-                right: 0,
-                top: "50%",
-                transform: "translateY(-50%)",
-                backgroundColor: "red",
-                color: "white",
-                border: "none",
-                padding: "0.5rem 1rem",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
-              onClick={() => handleDelete(selectedContractorId)}
-            >
-              Delete
-            </button>
-          )}
-        </div>
 
         <form onSubmit={handleSubmit}>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "10px",
-              justifyContent: "center",
-            }}
-          >
-            <select
-              required
-              value={selectedContractorId}
-              onChange={handleSelectContractor}
-              style={styles.select}
-            >
-              <option value="" disabled>
-                Select Contractor
-              </option>
-              {contractors.map((contractor) => (
-                <option key={contractor.id} value={contractor.id}>
-                  {contractor.contractor_name} - {contractor.email}
-                </option>
-              ))}
-            </select>
+          <Box sx={styles.formBox}>
+            <FormControl sx={styles.field} required>
+              <InputLabel>Select Contractor</InputLabel>
+              <Select value={selectedContractorId} onChange={handleSelectContractor} label="Select Contractor">
+                {contractors.map((contractor) => (
+                  <MenuItem key={contractor.id} value={contractor.id}>
+                    {contractor.contractor_name} — {contractor.email}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
             {selectedContractorId && (
               <>
                 <TextField
                   name="contractor_name"
-                  placeholder="Contractor Name"
+                  label="Contractor Name"
                   value={formData.contractor_name}
                   onChange={handleChange}
-                  label="Contractor Name"
-                  style={styles.input}
+                  sx={styles.field}
+                  required
                 />
                 <TextField
                   name="contact_person"
-                  placeholder="Contact Person"
-                  value={formData.contact_person}
                   label="Contact Person"
+                  value={formData.contact_person}
                   onChange={handleChange}
-                  style={styles.input}
+                  sx={styles.field}
+                  required
                 />
                 <TextField
                   name="contact_number"
-                  placeholder="Contact Number"
-                  value={formData.contact_number}
                   label="Contact Number"
+                  value={formData.contact_number}
                   onChange={handleChange}
-                  style={styles.input}
+                  sx={styles.field}
+                  required
                 />
                 <TextField
                   name="email"
-                  placeholder="Email"
-                  value={formData.email}
                   label="Email"
+                  value={formData.email}
                   onChange={handleChange}
-                  style={styles.input}
+                  sx={styles.field}
+                  type="email"
                 />
                 <TextField
                   name="address"
-                  placeholder="Address"
                   label="Address"
-                  multiline
                   value={formData.address}
                   onChange={handleChange}
-                  style={styles.input}
+                  sx={styles.field}
+                  multiline
+                  minRows={1}
                 />
               </>
             )}
-          </div>
+          </Box>
 
-          <br />
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <button
+          <Box textAlign="center" mt={3}>
+            <Button
               type="submit"
-              disabled={!selectedContractorId}
-              style={styles.button}
+              variant="contained"
+              color="primary"
+              disabled={!selectedContractorId || loading}
+              sx={{ minWidth: 250 }}
             >
-              {loading ? "Updating..." : "Update"}
-            </button>
-          </div>
+              {loading ? <CircularProgress size={24} color="inherit" /> : "Update"}
+            </Button>
+          </Box>
         </form>
 
         {message && (
-          <p
-            style={{
-              ...styles.message,
-              color: message.startsWith("Failed") ? "red" : "green",
-            }}
+          <Typography
+            mt={2}
+            textAlign="center"
+            fontWeight="500"
+            color={message.startsWith("Failed") ? "error" : "green"}
           >
             {message}
-          </p>
+          </Typography>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
+    </>
   );
 }
 
@@ -256,55 +283,26 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    minHeight: "100vh",
     backgroundColor: "#f7f7f7",
+    width:"100%",
   },
   card: {
     backgroundColor: "#fff",
-    padding: "2rem",
+    p: 2,
     borderRadius: "8px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    width: "90%",
+            width:"100%",
+
   },
-  heading: {
-    textAlign: "center",
-    marginBottom: "1.5rem",
-    color: "#333",
-  },
-  input: {
-    padding: "0.8rem",
-    borderRadius: "20px",
-    backgroundColor: "#f9f9f9",
-    color: "#000",
-    textAlign: "center",
-    flex: "1 1 calc(20% - 10px)",
-    minWidth: "150px",
-  },
-  select: {
-    color: "#000",
-    padding: "0.8rem",
-    borderRadius: "20px",
-    border: "1px solid #ccc",
-    backgroundColor: "#f9f9f9",
-    flex: "1 1 calc(20% - 10px)",
-    minWidth: "150px",
-  },
-  button: {
-    width: "40%",
-    padding: "0.6rem",
-    border: "none",
-    borderRadius: "20px",
-    backgroundColor: "#4CAF50",
-    color: "#fff",
-    fontSize: "1rem",
-    cursor: "pointer",
+  formBox: {
     display: "flex",
+    flexWrap: "wrap",
     justifyContent: "center",
-    transition: "background 0.3s",
+    gap: 2,
+
   },
-  message: {
-    marginTop: "1rem",
-    textAlign: "center",
-    fontWeight: "500",
+  field: {
+    flex: { xs: "1 1 100%", md: "1 1 calc(33.33% - 16px)" },
+    minWidth: 150,
   },
 };
