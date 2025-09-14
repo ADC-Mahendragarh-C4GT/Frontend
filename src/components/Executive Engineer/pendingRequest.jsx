@@ -5,6 +5,7 @@ import {
   getRoads,
   updateRequestStatus,
   getLoginUser,
+  sendStatusEmail,
 } from "../../api/api";
 import Header from "../header";
 import {
@@ -75,13 +76,29 @@ export default function PendingRequest() {
     const userLastName = localStorage.getItem("userLastName");
     const user_type = localStorage.getItem("user_type");
     const response_by = `${userFirstName} ${userLastName} (${user_type})`;
-    const response_date = new Date().toISOString().split("T")[0];
+
     const loginUserId = localStorage.getItem("id");
     const login_user = await getLoginUser(loginUserId);
 
-    updateRequestStatus(id, { status, response_by, response_date, login_user })
-      .then(() => fetchData())
-      .catch((err) => console.error("Failed to update status", err));
+    try {
+      await updateRequestStatus(id, {
+        status,
+        response_by,
+        response_date: new Date().toISOString().split("T")[0],
+        login_user,
+      });
+
+      const req = pendingRequests.find((r) => r.id === id);
+      await sendStatusEmail(id, {
+        status,
+        response_by,
+        department_email: req.contact_info,
+      });
+
+      fetchData();
+    } catch (err) {
+      console.error("Failed to update status", err);
+    }
   };
 
   const renderPdfButton = (url) =>
@@ -131,7 +148,6 @@ export default function PendingRequest() {
                     <TableCell
                       key={head}
                       align="center"
-                      
                       sx={{ fontWeight: 600 }}
                     >
                       {head}
@@ -220,7 +236,7 @@ export default function PendingRequest() {
           Past Requests :-
         </Typography>
 
-        <Paper sx={{ width: "100%", overflow: "hidden"}}>
+        <Paper sx={{ width: "100%", overflow: "hidden" }}>
           <TableContainer>
             <Table stickyHeader>
               <TableHead>

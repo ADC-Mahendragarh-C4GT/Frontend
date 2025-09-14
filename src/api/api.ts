@@ -455,7 +455,7 @@ export const welcomeEmail = (email: string, token: string) => {
 };
 
 
-export const emailToXEN = (formData: any, xenEmails: string[], token: string) => {
+export const emailToXEN = (formData: any, xenEmails: string[]) => {
   return api.post(
     "send-xen-email/",
     { formData, emails: xenEmails },
@@ -466,4 +466,13 @@ export const emailToXEN = (formData: any, xenEmails: string[], token: string) =>
       },
     }
   );
+};
+
+export const sendStatusEmail = (
+  requestId: number,
+  payload: { status: string; response_by: string; department_email: string }
+) => {
+  return api.post(`/send-status-email/${requestId}/`, payload, {
+    headers: { "Content-Type": "application/json" },
+  });
 };
