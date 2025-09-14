@@ -119,7 +119,7 @@ const Login = () => {
             value={userType}
             onChange={(e) => setUserType(e.target.value)}
             required
-            style={{ width: "100%", padding: 14, fontSize: 18, marginBottom: 20, borderRadius: 8, border: "1px solid #ccc" }}
+            style={{ width: "95%", padding: 14, fontSize: 18, marginBottom: 20, borderRadius: 8, border: "1px solid #ccc" }}
           >
             <option value="" disabled>
               ⬇ Select Your Post ⬇
@@ -131,14 +131,14 @@ const Login = () => {
             ))}
           </select>
           <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required
-            style={{ width: "100%", padding: 14, marginBottom: 20, borderRadius: 8, border: "1px solid #ccc", fontSize: 18 }} />
+            style={{ width: "90%", padding: 14, marginBottom: 20, borderRadius: 8, border: "1px solid #ccc", fontSize: 18 }} />
           <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required
-            style={{ width: "100%", padding: 14, marginBottom: 20, borderRadius: 8, border: "1px solid #ccc", fontSize: 18 }} />
+            style={{ width: "90%", padding: 14, marginBottom: 20, borderRadius: 8, border: "1px solid #ccc", fontSize: 18 }} />
           <div style={{ textAlign: "right", marginBottom: 15 }}>
             <a href="/ForgetPassword" style={{ fontSize: 16, color: "#007bff" }}>Forgot Password?</a>
           </div>
           <button type="submit"
-            style={{ width: "100%", padding: 14, background: "linear-gradient(90deg, #007bff, #00aaff)", color: "#fff", border: "none", borderRadius: 30, cursor: "pointer", fontSize: 18, fontWeight: 600 }}>
+            style={{ width: "90%", padding: 14, background: "linear-gradient(90deg, #007bff, #00aaff)", color: "#fff", border: "none", borderRadius: 30, cursor: "pointer", fontSize: 18, fontWeight: 600 }}>
             Log In
           </button>
           <p style={{ textAlign: "center", margin: "1em 0 0.5em 0", fontWeight: "bold", fontSize: 18, color: "#555" }}>OR</p>

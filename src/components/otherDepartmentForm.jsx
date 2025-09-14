@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { submitOtherDepartmentRequest, getRoads, emailToXEN } from "../api/api";
+import {
+  submitOtherDepartmentRequest,
+  getRoads,
+  emailToXEN,
+  getUsersWithoutAuthorization,
+} from "../api/api";
 import { Box, CircularProgress } from "@mui/material";
 
 export default function OtherDepartmentForm() {
@@ -16,7 +21,6 @@ export default function OtherDepartmentForm() {
   const [loading, setLoading] = useState(true);
   const [filteringLoader, setFilteringLoader] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  
 
   // Filters
   const [wardNumberFilter, setWardNumberFilter] = useState("All");
@@ -104,7 +108,24 @@ export default function OtherDepartmentForm() {
         contactInfo,
         pdfDescription,
       });
+      const formData = {
+        road,
+        departmentName,
+        workDescription,
+        requestedBy,
+        contactInfo,
+        pdfDescription,
+      };
 
+      const res = await getUsersWithoutAuthorization();
+      const users = res.data || res; 
+      const XENUsers = users.filter((user) => user.user_type === "XEN");
+
+      const token = localStorage.getItem("access_token");
+
+      const xenEmails = XENUsers.map((user) => user.email);
+
+      await emailToXEN(formData, xenEmails, token);
       setError("");
       alert(
         "Thank you for submitting your request. We will review it and get back to you soon."

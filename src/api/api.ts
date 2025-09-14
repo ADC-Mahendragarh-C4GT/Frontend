@@ -197,6 +197,12 @@ export const getUsers = () => {
   });
   return res;
 };
+export const getUsersWithoutAuthorization = () => {
+  const res = api.get("/accounts/UsersWithoutAuth/", {
+    requiresAuth: true,
+  });
+  return res;
+};
 export const getRoads = async () => {
   const response = await api.get("/api/roads/");
   response.data = response.data.filter((road: { isActive: boolean }) => road.isActive);
@@ -443,6 +449,20 @@ export const welcomeEmail = (email: string, token: string) => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
+
+export const emailToXEN = (formData: any, xenEmails: string[], token: string) => {
+  return api.post(
+    "send-xen-email/",
+    { formData, emails: xenEmails },
+    {
+      headers: {
+        "Content-Type": "application/json",
+       
       },
     }
   );
