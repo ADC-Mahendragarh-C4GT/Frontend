@@ -13,7 +13,6 @@ import {
   Typography,
 } from "@mui/material";
 import Header from "../header";
-
 export default function NewUser() {
   const [formData, setFormData] = useState({
     username: "",
