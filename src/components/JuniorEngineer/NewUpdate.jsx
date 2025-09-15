@@ -4,6 +4,7 @@ import {
   getInfraWorks,
   createUpdate,
   getLoginUser,
+  getUpdatesByWork,
 } from "../../api/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -126,6 +127,28 @@ export default function NewUpdate() {
     const selectedWorkObj = infraWorks.find(
       (work) => String(work.id) === String(selectedWork)
     );
+
+    const prevUpdatesRes = await getUpdatesByWork(selectedWorkObj.id);
+    const prevUpdates = prevUpdatesRes.data || [];
+
+    const maxProgress =
+      prevUpdates.length > 0
+        ? Math.max(...prevUpdates.map((u) => Number(u.progress_percent) || 0))
+        : 0;
+
+    if (Number(progressPercent) < maxProgress) {
+      alert(
+        `Current progress is ${maxProgress}%. You cannot set progress below this value.`
+      );
+      setLoading(false);
+      return;
+    }
+
+    if (Number(progressPercent) > 100) {
+      alert("Progress cannot exceed 100%");
+      setLoading(false);
+      return;
+    }
 
     if (selectedWorkObj && Number(selectedWorkObj.progress_percent) === 100) {
       alert("This work is already 100% complete. No more updates allowed.");
