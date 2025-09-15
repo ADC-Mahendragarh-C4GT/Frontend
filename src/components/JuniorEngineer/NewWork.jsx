@@ -15,7 +15,7 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-import Header from "../header";
+import Header from "../Header";
 
 const NewWork = () => {
   const [formData, setFormData] = useState({
@@ -247,7 +247,9 @@ const NewWork = () => {
     margin: "normal",
     size: "small",
     sx: {
-      flex: { xs: "1 1 100%", md: "1 1 calc(33.33% - 16px)" },
+      flex: "1 1 auto", // let it shrink/grow naturally
+      minWidth: { xs: "100%", sm: 200 }, // full width on small devices
+      maxWidth: { xs: "100%", sm: 300 }, // limit width on larger screens
     },
   };
 
@@ -268,7 +270,7 @@ const NewWork = () => {
               justifyContent: "center",
               alignItems: "center",
               zIndex: 999,
-              color : "#000",
+              color: "#000",
             }}
           >
             <Box
@@ -382,6 +384,16 @@ const NewWork = () => {
                 name="road"
                 value={formData.road}
                 onChange={handleChange}
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      sx: {
+                        width: { xs: "90vw", sm: 300 }, // popup adapts to screen width
+                        whiteSpace: "normal", // wrap long text
+                      },
+                    },
+                  },
+                }}
                 required
               >
                 {filteredRoads.length == 0 ? (
