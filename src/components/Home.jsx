@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogActions,
 } from "@mui/material";
+import ExcelJS from "exceljs";
 
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -301,49 +302,167 @@ export default function Home() {
     }
   };
 
-  const handleAudit = async (startDate, endDate) => {
-    if (!startDate || !endDate) {
+const handleAudit = async (startDate, endDate) => {
+  // 1️⃣ Validate dates
+  if (!startDate || !endDate) {
+    console.warn("[Checkpoint] handleAudit aborted — start or end date missing");
+    return;
+  }
+
+  console.log("[Checkpoint] handleAudit started");
+
+  try {
+    setLoadingReport(true);
+
+    // 2️⃣ Fetch audit data
+    console.log("[Checkpoint] Fetching audit report...");
+    const response = await fetchAuditReport(startDate, endDate);
+    console.log("[Checkpoint] Fetched audit report:", response);
+
+    // 3️⃣ Validate response
+    const logsByModel = response?.data;
+    if (!logsByModel || typeof logsByModel !== "object") {
+      console.warn("[Checkpoint] No valid logsByModel — exiting");
       return;
     }
-    try {
-      setLoadingReport(true);
-      const response = await fetchAuditReport(startDate, endDate);
-      const logs = response.data;
 
-      const rows = logs.map((item) => {
-        return {
-          ID: item.id,
-          Action: item.action,
-          Timestamp: new Date(item.timestamp).toLocaleString(),
-          Performed_By:
-            item.performed_by?.first_name +
-              " " +
-              item.performed_by?.last_name +
-              " (" +
-              item.performed_by?.user_type +
-              ")" || "system",
-          Old_Details:
-            typeof item.old_details === "string"
-              ? item.old_details
-              : JSON.stringify(item.old_details),
-          New_Details:
-            typeof item.new_details === "string"
-              ? item.new_details
-              : JSON.stringify(item.new_details),
-        };
+    // 4️⃣ Create workbook
+    const workbook = new ExcelJS.Workbook();
+    console.log("[Checkpoint] Workbook created");
+
+    // 5️⃣ Iterate over models
+    for (const [model, modelLogs] of Object.entries(logsByModel)) {
+      console.log(`[Checkpoint] Processing model: ${model}`);
+
+      if (!Array.isArray(modelLogs) || modelLogs.length === 0) {
+        console.warn(`[Checkpoint] Model ${model} has no logs`);
+        continue;
+      }
+
+      // 5.1 Add worksheet
+      const sheetName = model.slice(0, 31);
+      const sheet = workbook.addWorksheet(sheetName);
+      console.log(`[Checkpoint] Worksheet added for ${model}`);
+
+      // 5.2 Collect detail keys
+      const detailKeys = new Set();
+      modelLogs.forEach((log) => {
+        const isSpecial = ["Road", "Contractor"].includes(model);
+
+        let oldDetails = log.old_details;
+        let newDetails = log.new_details;
+
+        // parse for special models if they come as strings
+        if (isSpecial) {
+          const parseSafe = (val) => {
+            if (!val) return {};
+            if (typeof val === "object") return val;
+            let txt = String(val).trim().replace(/^"+|"+$/g, "");
+            try {
+              return JSON.parse(txt);
+            } catch (_) {
+              try {
+                return JSON.parse(txt.replace(/'/g, '"'));
+              } catch (_) {
+                return {};
+              }
+            }
+          };
+          oldDetails = parseSafe(oldDetails);
+          newDetails = parseSafe(newDetails);
+        }
+
+        Object.keys(oldDetails || {}).filter((k) => isNaN(k)).forEach((k) => detailKeys.add(k));
+        Object.keys(newDetails || {}).filter((k) => isNaN(k)).forEach((k) => detailKeys.add(k));
       });
 
-      const worksheet = XLSX.utils.json_to_sheet(rows);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Audit Report");
+      const keysArray = Array.from(detailKeys);
+      console.log(`[Checkpoint] Collected keys for ${model}:`, keysArray);
 
-      XLSX.writeFile(workbook, "audit_report.xlsx");
-    } catch (error) {
-      console.error("Error fetching audit report:", error);
-    } finally {
-      setLoadingReport(false);
+      // 5.3 Build headers
+      const headers = ["ID", "Action", "Timestamp", "Performed_By"];
+      keysArray.forEach((key) => {
+        headers.push(`${key} (Old)`, `${key} (New)`);
+      });
+      sheet.addRow(headers);
+      console.log(`[Checkpoint] Headers added for ${model}`);
+
+      // 5.4 Add rows
+      modelLogs.forEach((log) => {
+        const performer = log.performed_by
+          ? `${log.performed_by.first_name || ""} ${log.performed_by.last_name || ""} (${log.performed_by.user_type || ""})`
+          : "system";
+
+        const isSpecial = ["Road", "Contractor"].includes(model);
+
+        const parseSafe = (val) => {
+          if (!val) return {};
+          if (!isSpecial && typeof val === "object") return val;
+          if (typeof val === "object") return val;
+          let txt = String(val).trim().replace(/^"+|"+$/g, "");
+          try {
+            return JSON.parse(txt);
+          } catch (_) {
+            try {
+              return JSON.parse(txt.replace(/'/g, '"'));
+            } catch (_) {
+              return {};
+            }
+          }
+        };
+
+        const oldDetails = parseSafe(log.old_details);
+        const newDetails = parseSafe(log.new_details);
+
+        const rowData = [
+          log.id,
+          log.action,
+          new Date(log.timestamp).toLocaleString(),
+          performer,
+        ];
+
+        keysArray.forEach((key) => {
+          const oldVal = oldDetails?.[key] ?? "";
+          const newVal = newDetails?.[key] ?? "";
+          rowData.push(oldVal, newVal);
+        });
+
+        const row = sheet.addRow(rowData);
+
+        // 5.5 Bold cells where value changed
+        keysArray.forEach((key, idx) => {
+          const oldVal = oldDetails?.[key] ?? "";
+          const newVal = newDetails?.[key] ?? "";
+          if (oldVal !== newVal) {
+            const base = 5 + idx * 2;
+            row.getCell(base).font = { bold: true };
+            row.getCell(base + 1).font = { bold: true };
+          }
+        });
+      });
+
+      console.log(`[Checkpoint] Rows added for ${model}`);
     }
-  };
+
+    // 6️⃣ Write workbook & trigger download
+    console.log("[Checkpoint] Writing workbook to buffer");
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    console.log("[Checkpoint] Creating blob & link");
+    const blob = new Blob([buffer], { type: "application/octet-stream" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "audit_report.xlsx";
+    link.click();
+
+    console.log("[Checkpoint] File downloaded");
+  } catch (error) {
+    console.error("Error generating audit report:", error);
+  } finally {
+    setLoadingReport(false);
+    console.log("[Checkpoint] handleAudit finished");
+  }
+};
 
   const finalFilteredUpdates = filteredUpdates?.filter((update) => {
     if (statusFilter && statusFilter !== "All") {

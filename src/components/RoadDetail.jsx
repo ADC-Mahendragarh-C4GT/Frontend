@@ -591,7 +591,17 @@ export default function RoadDetail() {
                                     {update?.status_note ?? "N/A"}
                                   </TableCell>
                                   <TableCell align="center">
-                                    {comment.comment_date ?? "N/A"}
+                                    {comment.comment_date
+                                      ? new Date(
+                                          comment.comment_date
+                                        ).toLocaleString("en-IN", {
+                                          year: "numeric",
+                                          month: "short",
+                                          day: "numeric",
+                                          hour: "2-digit",
+                                          minute: "2-digit",
+                                        })
+                                      : "N/A"}
                                   </TableCell>
                                   <TableCell align="center">
                                     {commenter?.id === currentUser?.id && (
