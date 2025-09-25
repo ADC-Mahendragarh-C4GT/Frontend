@@ -1,0 +1,17 @@
+React + Vite Setup Instructions
+
+Prerequisites
+- Node.js (LTS recommended)
+- npm
+
+Steps
+1) Install dependencies
+   npm install
+
+2) Start the development server
+   npm run dev
+
+Notes
+- Run the above commands from the project root directory.
+- After the server starts, open the provided local URL in your browser.
+
