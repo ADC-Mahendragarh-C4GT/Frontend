@@ -1,0 +1,11 @@
+this file mainly focused on what need to be update in both frontend and backend 
+
+in frontend :-
+1. in src/api/config.ts    :- update with the backend url
+
+in backend :-
+1. while running command in terminal add url(needed) after runserver. 
+ex. : python manage.py runserver 0.0.0.100:0000
+
+2. in .env :- update both backend and frontend url 
+variable name :- FRONTEND_URL, SITE_URL   which is needed to update
