@@ -4,13 +4,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 // @ts-ignore
 import Login from './components/Login';
 // @ts-ignore
-import Home from "./components/home";
+import Home from "./components/Home";
 // @ts-ignore
 import RoadDetail from "./components/RoadDetail";
 // @ts-ignore
 import OtherDepartmentForm from './components/OtherDepartmentForm';
 // @ts-ignore
-import PendingRequest from './components/Executive Engineer/pendingRequest';
+import PendingRequest from './components/Executive Engineer/PendingRequest';
 // @ts-ignore
 import NewRoad from './components/JuniorEngineer/NewRoad';
 // @ts-ignore

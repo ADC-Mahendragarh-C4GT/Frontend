@@ -1,6 +1,6 @@
 import React, { use } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Header from "./header";
+import Header from "./Header";
 import Paper from "@mui/material/Paper";
 import TableContainer from "@mui/material/TableContainer";
 import Table from "@mui/material/Table";

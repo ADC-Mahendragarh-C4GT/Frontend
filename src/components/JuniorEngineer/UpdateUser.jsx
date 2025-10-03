@@ -6,7 +6,7 @@ import {
   deleteUser,
   getLoginUser,
 } from "../../api/api";
-import Header from "../header";
+import Header from "../Header";
 import {
   Box,
   Button,

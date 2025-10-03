@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createContractor, getLoginUser } from "../../api/api";
 import { Box, Paper, Typography, TextField, Button, Grid } from "@mui/material";
-import Header from "../header";
+import Header from "../Header";
 
 export default function NewContractor() {
   const [formData, setFormData] = useState({

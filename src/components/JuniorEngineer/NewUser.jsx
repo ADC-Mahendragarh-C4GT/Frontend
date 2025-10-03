@@ -12,7 +12,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import Header from "../header";
+import Header from "../Header";
 export default function NewUser() {
   const [formData, setFormData] = useState({
     username: "",

@@ -20,7 +20,7 @@ import Box from "@mui/material/Box";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-import Header from "./header";
+import Header from "./Header";
 import {
   getUpdates,
   getPendingRequests,

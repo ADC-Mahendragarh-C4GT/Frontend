@@ -1,6 +1,5 @@
 import React from "react";
 import { useEffect, useState } from "react";
-
 import { logoutUser } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import { styled, alpha } from "@mui/material/styles";
